@@ -8,45 +8,47 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later 
+ * Foundation; either version 2 of the License, or (at your option) any later
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 
+ * this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
 
 #include "chatdlg.h"
 
-
 /* Implementation *************************************************************/
 CChatDlg::CChatDlg ( QWidget* parent ) :
-    CBaseDlg ( parent, Qt::Window ) // use Qt::Window to get min/max window buttons
+    CBaseDlg ( parent,
+               Qt::Window ) // use Qt::Window to get min/max window buttons
 {
     setupUi ( this );
 
-
     // Add help text to controls -----------------------------------------------
     // chat window
-    txvChatWindow->setWhatsThis ( "<b>" + tr ( "Chat Window" ) + ":</b> " + tr (
-        "The chat window shows a history of all chat messages." ) );
+    txvChatWindow->setWhatsThis (
+        "<b>" + tr ( "Chat Window" ) + ":</b> " +
+        tr ( "The chat window shows a history of all chat messages." ) );
 
     txvChatWindow->setAccessibleName ( tr ( "Chat history" ) );
 
     // input message text
-    edtLocalInputText->setWhatsThis ( "<b>" + tr ( "Input Message Text" ) + ":</b> " + tr (
-        "Enter the chat message text in the edit box and press enter to send the "
-        "message to the server which distributes the message to all connected "
-        "clients. Your message will then show up in the chat window." ) );
+    edtLocalInputText->setWhatsThis (
+        "<b>" + tr ( "Input Message Text" ) + ":</b> " +
+        tr ( "Enter the chat message text in the edit box and press enter to "
+             "send the "
+             "message to the server which distributes the message to all "
+             "connected "
+             "clients. Your message will then show up in the chat window." ) );
 
     edtLocalInputText->setAccessibleName ( tr ( "New chat text edit box" ) );
-
 
     // clear chat window and edit line
     txvChatWindow->clear();
@@ -58,29 +60,35 @@ CChatDlg::CChatDlg ( QWidget* parent ) :
     // set a placeholder text to make sure where to type the message in (#384)
     edtLocalInputText->setPlaceholderText ( tr ( "Type a message here" ) );
 
-
     // Menu  -------------------------------------------------------------------
     QMenuBar* pMenu     = new QMenuBar ( this );
     QMenu*    pEditMenu = new QMenu ( tr ( "&Edit" ), this );
 
-    pEditMenu->addAction ( tr ( "Cl&ear Chat History" ), this,
-        SLOT ( OnClearChatHistory() ), QKeySequence ( Qt::CTRL + Qt::Key_E ) );
+    pEditMenu->addAction ( tr ( "Cl&ear Chat History" ),
+                           this,
+                           SLOT ( OnClearChatHistory() ),
+                           QKeySequence ( Qt::CTRL + Qt::Key_E ) );
 
     pMenu->addMenu ( pEditMenu );
 
     // Now tell the layout about the menu
     layout()->setMenuBar ( pMenu );
 
-
     // Connections -------------------------------------------------------------
-    QObject::connect ( edtLocalInputText, &QLineEdit::textChanged,
-        this, &CChatDlg::OnLocalInputTextTextChanged );
+    QObject::connect ( edtLocalInputText,
+                       &QLineEdit::textChanged,
+                       this,
+                       &CChatDlg::OnLocalInputTextTextChanged );
 
-    QObject::connect ( butSend, &QPushButton::clicked,
-        this, &CChatDlg::OnSendText );
+    QObject::connect ( butSend,
+                       &QPushButton::clicked,
+                       this,
+                       &CChatDlg::OnSendText );
 
-    QObject::connect ( txvChatWindow, &QTextBrowser::anchorClicked,
-        this, &CChatDlg::OnAnchorClicked );
+    QObject::connect ( txvChatWindow,
+                       &QTextBrowser::anchorClicked,
+                       this,
+                       &CChatDlg::OnAnchorClicked );
 }
 
 void CChatDlg::OnLocalInputTextTextChanged ( const QString& strNewText )
@@ -99,7 +107,7 @@ void CChatDlg::OnSendText()
     if ( !edtLocalInputText->text().isEmpty() )
     {
         emit NewLocalInputText ( edtLocalInputText->text() );
-        edtLocalInputText->clear();        
+        edtLocalInputText->clear();
     }
 }
 
@@ -112,16 +120,20 @@ void CChatDlg::OnClearChatHistory()
 void CChatDlg::AddChatText ( QString strChatText )
 {
     // notify accessibility plugin that text has changed
-    QAccessible::updateAccessibility ( new QAccessibleValueChangeEvent ( txvChatWindow, strChatText ) );
+    QAccessible::updateAccessibility (
+        new QAccessibleValueChangeEvent ( txvChatWindow, strChatText ) );
 
-    // analyze strChatText to check if hyperlink (limit ourselves to http(s)://) but do not
-    // replace the hyperlinks if any HTML code for a hyperlink was found (the user has done the HTML
-    // coding hisself and we should not mess with that)
+    // analyze strChatText to check if hyperlink (limit ourselves to http(s)://)
+    // but do not replace the hyperlinks if any HTML code for a hyperlink was
+    // found (the user has done the HTML coding hisself and we should not mess
+    // with that)
     if ( !strChatText.contains ( QRegExp ( "href\\s*=|src\\s*=" ) ) )
     {
-        // searches for all occurrences of http(s) and cuts until a space (\S matches any non-white-space
-        // character and the + means that matches the previous element one or more times.)
-        strChatText.replace ( QRegExp ( "(https?://\\S+)" ), "<a href=\"\\1\">\\1</a>" );
+        // searches for all occurrences of http(s) and cuts until a space (\S
+        // matches any non-white-space character and the + means that matches
+        // the previous element one or more times.)
+        strChatText.replace ( QRegExp ( "(https?://\\S+)" ),
+                              "<a href=\"\\1\">\\1</a>" );
     }
 
     // add new text in chat window
@@ -131,10 +143,16 @@ void CChatDlg::AddChatText ( QString strChatText )
 void CChatDlg::OnAnchorClicked ( const QUrl& Url )
 {
     // only allow http(s) URLs to be opened in an external browser
-    if ( Url.scheme() == QLatin1String ( "https" ) || Url.scheme() == QLatin1String ( "http" ) )
+    if ( Url.scheme() == QLatin1String ( "https" ) ||
+         Url.scheme() == QLatin1String ( "http" ) )
     {
-        if ( QMessageBox::question ( this, APP_NAME, tr ( "Do you want to open the link" ) + " <b>" + Url.toString() +
-                                     "</b> " + tr ( "in an external browser?" ), QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes )
+        if ( QMessageBox::question ( this,
+                                     APP_NAME,
+                                     tr ( "Do you want to open the link" ) +
+                                         " <b>" + Url.toString() + "</b> " +
+                                         tr ( "in an external browser?" ),
+                                     QMessageBox::Yes | QMessageBox::No ) ==
+             QMessageBox::Yes )
         {
             QDesktopServices::openUrl ( Url );
         }

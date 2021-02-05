@@ -43,39 +43,38 @@ private network.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later 
+ * Foundation; either version 2 of the License, or (at your option) any later
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 
+ * this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
 
 #pragma once
 
-#include <QObject>
-#include <QLocale>
-#include <QList>
 #include <QElapsedTimer>
+#include <QList>
+#include <QLocale>
 #include <QMutex>
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-# include <QVersionNumber>
+#include <QObject>
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 6, 0 )
+#include <QVersionNumber>
 #endif
 #include "global.h"
-#include "util.h"
 #include "protocol.h"
-
+#include "util.h"
 
 /* Classes ********************************************************************/
 class CServerListEntry : public CServerInfo
 {
-public:
+  public:
     CServerListEntry() :
         CServerInfo ( CHostAddress(),
                       CHostAddress(),
@@ -83,7 +82,10 @@ public:
                       QLocale::AnyCountry,
                       "",
                       0,
-                      false ) { UpdateRegistration(); }
+                      false )
+    {
+        UpdateRegistration();
+    }
 
     CServerListEntry ( const CHostAddress&     NHAddr,
                        const CHostAddress&     NLHAddr,
@@ -91,30 +93,35 @@ public:
                        const QLocale::Country& NeCountry,
                        const QString&          NsCity,
                        const int               NiMaxNumClients,
-                       const bool              NbPermOnline)
-        : CServerInfo ( NHAddr,
-                        NLHAddr,
-                        NsName,
-                        NeCountry,
-                        NsCity,
-                        NiMaxNumClients,
-                        NbPermOnline ) { UpdateRegistration(); }
+                       const bool              NbPermOnline ) :
+        CServerInfo ( NHAddr,
+                      NLHAddr,
+                      NsName,
+                      NeCountry,
+                      NsCity,
+                      NiMaxNumClients,
+                      NbPermOnline )
+    {
+        UpdateRegistration();
+    }
 
     CServerListEntry ( const CHostAddress&    NHAddr,
                        const CHostAddress&    NLHAddr,
-                       const CServerCoreInfo& NewCoreServerInfo )
-        : CServerInfo ( NHAddr,
-                        NLHAddr,
-                        NewCoreServerInfo.strName,
-                        NewCoreServerInfo.eCountry,
-                        NewCoreServerInfo.strCity,
-                        NewCoreServerInfo.iMaxNumClients,
-                        NewCoreServerInfo.bPermanentOnline )
-        { UpdateRegistration(); }
+                       const CServerCoreInfo& NewCoreServerInfo ) :
+        CServerInfo ( NHAddr,
+                      NLHAddr,
+                      NewCoreServerInfo.strName,
+                      NewCoreServerInfo.eCountry,
+                      NewCoreServerInfo.strCity,
+                      NewCoreServerInfo.iMaxNumClients,
+                      NewCoreServerInfo.bPermanentOnline )
+    {
+        UpdateRegistration();
+    }
 
     void UpdateRegistration() { RegisterTime.start(); }
 
-public:
+  public:
     // time on which the entry was registered
     QElapsedTimer RegisterTime;
 };
@@ -123,7 +130,7 @@ class CServerListManager : public QObject
 {
     Q_OBJECT
 
-public:
+  public:
     CServerListManager ( const quint16  iNPortNum,
                          const QString& sNCentServAddr,
                          const QString& strServerInfo,
@@ -138,11 +145,17 @@ public:
     void SetEnabled ( const bool bState ) { bEnabled = bState; }
     bool GetEnabled() const { return bEnabled; }
 
-    void SetCentralServerAddress ( const QString sNCentServAddr );
+    void    SetCentralServerAddress ( const QString sNCentServAddr );
     QString GetCentralServerAddress() { return strCentralServerAddress; }
 
-    void SetCentralServerAddressType ( const ECSAddType eNCSAT ) { eCentralServerAddressType = eNCSAT; }
-    ECSAddType GetCentralServerAddressType() { return eCentralServerAddressType; }
+    void SetCentralServerAddressType ( const ECSAddType eNCSAT )
+    {
+        eCentralServerAddressType = eNCSAT;
+    }
+    ECSAddType GetCentralServerAddressType()
+    {
+        return eCentralServerAddressType;
+    }
 
     bool GetIsCentralServer() const { return bIsCentralServer; }
 
@@ -161,17 +174,23 @@ public:
     // stored in the first entry of the list, we assume here that the first
     // entry is correctly created in the constructor of the class
     void SetServerName ( const QString& strNewName )
-        { ServerList[0].strName = strNewName; }
+    {
+        ServerList[0].strName = strNewName;
+    }
 
     QString GetServerName() { return ServerList[0].strName; }
 
     void SetServerCity ( const QString& strNewCity )
-        { ServerList[0].strCity = strNewCity; }
+    {
+        ServerList[0].strCity = strNewCity;
+    }
 
     QString GetServerCity() { return ServerList[0].strCity; }
 
     void SetServerCountry ( const QLocale::Country eNewCountry )
-        { ServerList[0].eCountry = eNewCountry; }
+    {
+        ServerList[0].eCountry = eNewCountry;
+    }
 
     QLocale::Country GetServerCountry() { return ServerList[0].eCountry; }
 
@@ -179,40 +198,40 @@ public:
 
     void StoreRegistrationResult ( ESvrRegResult eStatus );
 
-protected:
+  protected:
     void SlaveServerRegisterServer ( const bool bIsRegister );
     void SetSvrRegStatus ( ESvrRegStatus eNSvrRegStatus );
 
-    QTimer                  TimerPollList;
-    QTimer                  TimerRegistering;
-    QTimer                  TimerPingServerInList;
-    QTimer                  TimerPingCentralServer;
-    QTimer                  TimerCLRegisterServerResp;
+    QTimer TimerPollList;
+    QTimer TimerRegistering;
+    QTimer TimerPingServerInList;
+    QTimer TimerPingCentralServer;
+    QTimer TimerCLRegisterServerResp;
 
-    QMutex                  Mutex;
+    QMutex Mutex;
 
     QList<CServerListEntry> ServerList;
 
-    QString                 strCentralServerAddress;
-    bool                    bEnabled;
-    bool                    bIsCentralServer;
-    ECSAddType              eCentralServerAddressType;
+    QString    strCentralServerAddress;
+    bool       bEnabled;
+    bool       bIsCentralServer;
+    ECSAddType eCentralServerAddressType;
 
-    CHostAddress            SlaveCurCentServerHostAddress;
-    CHostAddress            SlaveCurLocalHostAddress;
+    CHostAddress SlaveCurCentServerHostAddress;
+    CHostAddress SlaveCurLocalHostAddress;
 
-    QList<QHostAddress>     vWhiteList;
-    QString                 strMinServerVersion;
+    QList<QHostAddress> vWhiteList;
+    QString             strMinServerVersion;
 
-    CProtocol*              pConnLessProtocol;
+    CProtocol* pConnLessProtocol;
 
     // server registration status
-    ESvrRegStatus           eSvrRegStatus;
+    ESvrRegStatus eSvrRegStatus;
 
     // count of registration retries
-    int                     iSvrRegRetries;
+    int iSvrRegRetries;
 
-public slots:
+  public slots:
     void OnTimerPollList();
     void OnTimerPingServerInList();
     void OnTimerPingCentralServer();
@@ -220,6 +239,6 @@ public slots:
     void OnTimerRegistering() { SlaveServerRegisterServer ( true ); }
     void OnTimerIsPermanent() { ServerList[0].bPermanentOnline = true; }
 
-signals:
+  signals:
     void SvrRegStatusChanged();
 };

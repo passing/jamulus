@@ -8,45 +8,44 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later 
+ * Foundation; either version 2 of the License, or (at your option) any later
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 
+ * this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
 
 #pragma once
 
-#include <QThread>
 #include <QDateTime>
 #include <QFile>
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-# include <QVersionNumber>
+#include <QThread>
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 6, 0 )
+#include <QVersionNumber>
 #endif
-#include "global.h"
 #include "buffer.h"
-#include "util.h"
+#include "global.h"
 #include "protocol.h"
 #include "socket.h"
-
+#include "util.h"
 
 /* Definitions ****************************************************************/
 // set the time-out for the input buffer until the state changes from
 // connected to not connected (the actual time depends on the way the error
 // correction is implemented)
-#define CON_TIME_OUT_SEC_MAX                 30 // seconds
+#define CON_TIME_OUT_SEC_MAX 30 // seconds
 
-// number of frames for audio fade-in, 48 kHz, x samples: 3 sec / (x samples / 48 kHz)
-#define FADE_IN_NUM_FRAMES                   2250
-#define FADE_IN_NUM_FRAMES_DBLE_FRAMESIZE    1125
-
+// number of frames for audio fade-in, 48 kHz, x samples: 3 sec / (x samples /
+// 48 kHz)
+#define FADE_IN_NUM_FRAMES 2250
+#define FADE_IN_NUM_FRAMES_DBLE_FRAMESIZE 1125
 
 enum EPutDataStat
 {
@@ -60,13 +59,12 @@ enum EPutDataStat
     PS_NEW_CONNECTION
 };
 
-
 /* Classes ********************************************************************/
 class CChannel : public QObject
 {
     Q_OBJECT
 
-public:
+  public:
     // we have to make "server" the default since I do not see a chance to
     // use constructor initialization in the server for a vector of channels
     CChannel ( const bool bNIsServer = true );
@@ -80,8 +78,7 @@ public:
                                 const int               iNumBytes,
                                 CHostAddress            RecHostAddr );
 
-    EGetDataStat GetData ( CVector<uint8_t>& vecbyData,
-                           const int         iNumBytes );
+    EGetDataStat GetData ( CVector<uint8_t>& vecbyData, const int iNumBytes );
 
     void PrepAndSendPacket ( CHighPrioSocket*        pSocket,
                              const CVector<uint8_t>& vecbyNPacket,
@@ -98,34 +95,49 @@ public:
     bool GetAddress ( CHostAddress& RetAddr );
     const CHostAddress& GetAddress() const { return InetAddr; }
 
-    void ResetInfo() { ChannelInfo = CChannelCoreInfo(); } // reset does not emit a message
-    QString GetName();
-    void SetChanInfo ( const CChannelCoreInfo& NChanInf );
+    void ResetInfo()
+    {
+        ChannelInfo = CChannelCoreInfo();
+    } // reset does not emit a message
+    QString           GetName();
+    void              SetChanInfo ( const CChannelCoreInfo& NChanInf );
     CChannelCoreInfo& GetChanInfo() { return ChannelInfo; }
 
     void SetRemoteInfo ( const CChannelCoreInfo ChInfo )
-        { Protocol.CreateChanInfoMes ( ChInfo ); }
+    {
+        Protocol.CreateChanInfoMes ( ChInfo );
+    }
 
     void CreateReqChanInfoMes() { Protocol.CreateReqChanInfoMes(); }
     void CreateVersionAndOSMes() { Protocol.CreateVersionAndOSMes(); }
-    void CreateMuteStateHasChangedMes ( const int iChanID, const bool bIsMuted ) { Protocol.CreateMuteStateHasChangedMes ( iChanID, bIsMuted ); }
+    void CreateMuteStateHasChangedMes ( const int iChanID, const bool bIsMuted )
+    {
+        Protocol.CreateMuteStateHasChangedMes ( iChanID, bIsMuted );
+    }
 
-    void SetGain ( const int iChanID, const float fNewGain );
+    void  SetGain ( const int iChanID, const float fNewGain );
     float GetGain ( const int iChanID );
-    float GetFadeInGain() { return static_cast<float> ( iFadeInCnt ) / iFadeInCntMax; }
+    float GetFadeInGain()
+    {
+        return static_cast<float> ( iFadeInCnt ) / iFadeInCntMax;
+    }
 
-    void SetPan ( const int iChanID, const float fNewPan );
+    void  SetPan ( const int iChanID, const float fNewPan );
     float GetPan ( const int iChanID );
 
     void SetRemoteChanGain ( const int iId, const float fGain )
-        { Protocol.CreateChanGainMes ( iId, fGain ); }
+    {
+        Protocol.CreateChanGainMes ( iId, fGain );
+    }
 
     void SetRemoteChanPan ( const int iId, const float fPan )
-        { Protocol.CreateChanPanMes ( iId, fPan ); }
+    {
+        Protocol.CreateChanPanMes ( iId, fPan );
+    }
 
     bool SetSockBufNumFrames ( const int  iNewNumFrames,
                                const bool bPreserve = false );
-    int GetSockBufNumFrames() const { return iCurSockBufNumFrames; }
+    int  GetSockBufNumFrames() const { return iCurSockBufNumFrames; }
 
     void UpdateSocketBufferSize();
 
@@ -133,48 +145,76 @@ public:
 
     // set/get network out buffer size and size factor
     void SetAudioStreamProperties ( const EAudComprType eNewAudComprType,
-                                    const int iNewNetwFrameSize,
-                                    const int iNewNetwFrameSizeFact,
-                                    const int iNewNumAudioChannels );
+                                    const int           iNewNetwFrameSize,
+                                    const int           iNewNetwFrameSizeFact,
+                                    const int           iNewNumAudioChannels );
 
     void SetDoAutoSockBufSize ( const bool bValue )
-        { bDoAutoSockBufSize = bValue; }
+    {
+        bDoAutoSockBufSize = bValue;
+    }
 
     bool GetDoAutoSockBufSize() const { return bDoAutoSockBufSize; }
 
     int GetNetwFrameSizeFact() const { return iNetwFrameSizeFact; }
     int GetCeltNumCodedBytes() const { return iCeltNumCodedBytes; }
 
-    void GetBufErrorRates ( CVector<double>& vecErrRates, double& dLimit, double& dMaxUpLimit )
-        { SockBuf.GetErrorRates ( vecErrRates, dLimit, dMaxUpLimit ); }
+    void GetBufErrorRates ( CVector<double>& vecErrRates,
+                            double&          dLimit,
+                            double&          dMaxUpLimit )
+    {
+        SockBuf.GetErrorRates ( vecErrRates, dLimit, dMaxUpLimit );
+    }
 
     EAudComprType GetAudioCompressionType() { return eAudioCompressionType; }
-    int GetNumAudioChannels() const { return iNumAudioChannels; }
+    int           GetNumAudioChannels() const { return iNumAudioChannels; }
 
     // network protocol interface
     void CreateJitBufMes ( const int iJitBufSize )
-    { 
+    {
         if ( ProtocolIsEnabled() )
         {
             Protocol.CreateJitBufMes ( iJitBufSize );
         }
     }
-    void CreateClientIDMes ( const int iChanID )             { Protocol.CreateClientIDMes ( iChanID ); }
-    void CreateReqNetwTranspPropsMes()                       { Protocol.CreateReqNetwTranspPropsMes(); }
-    void CreateReqSplitMessSupportMes()                      { Protocol.CreateReqSplitMessSupportMes(); }
-    void CreateReqJitBufMes()                                { Protocol.CreateReqJitBufMes(); }
-    void CreateReqConnClientsList()                          { Protocol.CreateReqConnClientsList(); }
-    void CreateChatTextMes ( const QString& strChatText )    { Protocol.CreateChatTextMes ( strChatText ); }
-    void CreateLicReqMes ( const ELicenceType eLicenceType ) { Protocol.CreateLicenceRequiredMes ( eLicenceType ); }
+    void CreateClientIDMes ( const int iChanID )
+    {
+        Protocol.CreateClientIDMes ( iChanID );
+    }
+    void CreateReqNetwTranspPropsMes()
+    {
+        Protocol.CreateReqNetwTranspPropsMes();
+    }
+    void CreateReqSplitMessSupportMes()
+    {
+        Protocol.CreateReqSplitMessSupportMes();
+    }
+    void CreateReqJitBufMes() { Protocol.CreateReqJitBufMes(); }
+    void CreateReqConnClientsList() { Protocol.CreateReqConnClientsList(); }
+    void CreateChatTextMes ( const QString& strChatText )
+    {
+        Protocol.CreateChatTextMes ( strChatText );
+    }
+    void CreateLicReqMes ( const ELicenceType eLicenceType )
+    {
+        Protocol.CreateLicenceRequiredMes ( eLicenceType );
+    }
 
-// TODO needed for compatibility to old servers >= 3.4.6 and <= 3.5.12
-void CreateReqChannelLevelListMes() { Protocol.CreateReqChannelLevelListMes(); }
+    // TODO needed for compatibility to old servers >= 3.4.6 and <= 3.5.12
+    void CreateReqChannelLevelListMes()
+    {
+        Protocol.CreateReqChannelLevelListMes();
+    }
 
     void CreateConClientListMes ( const CVector<CChannelInfo>& vecChanInfo )
-        { Protocol.CreateConClientListMes ( vecChanInfo ); }
+    {
+        Protocol.CreateConClientListMes ( vecChanInfo );
+    }
 
     void CreateRecorderStateMes ( const ERecorderState eRecorderState )
-        { Protocol.CreateRecorderStateMes ( eRecorderState ); }
+    {
+        Protocol.CreateRecorderStateMes ( eRecorderState );
+    }
 
     CNetworkTransportProps GetNetworkTransportPropsFromCurrentSettings();
 
@@ -182,7 +222,7 @@ void CreateReqChannelLevelListMes() { Protocol.CreateReqChannelLevelListMes(); }
                                          const int             iInSize,
                                          const bool            bIsStereoIn );
 
-protected:
+  protected:
     bool ProtocolIsEnabled();
 
     void ResetNetworkTransportProperties()
@@ -199,57 +239,58 @@ protected:
     }
 
     // connection parameters
-    CHostAddress            InetAddr;
+    CHostAddress InetAddr;
 
     // channel info
-    CChannelCoreInfo        ChannelInfo;
+    CChannelCoreInfo ChannelInfo;
 
     // mixer and effect settings
-    CVector<float>          vecfGains;
-    CVector<float>          vecfPannings;
+    CVector<float> vecfGains;
+    CVector<float> vecfPannings;
 
     // network jitter-buffer
-    CNetBufWithStats        SockBuf;
-    int                     iCurSockBufNumFrames;
-    bool                    bDoAutoSockBufSize;
-    bool                    bUseSequenceNumber;
-    uint8_t                 iSendSequenceNumber;
+    CNetBufWithStats SockBuf;
+    int              iCurSockBufNumFrames;
+    bool             bDoAutoSockBufSize;
+    bool             bUseSequenceNumber;
+    uint8_t          iSendSequenceNumber;
 
     // network output conversion buffer
-    CConvBuf<uint8_t>       ConvBuf;
+    CConvBuf<uint8_t> ConvBuf;
 
     // network protocol
-    CProtocol               Protocol;
+    CProtocol Protocol;
 
-    int                     iConTimeOut;
-    int                     iConTimeOutStartVal;
-    int                     iFadeInCnt;
-    int                     iFadeInCntMax;
+    int iConTimeOut;
+    int iConTimeOutStartVal;
+    int iFadeInCnt;
+    int iFadeInCntMax;
 
-    bool                    bIsEnabled;
-    bool                    bIsServer;
+    bool bIsEnabled;
+    bool bIsServer;
 
-    int                     iNetwFrameSizeFact;
-    int                     iNetwFrameSize;
-    int                     iCeltNumCodedBytes;
-    int                     iAudioFrameSizeSamples;
+    int iNetwFrameSizeFact;
+    int iNetwFrameSize;
+    int iCeltNumCodedBytes;
+    int iAudioFrameSizeSamples;
 
-    EAudComprType           eAudioCompressionType;
-    int                     iNumAudioChannels;
+    EAudComprType eAudioCompressionType;
+    int           iNumAudioChannels;
 
-    QMutex                  Mutex;
-    QMutex                  MutexSocketBuf;
-    QMutex                  MutexConvBuf;
+    QMutex Mutex;
+    QMutex MutexSocketBuf;
+    QMutex MutexConvBuf;
 
     CStereoSignalLevelMeter SignalLevelMeter;
 
-public slots:
+  public slots:
     void OnSendProtMessage ( CVector<uint8_t> vecMessage );
     void OnJittBufSizeChange ( int iNewJitBufSize );
     void OnChangeChanGain ( int iChanID, float fNewGain );
     void OnChangeChanPan ( int iChanID, float fNewPan );
     void OnChangeChanInfo ( CChannelCoreInfo ChanInfo );
-    void OnNetTranspPropsReceived ( CNetworkTransportProps NetworkTransportProps );
+    void
+         OnNetTranspPropsReceived ( CNetworkTransportProps NetworkTransportProps );
     void OnReqNetTranspProps();
     void OnReqSplitMessSupport();
     void OnSplitMessSupported() { Protocol.SetSplitMessageSupported ( true ); }
@@ -282,7 +323,7 @@ public slots:
 
     void OnNewConnection() { emit NewConnection(); }
 
-signals:
+  signals:
     void MessReadyForSending ( CVector<uint8_t> vecMessage );
     void NewConnection();
     void ReqJittBufSize();
@@ -298,7 +339,8 @@ signals:
     void ChatTextReceived ( QString strChatText );
     void ReqNetTranspProps();
     void LicenceRequired ( ELicenceType eLicenceType );
-    void VersionAndOSReceived ( COSUtil::EOpSystemType eOSType, QString strVersion );
+    void VersionAndOSReceived ( COSUtil::EOpSystemType eOSType,
+                                QString                strVersion );
     void RecorderStateReceived ( ERecorderState eRecorderState );
     void Disconnected();
 

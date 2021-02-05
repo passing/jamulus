@@ -27,7 +27,6 @@
 
 #include "levelmeter.h"
 
-
 /* Implementation *************************************************************/
 CLevelMeter::CLevelMeter ( QWidget* parent ) :
     QWidget ( parent ),
@@ -37,8 +36,8 @@ CLevelMeter::CLevelMeter ( QWidget* parent ) :
     QWidget*     pLEDMeter  = new QWidget();
     QVBoxLayout* pLEDLayout = new QVBoxLayout ( pLEDMeter );
     pLEDLayout->setAlignment ( Qt::AlignHCenter );
-    pLEDLayout->setMargin    ( 0 );
-    pLEDLayout->setSpacing   ( 0 );
+    pLEDLayout->setMargin ( 0 );
+    pLEDLayout->setSpacing ( 0 );
 
     // create LEDs plus the clip LED
     vecpLEDs.Init ( NUM_LEDS_INCL_CLIP_LED );
@@ -48,7 +47,8 @@ CLevelMeter::CLevelMeter ( QWidget* parent ) :
         // create LED object
         vecpLEDs[iLEDIdx] = new cLED ( parent );
 
-        // add LED to layout with spacer (do not add spacer on the bottom of the first LED)
+        // add LED to layout with spacer (do not add spacer on the bottom of the
+        // first LED)
         if ( iLEDIdx < NUM_LEDS_INCL_CLIP_LED - 1 )
         {
             pLEDLayout->addStretch();
@@ -60,17 +60,20 @@ CLevelMeter::CLevelMeter ( QWidget* parent ) :
     // initialize bar meter
     pBarMeter = new QProgressBar();
     pBarMeter->setOrientation ( Qt::Vertical );
-    pBarMeter->setRange ( 0, 100 * NUM_STEPS_LED_BAR ); // use factor 100 to reduce quantization (bar is continuous)
-    pBarMeter->setFormat ( "" ); // suppress percent numbers
+    pBarMeter->setRange (
+        0,
+        100 * NUM_STEPS_LED_BAR ); // use factor 100 to reduce quantization (bar
+                                   // is continuous)
+    pBarMeter->setFormat ( "" );   // suppress percent numbers
 
     // setup stacked layout for meter type switching mechanism
     pStackedLayout = new QStackedLayout ( this );
     pStackedLayout->addWidget ( pLEDMeter );
     pStackedLayout->addWidget ( pBarMeter );
 
-    // according to QScrollArea description: "When using a scroll area to display the
-    // contents of a custom widget, it is important to ensure that the size hint of
-    // the child widget is set to a suitable value."
+    // according to QScrollArea description: "When using a scroll area to
+    // display the contents of a custom widget, it is important to ensure that
+    // the size hint of the child widget is set to a suitable value."
     pBarMeter->setMinimumSize ( QSize ( 1, 1 ) );
     pLEDMeter->setMinimumSize ( QSize ( 1, 1 ) );
 
@@ -81,10 +84,11 @@ CLevelMeter::CLevelMeter ( QWidget* parent ) :
     TimerClip.setSingleShot ( true );
     TimerClip.setInterval ( CLIP_IND_TIME_OUT_MS );
 
-
     // Connections -------------------------------------------------------------
-    QObject::connect ( &TimerClip, &QTimer::timeout,
-        this, &CLevelMeter::ClipReset );
+    QObject::connect ( &TimerClip,
+                       &QTimer::timeout,
+                       this,
+                       &CLevelMeter::ClipReset );
 }
 
 CLevelMeter::~CLevelMeter()
@@ -116,7 +120,8 @@ void CLevelMeter::SetLevelMeterType ( const ELevelMeterType eNType )
         break;
 
     case MT_SLIM_BAR:
-        // set all LEDs to disabled, otherwise we would not get our desired small width
+        // set all LEDs to disabled, otherwise we would not get our desired
+        // small width
         for ( int iLEDIdx = 0; iLEDIdx < NUM_LEDS_INCL_CLIP_LED; iLEDIdx++ )
         {
             vecpLEDs[iLEDIdx]->SetColor ( cLED::RL_DISABLED );
@@ -131,7 +136,7 @@ void CLevelMeter::SetLevelMeterType ( const ELevelMeterType eNType )
 }
 
 void CLevelMeter::SetBarMeterStyleAndClipStatus ( const ELevelMeterType eNType,
-                                                  const bool            bIsClip )
+                                                  const bool bIsClip )
 {
     switch ( eNType )
     {
@@ -185,7 +190,8 @@ void CLevelMeter::SetValue ( const double dValue )
     switch ( eLevelMeterType )
     {
     case MT_LED:
-        // update state of all LEDs for current level value (except of the clip LED)
+        // update state of all LEDs for current level value (except of the clip
+        // LED)
         for ( int iLEDIdx = 0; iLEDIdx < NUM_STEPS_LED_BAR; iLEDIdx++ )
         {
             // set active LED color if value is above current LED index
@@ -267,12 +273,14 @@ void CLevelMeter::ClipReset()
     }
 }
 
-
 CLevelMeter::cLED::cLED ( QWidget* parent ) :
-    BitmCubeRoundBlack  ( QString::fromUtf8 ( ":/png/LEDs/res/HLEDBlackSmall.png" ) ),
-    BitmCubeRoundGreen  ( QString::fromUtf8 ( ":/png/LEDs/res/HLEDGreenSmall.png" ) ),
-    BitmCubeRoundYellow ( QString::fromUtf8 ( ":/png/LEDs/res/HLEDYellowSmall.png" ) ),
-    BitmCubeRoundRed    ( QString::fromUtf8 ( ":/png/LEDs/res/HLEDRedSmall.png" ) )
+    BitmCubeRoundBlack (
+        QString::fromUtf8 ( ":/png/LEDs/res/HLEDBlackSmall.png" ) ),
+    BitmCubeRoundGreen (
+        QString::fromUtf8 ( ":/png/LEDs/res/HLEDGreenSmall.png" ) ),
+    BitmCubeRoundYellow (
+        QString::fromUtf8 ( ":/png/LEDs/res/HLEDYellowSmall.png" ) ),
+    BitmCubeRoundRed ( QString::fromUtf8 ( ":/png/LEDs/res/HLEDRedSmall.png" ) )
 {
     // create LED label
     pLEDLabel = new QLabel ( "", parent );

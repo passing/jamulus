@@ -24,7 +24,6 @@
 
 #include "vstmain.h"
 
-
 /* Implementation *************************************************************/
 // this function is required for host to get plugin
 AudioEffect* createEffectInstance ( audioMasterCallback AudioMaster )
@@ -37,7 +36,7 @@ CLlconVST::CLlconVST ( audioMasterCallback AudioMaster ) :
     Client ( LLCON_DEFAULT_PORT_NUMBER )
 {
     // stereo input/output
-    setNumInputs  ( 2 );
+    setNumInputs ( 2 );
     setNumOutputs ( 2 );
 
     setUniqueID ( 'Llco' );
@@ -51,14 +50,16 @@ CLlconVST::CLlconVST ( audioMasterCallback AudioMaster ) :
     // we want a single shot timer to shut down the connection if no
     // processing is done anymore (VST host has stopped the stream)
     TimerOnOff.setSingleShot ( true );
-    TimerOnOff.setInterval   ( VST_STOP_TIMER_INTERVAL );
+    TimerOnOff.setInterval ( VST_STOP_TIMER_INTERVAL );
 
     // connect timer event
-    connect ( &TimerOnOff, SIGNAL ( timeout() ),
-        this, SLOT ( OnTimerOnOff() ) );
+    connect ( &TimerOnOff,
+              SIGNAL ( timeout() ),
+              this,
+              SLOT ( OnTimerOnOff() ) );
 
-// TODO settings
-Client.SetServerAddr ( DEFAULT_SERVER_ADDRESS );
+    // TODO settings
+    Client.SetServerAddr ( DEFAULT_SERVER_ADDRESS );
 }
 
 bool CLlconVST::GetName ( char* cName )

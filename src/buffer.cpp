@@ -27,7 +27,6 @@
 
 #include "buffer.h"
 
-
 /* Network buffer implementation **********************************************/
 void CNetBuf::Init ( const int  iNewBlockSize,
                      const int  iNewNumBlocks,
@@ -41,10 +40,12 @@ void CNetBuf::Init ( const int  iNewBlockSize,
     // not have to implement special code for this case
     // only enter the "preserve" branch, if object was already initialized
     // and the block sizes are the same
-    if ( bPreserve && ( !bIsSimulation ) && bIsInitialized && ( iBlockSize == iNewBlockSize ) )
+    if ( bPreserve && ( !bIsSimulation ) && bIsInitialized &&
+         ( iBlockSize == iNewBlockSize ) )
     {
         // extract all data from buffer in temporary storage
-        CVector<CVector<uint8_t> > vecvecTempMemory = vecvecMemory; // allocate worst case memory by copying
+        CVector<CVector<uint8_t>> vecvecTempMemory =
+            vecvecMemory; // allocate worst case memory by copying
 
         if ( !bNUseSequenceNumber )
         {
@@ -55,11 +56,12 @@ void CNetBuf::Init ( const int  iNewBlockSize,
                 iPreviousDataCnt++;
             }
 
-            // now resize the buffer to the new size (buffer is empty after this operation)
+            // now resize the buffer to the new size (buffer is empty after this
+            // operation)
             Resize ( iNewNumBlocks, iNewBlockSize );
 
-            // copy the previous data back in the buffer (make sure we only copy as much
-            // data back as the new buffer size can hold)
+            // copy the previous data back in the buffer (make sure we only copy
+            // as much data back as the new buffer size can hold)
             int iDataCnt = 0;
 
             while ( ( iDataCnt < iPreviousDataCnt ) &&
@@ -83,7 +85,8 @@ void CNetBuf::Init ( const int  iNewBlockSize,
                 vecvecTempMemory[iCurBlockPos++] = vecvecMemory[iBlockGetPos++];
             }
 
-            for ( iBlockGetPos = 0; iBlockGetPos < iOldBlockGetPos; iBlockGetPos++ )
+            for ( iBlockGetPos = 0; iBlockGetPos < iOldBlockGetPos;
+                  iBlockGetPos++ )
             {
                 veciTempBlockValid[iCurBlockPos] = veciBlockValid[iBlockGetPos];
                 vecvecTempMemory[iCurBlockPos++] = vecvecMemory[iBlockGetPos];
@@ -96,7 +99,9 @@ void CNetBuf::Init ( const int  iNewBlockSize,
             iSequenceNumberAtGetPos = iOldSequenceNumberAtGetPos;
             iBlockGetPos            = 0; // per definition
 
-            for ( int iCurPos = 0; iCurPos < std::min ( iNewNumBlocks, iOldNumBlocksMemory ); iCurPos++ )
+            for ( int iCurPos = 0;
+                  iCurPos < std::min ( iNewNumBlocks, iOldNumBlocksMemory );
+                  iCurPos++ )
             {
                 veciBlockValid[iCurPos] = veciTempBlockValid[iCurPos];
                 vecvecMemory[iCurPos]   = vecvecTempMemory[iCurPos];
@@ -112,11 +117,10 @@ void CNetBuf::Init ( const int  iNewBlockSize,
     bIsInitialized = true;
 }
 
-void CNetBuf::Resize ( const int iNewNumBlocks,
-                       const int iNewBlockSize )
+void CNetBuf::Resize ( const int iNewNumBlocks, const int iNewBlockSize )
 {
     // allocate memory for actual data buffer
-    vecvecMemory.Init   ( iNewNumBlocks );
+    vecvecMemory.Init ( iNewNumBlocks );
     veciBlockValid.Init ( iNewNumBlocks, 0 ); // initialize with zeros = invalid
 
     if ( !bIsSimulation )
@@ -127,7 +131,8 @@ void CNetBuf::Resize ( const int iNewNumBlocks,
         }
     }
 
-    // init buffer pointers and buffer state (empty buffer) and store buffer properties
+    // init buffer pointers and buffer state (empty buffer) and store buffer
+    // properties
     iBlockGetPos     = 0;
     iBlockPutPos     = 0;
     eBufState        = BS_EMPTY;
@@ -135,11 +140,10 @@ void CNetBuf::Resize ( const int iNewNumBlocks,
     iNumBlocksMemory = iNewNumBlocks;
 }
 
-bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData,
-                    int                     iInSize )
+bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData, int iInSize )
 {
-    // if the sequence number is used, we need a complete different way of applying
-    // the new network packet
+    // if the sequence number is used, we need a complete different way of
+    // applying the new network packet
     if ( bUseSequenceNumber )
     {
         // check that the input size is a multiple of the block size
@@ -148,8 +152,9 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData,
             return false;
         }
 
-        // to get the number of input blocks we assume that the number of bytes for
-        // the sequence number is much smaller than the number of coded audio bytes
+        // to get the number of input blocks we assume that the number of bytes
+        // for the sequence number is much smaller than the number of coded
+        // audio bytes
         const int iNumBlocks = /* floor */ ( iInSize / iBlockSize );
 
         // copy new data in internal buffer
@@ -157,10 +162,13 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData,
         {
             // extract sequence number of current received block (per definition
             // the sequence number is appended after the coded audio data)
-            const int iCurrentSequenceNumber = vecbyData[iBlock * ( iBlockSize + iNumBytesSeqNum ) + iBlockSize];
+            const int iCurrentSequenceNumber =
+                vecbyData[iBlock * ( iBlockSize + iNumBytesSeqNum ) +
+                          iBlockSize];
 
             // calculate the sequence number difference and take care of wrap
-            int iSeqNumDiff = iCurrentSequenceNumber - static_cast<int> ( iSequenceNumberAtGetPos );
+            int iSeqNumDiff = iCurrentSequenceNumber -
+                              static_cast<int> ( iSequenceNumberAtGetPos );
 
             if ( iSeqNumDiff < -128 )
             {
@@ -171,28 +179,34 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData,
                 iSeqNumDiff -= 256;
             }
 
-            // The 1-byte sequence number wraps around at a count of 256. So, if a packet is delayed
-            // further than this we cannot detect it. But it does not matter since such a packet is
-            // more than 100 ms delayed so we have a bad network situation anyway. Therefore we
-            // assume that the sequence number difference between the received and local counter is
-            // correct. The idea of the following code is that we always move our "buffer window" so
-            // that the received packet fits into the buffer. By doing this we are robust against
-            // sample rate offsets between client/server or buffer glitches in the audio driver since
-            // we adjust the window. The downside is that we never throw away single packets which arrive
-            // too late so we throw away valid packets when we move the "buffer window" to the delayed
-            // packet and then back to the correct place when the next normal packet is received. But
-            // tests showed that the new buffer strategy does not perform worse than the old jitter
-            // buffer which did not use any sequence number at all.
+            // The 1-byte sequence number wraps around at a count of 256. So, if
+            // a packet is delayed further than this we cannot detect it. But it
+            // does not matter since such a packet is more than 100 ms delayed
+            // so we have a bad network situation anyway. Therefore we assume
+            // that the sequence number difference between the received and
+            // local counter is correct. The idea of the following code is that
+            // we always move our "buffer window" so that the received packet
+            // fits into the buffer. By doing this we are robust against sample
+            // rate offsets between client/server or buffer glitches in the
+            // audio driver since we adjust the window. The downside is that we
+            // never throw away single packets which arrive too late so we throw
+            // away valid packets when we move the "buffer window" to the
+            // delayed packet and then back to the correct place when the next
+            // normal packet is received. But tests showed that the new buffer
+            // strategy does not perform worse than the old jitter buffer which
+            // did not use any sequence number at all.
             if ( iSeqNumDiff < 0 )
             {
-                // the received packet comes too late so we shift the "buffer window" to the past
-                // until the received packet is the very first packet in the buffer
+                // the received packet comes too late so we shift the "buffer
+                // window" to the past until the received packet is the very
+                // first packet in the buffer
                 for ( int i = iSeqNumDiff; i < 0; i++ )
                 {
                     // insert an invalid block at the shifted position
                     veciBlockValid[iBlockGetPos] = 0; // invalidate
 
-                    // we decrease the local sequence number and get position and take care of wrap
+                    // we decrease the local sequence number and get position
+                    // and take care of wrap
                     iSequenceNumberAtGetPos--;
                     iBlockGetPos--;
 
@@ -202,19 +216,22 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData,
                     }
                 }
 
-                // insert the new packet at the beginning of the buffer since it was delayed
+                // insert the new packet at the beginning of the buffer since it
+                // was delayed
                 iBlockPutPos = iBlockGetPos;
             }
             else if ( iSeqNumDiff >= iNumBlocksMemory )
             {
-                // the received packet comes too early so we move the "buffer window" in the
-                // future until the received packet is the last packet in the buffer
+                // the received packet comes too early so we move the "buffer
+                // window" in the future until the received packet is the last
+                // packet in the buffer
                 for ( int i = 0; i < iSeqNumDiff - iNumBlocksMemory + 1; i++ )
                 {
                     // insert an invalid block at the shifted position
                     veciBlockValid[iBlockGetPos] = 0; // invalidate
 
-                    // we increase the local sequence number and get position and take care of wrap
+                    // we increase the local sequence number and get position
+                    // and take care of wrap
                     iSequenceNumberAtGetPos++;
                     iBlockGetPos++;
 
@@ -224,8 +241,9 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData,
                     }
                 }
 
-                // insert the new packet at the end of the buffer since it is too early (since
-                // we add an offset to the get position, we have to take care of wrapping)
+                // insert the new packet at the end of the buffer since it is
+                // too early (since we add an offset to the get position, we
+                // have to take care of wrapping)
                 iBlockPutPos = iBlockGetPos + iNumBlocksMemory - 1;
 
                 if ( iBlockPutPos >= iNumBlocksMemory )
@@ -235,8 +253,9 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData,
             }
             else
             {
-                // this is the regular case: the received packet fits into the buffer so
-                // we will write it at the correct position based on the sequence number
+                // this is the regular case: the received packet fits into the
+                // buffer so we will write it at the correct position based on
+                // the sequence number
                 iBlockPutPos = iBlockGetPos + iSeqNumDiff;
 
                 if ( iBlockPutPos >= iNumBlocksMemory )
@@ -249,8 +268,11 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData,
             if ( !bIsSimulation )
             {
                 // copy one block of data in buffer
-                std::copy ( vecbyData.begin() + iBlock * ( iBlockSize + iNumBytesSeqNum ),
-                            vecbyData.begin() + iBlock * ( iBlockSize + iNumBytesSeqNum ) + iBlockSize,
+                std::copy ( vecbyData.begin() +
+                                iBlock * ( iBlockSize + iNumBytesSeqNum ),
+                            vecbyData.begin() +
+                                iBlock * ( iBlockSize + iNumBytesSeqNum ) +
+                                iBlockSize,
                             vecvecMemory[iBlockPutPos].begin() );
             }
 
@@ -260,8 +282,8 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData,
     }
     else
     {
-        // check if there is not enough space available and that the input size is a
-        // multiple of the block size
+        // check if there is not enough space available and that the input size
+        // is a multiple of the block size
         if ( ( GetAvailSpace() < iInSize ) ||
              ( ( iInSize % iBlockSize ) != 0 ) )
         {
@@ -278,7 +300,8 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData,
             {
                 // copy one block of data in buffer
                 std::copy ( vecbyData.begin() + iBlock * iBlockSize,
-                            vecbyData.begin() + iBlock * iBlockSize + iBlockSize,
+                            vecbyData.begin() + iBlock * iBlockSize +
+                                iBlockSize,
                             vecvecMemory[iBlockPutPos].begin() );
             }
 
@@ -306,14 +329,12 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData,
     return true;
 }
 
-bool CNetBuf::Get ( CVector<uint8_t>& vecbyData,
-                    const int         iOutSize )
+bool CNetBuf::Get ( CVector<uint8_t>& vecbyData, const int iOutSize )
 {
     bool bReturn = true;
 
     // check requested output size and available buffer data
-    if ( ( iOutSize == 0 ) ||
-         ( iOutSize != iBlockSize ) ||
+    if ( ( iOutSize == 0 ) || ( iOutSize != iBlockSize ) ||
          ( GetAvailData() < iOutSize ) )
     {
         return false;
@@ -329,7 +350,8 @@ bool CNetBuf::Get ( CVector<uint8_t>& vecbyData,
         veciBlockValid[iBlockGetPos] = 0; // zero means invalid
     }
 
-    // for simultion buffer or invalid block only update pointer, no data copying
+    // for simultion buffer or invalid block only update pointer, no data
+    // copying
     if ( !bIsSimulation && bReturn )
     {
         // copy data from internal buffer in output buffer
@@ -410,18 +432,17 @@ int CNetBuf::GetAvailData() const
     return iAvBlocks * iBlockSize;
 }
 
-
 /* Network buffer with statistic calculations implementation ******************/
 CNetBufWithStats::CNetBufWithStats() :
-    CNetBuf                   ( false ), // base class init: no simulation mode
-    iMaxStatisticCount        ( MAX_STATISTIC_COUNT ),
+    CNetBuf ( false ), // base class init: no simulation mode
+    iMaxStatisticCount ( MAX_STATISTIC_COUNT ),
     bUseDoubleSystemFrameSize ( false ),
-    dAutoFilt_WightUpNormal   ( IIR_WEIGTH_UP_NORMAL ),
+    dAutoFilt_WightUpNormal ( IIR_WEIGTH_UP_NORMAL ),
     dAutoFilt_WightDownNormal ( IIR_WEIGTH_DOWN_NORMAL ),
-    dAutoFilt_WightUpFast     ( IIR_WEIGTH_UP_FAST ),
-    dAutoFilt_WightDownFast   ( IIR_WEIGTH_DOWN_FAST ),
-    dErrorRateBound           ( ERROR_RATE_BOUND ),
-    dUpMaxErrorBound          ( UP_MAX_ERROR_BOUND )
+    dAutoFilt_WightUpFast ( IIR_WEIGTH_UP_FAST ),
+    dAutoFilt_WightDownFast ( IIR_WEIGTH_DOWN_FAST ),
+    dErrorRateBound ( ERROR_RATE_BOUND ),
+    dUpMaxErrorBound ( UP_MAX_ERROR_BOUND )
 {
     // Define the sizes of the simulation buffers,
     // must be NUM_STAT_SIMULATION_BUFFERS elements!
@@ -469,7 +490,10 @@ void CNetBufWithStats::Init ( const int  iNewBlockSize,
                               const bool bPreserve )
 {
     // call base class Init
-    CNetBuf::Init ( iNewBlockSize, iNewNumBlocks, bNUseSequenceNumber, bPreserve );
+    CNetBuf::Init ( iNewBlockSize,
+                    iNewNumBlocks,
+                    bNUseSequenceNumber,
+                    bPreserve );
 
     // inits for statistics calculation
     if ( !bPreserve )
@@ -477,13 +501,14 @@ void CNetBufWithStats::Init ( const int  iNewBlockSize,
         // set the auto filter weights and max statistic count
         if ( bUseDoubleSystemFrameSize )
         {
-            dAutoFilt_WightUpNormal   = IIR_WEIGTH_UP_NORMAL_DOUBLE_FRAME_SIZE;
-            dAutoFilt_WightDownNormal = IIR_WEIGTH_DOWN_NORMAL_DOUBLE_FRAME_SIZE;
-            dAutoFilt_WightUpFast     = IIR_WEIGTH_UP_FAST_DOUBLE_FRAME_SIZE;
-            dAutoFilt_WightDownFast   = IIR_WEIGTH_DOWN_FAST_DOUBLE_FRAME_SIZE;
-            iMaxStatisticCount        = MAX_STATISTIC_COUNT_DOUBLE_FRAME_SIZE;
-            dErrorRateBound           = ERROR_RATE_BOUND_DOUBLE_FRAME_SIZE;
-            dUpMaxErrorBound          = UP_MAX_ERROR_BOUND_DOUBLE_FRAME_SIZE;
+            dAutoFilt_WightUpNormal = IIR_WEIGTH_UP_NORMAL_DOUBLE_FRAME_SIZE;
+            dAutoFilt_WightDownNormal =
+                IIR_WEIGTH_DOWN_NORMAL_DOUBLE_FRAME_SIZE;
+            dAutoFilt_WightUpFast   = IIR_WEIGTH_UP_FAST_DOUBLE_FRAME_SIZE;
+            dAutoFilt_WightDownFast = IIR_WEIGTH_DOWN_FAST_DOUBLE_FRAME_SIZE;
+            iMaxStatisticCount      = MAX_STATISTIC_COUNT_DOUBLE_FRAME_SIZE;
+            dErrorRateBound         = ERROR_RATE_BOUND_DOUBLE_FRAME_SIZE;
+            dUpMaxErrorBound        = UP_MAX_ERROR_BOUND_DOUBLE_FRAME_SIZE;
         }
         else
         {
@@ -499,7 +524,9 @@ void CNetBufWithStats::Init ( const int  iNewBlockSize,
         for ( int i = 0; i < NUM_STAT_SIMULATION_BUFFERS; i++ )
         {
             // init simulation buffers with the correct size
-            SimulationBuffer[i].Init ( iNewBlockSize, viBufSizesForSim[i], bNUseSequenceNumber );
+            SimulationBuffer[i].Init ( iNewBlockSize,
+                                       viBufSizesForSim[i],
+                                       bNUseSequenceNumber );
 
             // init statistics
             ErrorRateStatistic[i].Init ( iMaxStatisticCount, true );
@@ -542,8 +569,7 @@ bool CNetBufWithStats::Put ( const CVector<uint8_t>& vecbyData,
     return bPutOK;
 }
 
-bool CNetBufWithStats::Get ( CVector<uint8_t>& vecbyData,
-                             const int         iOutSize )
+bool CNetBufWithStats::Get ( CVector<uint8_t>& vecbyData, const int iOutSize )
 {
     // call base class Get
     const bool bGetOK = CNetBuf::Get ( vecbyData, iOutSize );
@@ -567,7 +593,6 @@ void CNetBufWithStats::UpdateAutoSetting()
     int  iCurMaxUpDecision = 0; // dummy initialization
     bool bDecisionFound;
 
-
     // Get regular error rate decision -----------------------------------------
     // Use a specified error bound to identify the best buffer size for the
     // current network situation. Start with the smallest buffer and
@@ -589,7 +614,6 @@ void CNetBufWithStats::UpdateAutoSetting()
         // in case no buffer is below bound, use largest buffer size
         iCurDecision = viBufSizesForSim[NUM_STAT_SIMULATION_BUFFERS - 1];
     }
-
 
     // Get maximum upper error rate decision -----------------------------------
     // Use a specified error bound to identify the maximum upper error rate
@@ -618,7 +642,6 @@ void CNetBufWithStats::UpdateAutoSetting()
         // phase to get quickly back to normal buffer sizes (hopefully).
         ResetInitCounter();
     }
-
 
     // Post calculation (filtering) --------------------------------------------
     // Define different weights for up and down direction. Up direction
@@ -668,21 +691,21 @@ void CNetBufWithStats::UpdateAutoSetting()
                              dWeightUp,
                              dWeightDown );
 
-/*
-// TEST store important detection parameters in file for debugging
-static FILE* pFile = fopen ( "test.dat", "w" );
-static int icnt = 0;
-if ( icnt == 50 )
-{
-    fprintf ( pFile, "%d %e\n", iCurDecision, dCurIIRFilterResult );
-    fflush ( pFile );
-    icnt = 0;
-}
-else
-{
-    icnt++;
-}
-*/
+    /*
+    // TEST store important detection parameters in file for debugging
+    static FILE* pFile = fopen ( "test.dat", "w" );
+    static int icnt = 0;
+    if ( icnt == 50 )
+    {
+        fprintf ( pFile, "%d %e\n", iCurDecision, dCurIIRFilterResult );
+        fflush ( pFile );
+        icnt = 0;
+    }
+    else
+    {
+        icnt++;
+    }
+    */
 
     // apply a hysteresis
     iCurAutoBufferSizeSetting =
@@ -690,15 +713,14 @@ else
                                            iCurDecidedResult,
                                            dHysteresisValue );
 
-
     // Initialization phase check and correction -------------------------------
     // sometimes in the very first period after a connection we get a bad error
     // rate result -> delete this from the initialization phase
     if ( iInitCounter == iMaxStatisticCount / 8 )
     {
         // check error rate of the largest buffer as the indicator
-        if ( ErrorRateStatistic[NUM_STAT_SIMULATION_BUFFERS - 1].
-             GetAverage() > dErrorRateBound )
+        if ( ErrorRateStatistic[NUM_STAT_SIMULATION_BUFFERS - 1].GetAverage() >
+             dErrorRateBound )
         {
             for ( int i = 0; i < NUM_STAT_SIMULATION_BUFFERS; i++ )
             {
