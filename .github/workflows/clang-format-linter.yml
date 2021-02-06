@@ -11,7 +11,7 @@ jobs:
     - uses: DoozyX/clang-format-lint-action@v0.11
       with:
         source: '.'
-        exclude: './libs ./ios/ios_app_delegate.h'
+        exclude: './libs'
         extensions: 'h,cpp,c'
         clangFormatVersion: 10
         inplace: True
