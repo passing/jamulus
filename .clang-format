@@ -13,6 +13,7 @@ BreakConstructorInitializers: AfterColon
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 IndentWidth: 4
 PointerAlignment: Left
+ReflowComments: false
 SpaceAfterCStyleCast: true
 SpaceAfterTemplateKeyword: false
 SpaceBeforeParens: NonEmptyParentheses
