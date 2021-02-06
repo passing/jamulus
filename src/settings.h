@@ -24,32 +24,33 @@
 
 #pragma once
 
+#include <QDir>
 #include <QDomDocument>
 #include <QFile>
 #include <QSettings>
-#include <QDir>
 #ifndef HEADLESS
-# include <QMessageBox>
+#include <QMessageBox>
 #endif
-#include "global.h"
 #include "client.h"
+#include "global.h"
 #include "server.h"
 #include "util.h"
-
 
 /* Classes ********************************************************************/
 class CSettings : public QObject
 {
     Q_OBJECT
 
-public:
+  public:
     CSettings() :
-        vecWindowPosMain ( ), // empty array
-        strLanguage      ( "" ),
-        strFileName      ( "" )
+        vecWindowPosMain(), // empty array
+        strLanguage ( "" ),
+        strFileName ( "" )
     {
-        QObject::connect ( QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
-            this, &CSettings::OnAboutToQuit );
+        QObject::connect ( QCoreApplication::instance(),
+                           &QCoreApplication::aboutToQuit,
+                           this,
+                           &CSettings::OnAboutToQuit );
     }
 
     void Load ( const QList<QString> CommandLineOptions );
@@ -59,10 +60,11 @@ public:
     QByteArray vecWindowPosMain;
     QString    strLanguage;
 
-protected:
+  protected:
     virtual void WriteSettingsToXML ( QDomDocument& IniXMLDocument ) = 0;
-    virtual void ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument,
-                                       const QList<QString>& CommandLineOptions ) = 0;
+    virtual void
+    ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument,
+                          const QList<QString>& CommandLineOptions ) = 0;
 
     void ReadFromFile ( const QString& strCurFileName,
                         QDomDocument&  XMLDocument );
@@ -83,13 +85,21 @@ protected:
     //            will not generate a compile error since there is a default
     //            conversion available for QByteArray to QString.
     QString ToBase64 ( const QByteArray strIn ) const
-        { return QString::fromLatin1 ( strIn.toBase64() ); }
+    {
+        return QString::fromLatin1 ( strIn.toBase64() );
+    }
     QString ToBase64 ( const QString strIn ) const
-        { return ToBase64 ( strIn.toUtf8() ); }
+    {
+        return ToBase64 ( strIn.toUtf8() );
+    }
     QByteArray FromBase64ToByteArray ( const QString strIn ) const
-        { return QByteArray::fromBase64 ( strIn.toLatin1() ); }
+    {
+        return QByteArray::fromBase64 ( strIn.toLatin1() );
+    }
     QString FromBase64ToString ( const QString strIn ) const
-        { return QString::fromUtf8 ( FromBase64ToByteArray ( strIn ) ); }
+    {
+        return QString::fromUtf8 ( FromBase64ToByteArray ( strIn ) );
+    }
 
     // init file access function for read/write
     void SetNumericIniSet ( QDomDocument&  xmlFile,
@@ -115,10 +125,10 @@ protected:
                          bool&               bValue );
 
     // actual working function for init-file access
-    QString GetIniSetting( const QDomDocument& xmlFile,
-                           const QString&      sSection,
-                           const QString&      sKey,
-                           const QString&      sDefaultVal = "" );
+    QString GetIniSetting ( const QDomDocument& xmlFile,
+                            const QString&      sSection,
+                            const QString&      sKey,
+                            const QString&      sDefaultVal = "" );
 
     void PutIniSetting ( QDomDocument&  xmlFile,
                          const QString& sSection,
@@ -127,39 +137,42 @@ protected:
 
     QString strFileName;
 
-public slots:
+  public slots:
     void OnAboutToQuit() { Save(); }
 };
 
-
 class CClientSettings : public CSettings
 {
-public:
+  public:
     CClientSettings ( CClient* pNCliP, const QString& sNFiName ) :
-        CSettings                   ( ),
-        vecStoredFaderTags          ( MAX_NUM_STORED_FADER_SETTINGS, "" ),
-        vecStoredFaderLevels        ( MAX_NUM_STORED_FADER_SETTINGS, AUD_MIX_FADER_MAX ),
-        vecStoredPanValues          ( MAX_NUM_STORED_FADER_SETTINGS, AUD_MIX_PAN_MAX / 2 ),
-        vecStoredFaderIsSolo        ( MAX_NUM_STORED_FADER_SETTINGS, false ),
-        vecStoredFaderIsMute        ( MAX_NUM_STORED_FADER_SETTINGS, false ),
-        vecStoredFaderGroupID       ( MAX_NUM_STORED_FADER_SETTINGS, INVALID_INDEX ),
-        vstrIPAddress               ( MAX_NUM_SERVER_ADDR_ITEMS, "" ),
-        iNewClientFaderLevel        ( 100 ),
+        CSettings(),
+        vecStoredFaderTags ( MAX_NUM_STORED_FADER_SETTINGS, "" ),
+        vecStoredFaderLevels ( MAX_NUM_STORED_FADER_SETTINGS,
+                               AUD_MIX_FADER_MAX ),
+        vecStoredPanValues ( MAX_NUM_STORED_FADER_SETTINGS,
+                             AUD_MIX_PAN_MAX / 2 ),
+        vecStoredFaderIsSolo ( MAX_NUM_STORED_FADER_SETTINGS, false ),
+        vecStoredFaderIsMute ( MAX_NUM_STORED_FADER_SETTINGS, false ),
+        vecStoredFaderGroupID ( MAX_NUM_STORED_FADER_SETTINGS, INVALID_INDEX ),
+        vstrIPAddress ( MAX_NUM_SERVER_ADDR_ITEMS, "" ),
+        iNewClientFaderLevel ( 100 ),
         bConnectDlgShowAllMusicians ( true ),
-        eChannelSortType            ( ST_NO_SORT ),
-        iNumMixerPanelRows          ( 1 ),
-        vstrCentralServerAddress    ( MAX_NUM_SERVER_ADDR_ITEMS, "" ),
-        eCentralServerAddressType   ( AT_DEFAULT ),
-        vecWindowPosSettings        ( ), // empty array
-        vecWindowPosChat            ( ), // empty array
-        vecWindowPosProfile         ( ), // empty array
-        vecWindowPosConnect         ( ), // empty array
-        bWindowWasShownSettings     ( false ),
-        bWindowWasShownChat         ( false ),
-        bWindowWasShownProfile      ( false ),
-        bWindowWasShownConnect      ( false ),
-        pClient                     ( pNCliP )
-        { SetFileName ( sNFiName, DEFAULT_INI_FILE_NAME ); }
+        eChannelSortType ( ST_NO_SORT ),
+        iNumMixerPanelRows ( 1 ),
+        vstrCentralServerAddress ( MAX_NUM_SERVER_ADDR_ITEMS, "" ),
+        eCentralServerAddressType ( AT_DEFAULT ),
+        vecWindowPosSettings(), // empty array
+        vecWindowPosChat(),     // empty array
+        vecWindowPosProfile(),  // empty array
+        vecWindowPosConnect(),  // empty array
+        bWindowWasShownSettings ( false ),
+        bWindowWasShownChat ( false ),
+        bWindowWasShownProfile ( false ),
+        bWindowWasShownConnect ( false ),
+        pClient ( pNCliP )
+    {
+        SetFileName ( sNFiName, DEFAULT_INI_FILE_NAME );
+    }
 
     void LoadFaderSettings ( const QString& strCurFileName );
     void SaveFaderSettings ( const QString& strCurFileName );
@@ -189,10 +202,10 @@ public:
     bool       bWindowWasShownProfile;
     bool       bWindowWasShownConnect;
 
-protected:
+  protected:
     // No CommandLineOptions used when reading Client inifile
     virtual void WriteSettingsToXML ( QDomDocument& IniXMLDocument ) override;
-    virtual void ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument,
+    virtual void ReadSettingsFromXML ( const QDomDocument& IniXMLDocument,
                                        const QList<QString>& ) override;
 
     void ReadFaderSettingsFromXML ( const QDomDocument& IniXMLDocument );
@@ -201,19 +214,21 @@ protected:
     CClient* pClient;
 };
 
-
 class CServerSettings : public CSettings
 {
-public:
+  public:
     CServerSettings ( CServer* pNSerP, const QString& sNFiName ) :
-        CSettings ( ),
-        pServer   ( pNSerP )
-        { SetFileName ( sNFiName, DEFAULT_INI_FILE_NAME_SERVER); }
+        CSettings(),
+        pServer ( pNSerP )
+    {
+        SetFileName ( sNFiName, DEFAULT_INI_FILE_NAME_SERVER );
+    }
 
-protected:
+  protected:
     virtual void WriteSettingsToXML ( QDomDocument& IniXMLDocument ) override;
-    virtual void ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument,
-                                       const QList<QString>& CommandLineOptions ) override;
+    virtual void
+    ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument,
+                          const QList<QString>& CommandLineOptions ) override;
 
     CServer* pServer;
 };

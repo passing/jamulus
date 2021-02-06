@@ -24,33 +24,29 @@
 
 #pragma once
 
-#include <QDialog>
-#include <QTabWidget>
-#include <QLabel>
-#include <QVBoxLayout>
-#include <QImage>
-#include <QPainter>
-#include <QTimer>
 #include "client.h"
 #include "util.h"
-
+#include <QDialog>
+#include <QImage>
+#include <QLabel>
+#include <QPainter>
+#include <QTabWidget>
+#include <QTimer>
+#include <QVBoxLayout>
 
 /* Definitions ****************************************************************/
 // defines the update time of the error rate graph
-#define ERR_RATE_GRAPH_UPDATE_TIME_MS       200 // ms
-
+#define ERR_RATE_GRAPH_UPDATE_TIME_MS 200 // ms
 
 /* Classes ********************************************************************/
 class CAnalyzerConsole : public CBaseDlg
 {
     Q_OBJECT
 
-public:
-    CAnalyzerConsole ( CClient* pNCliP,
-                       QWidget* parent = nullptr );
+  public:
+    CAnalyzerConsole ( CClient* pNCliP, QWidget* parent = nullptr );
 
-
-protected:
+  protected:
     virtual void showEvent ( QShowEvent* );
     virtual void hideEvent ( QHideEvent* );
 
@@ -60,32 +56,31 @@ protected:
                            const double dAxisMax,
                            const double dValue ) const;
 
-    CClient*    pClient;
+    CClient* pClient;
 
     QTabWidget* pMainTabWidget;
     QWidget*    pTabWidgetBufErrRate;
 
-    QLabel*     pGraphErrRate;
-    QImage      GraphImage;
+    QLabel* pGraphErrRate;
+    QImage  GraphImage;
 
-    QRect       GraphErrRateCanvasRect;
-    QRect       GraphGridFrame;
+    QRect GraphErrRateCanvasRect;
+    QRect GraphGridFrame;
 
-    int         iGridFrameOffset;
-    int         iLineWidth;
-    int         iMarkerSize;
-    int         iXAxisTextHeight;
+    int iGridFrameOffset;
+    int iLineWidth;
+    int iMarkerSize;
+    int iXAxisTextHeight;
 
-    QColor      GraphBackgroundColor;
-    QColor      GraphFrameColor;
-    QColor      GraphGridColor;
-    QColor      LineColor;
-    QColor      LineLimitColor;
-    QColor      LineMaxUpLimitColor;
+    QColor GraphBackgroundColor;
+    QColor GraphFrameColor;
+    QColor GraphGridColor;
+    QColor LineColor;
+    QColor LineLimitColor;
+    QColor LineMaxUpLimitColor;
 
-    QTimer      TimerErrRateUpdate;
+    QTimer TimerErrRateUpdate;
 
-
-public slots:
+  public slots:
     void OnTimerErrRateUpdate();
 };

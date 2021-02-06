@@ -22,20 +22,23 @@
  *
 \******************************************************************************/
 
-#if !defined ( _VSTSOUND_H__9518A346345768_11D3_8C0D_EEBF182CF549__INCLUDED_ )
+#if !defined( _VSTSOUND_H__9518A346345768_11D3_8C0D_EEBF182CF549__INCLUDED_ )
 #define _VSTSOUND_H__9518A346345768_11D3_8C0D_EEBF182CF549__INCLUDED_
 
-#include "../src/util.h"
 #include "../src/global.h"
 #include "../src/soundbase.h"
-
+#include "../src/util.h"
 
 /* Classes ********************************************************************/
 class CSound : public CSoundBase
 {
-public:
-    CSound ( void (*fpNewCallback) ( CVector<int16_t>& psData, void* arg ), void* arg ) :
-        CSoundBase ( true, fpNewCallback, arg ), iVSTMonoBufferSize ( 0 ) {}
+  public:
+    CSound ( void ( *fpNewCallback ) ( CVector<int16_t>& psData, void* arg ),
+             void* arg ) :
+        CSoundBase ( true, fpNewCallback, arg ),
+        iVSTMonoBufferSize ( 0 )
+    {
+    }
 
     // special VST functions
     void SetMonoBufferSize ( const int iNVBS ) { iVSTMonoBufferSize = iNVBS; }
@@ -48,14 +51,14 @@ public:
     {
         // init base class
         CSoundBase::Init ( iVSTMonoBufferSize );
-        vecsTmpAudioSndCrdStereo.Init ( 2 * iVSTMonoBufferSize /* stereo */);
+        vecsTmpAudioSndCrdStereo.Init ( 2 * iVSTMonoBufferSize /* stereo */ );
         return iVSTMonoBufferSize;
     }
 
     // this vector must be accessible from the outside (quick hack solution)
     CVector<int16_t> vecsTmpAudioSndCrdStereo;
 
-protected:
+  protected:
     int iVSTMonoBufferSize;
 };
 

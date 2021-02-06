@@ -24,27 +24,25 @@
 
 #pragma once
 
+#include "global.h"
+#include "util.h"
 #include <QFrame>
-#include <QPixmap>
-#include <QTimer>
 #include <QLayout>
+#include <QPixmap>
 #include <QProgressBar>
 #include <QStackedLayout>
-#include "util.h"
-#include "global.h"
-
+#include <QTimer>
 
 /* Definitions ****************************************************************/
-#define NUM_LEDS_INCL_CLIP_LED           ( NUM_STEPS_LED_BAR + 1 )
-#define CLIP_IND_TIME_OUT_MS             20000
-
+#define NUM_LEDS_INCL_CLIP_LED ( NUM_STEPS_LED_BAR + 1 )
+#define CLIP_IND_TIME_OUT_MS 20000
 
 /* Classes ********************************************************************/
 class CLevelMeter : public QWidget
 {
     Q_OBJECT
 
-public:
+  public:
     enum ELevelMeterType
     {
         MT_LED,
@@ -58,10 +56,10 @@ public:
     void SetValue ( const double dValue );
     void SetLevelMeterType ( const ELevelMeterType eNType );
 
-protected:
+  protected:
     class cLED
     {
-    public:
+      public:
         enum ELightColor
         {
             RL_DISABLED,
@@ -77,11 +75,11 @@ protected:
         ELightColor GetColor() { return eCurLightColor; };
         QLabel*     GetLabelPointer() { return pLEDLabel; }
 
-    protected:
-        QPixmap     BitmCubeRoundBlack;
-        QPixmap     BitmCubeRoundGreen;
-        QPixmap     BitmCubeRoundYellow;
-        QPixmap     BitmCubeRoundRed;
+      protected:
+        QPixmap BitmCubeRoundBlack;
+        QPixmap BitmCubeRoundGreen;
+        QPixmap BitmCubeRoundYellow;
+        QPixmap BitmCubeRoundRed;
 
         ELightColor eCurLightColor;
         QLabel*     pLEDLabel;
@@ -97,8 +95,8 @@ protected:
     CVector<cLED*>  vecpLEDs;
     QProgressBar*   pBarMeter;
 
-    QTimer          TimerClip;
+    QTimer TimerClip;
 
-public slots:
+  public slots:
     void ClipReset();
 };

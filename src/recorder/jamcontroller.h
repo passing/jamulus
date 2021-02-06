@@ -28,35 +28,38 @@
 
 #include "jamrecorder.h"
 
-namespace recorder {
+namespace recorder
+{
 
 class CJamController : public QObject
 {
     Q_OBJECT
-public:
+  public:
     explicit CJamController();
 
-    bool GetRecorderInitialised() { return bRecorderInitialised; }
+    bool    GetRecorderInitialised() { return bRecorderInitialised; }
     QString GetRecorderErrMsg() { return strRecorderErrMsg; }
-    bool GetRecordingEnabled() { return bEnableRecording; }
-    void RequestNewRecording();
-    void SetEnableRecording ( bool bNewEnableRecording, bool isRunning );
+    bool    GetRecordingEnabled() { return bEnableRecording; }
+    void    RequestNewRecording();
+    void    SetEnableRecording ( bool bNewEnableRecording, bool isRunning );
     QString GetRecordingDir() { return strRecordingDir; }
-    void SetRecordingDir ( QString newRecordingDir, int iServerFrameSizeSamples, bool bDisableRecording );
+    void    SetRecordingDir ( QString newRecordingDir,
+                              int     iServerFrameSizeSamples,
+                              bool    bDisableRecording );
     ERecorderState GetRecorderState();
 
-private:
+  private:
     CServer* pServer;
 
-    bool          bRecorderInitialised;
-    bool          bEnableRecording;
-    QString       strRecordingDir;
-    QThread*      pthJamRecorder;
+    bool     bRecorderInitialised;
+    bool     bEnableRecording;
+    QString  strRecordingDir;
+    QThread* pthJamRecorder;
 
     CJamRecorder* pJamRecorder;
     QString       strRecorderErrMsg;
 
-signals:
+  signals:
     void RestartRecorder();
     void StopRecorder();
     void RecordingSessionStarted ( QString sessionDir );
@@ -68,9 +71,8 @@ signals:
                       const CHostAddress     RecHostAddr,
                       const int              iNumAudChan,
                       const CVector<int16_t> vecsData );
-
 };
 
-}
+} // namespace recorder
 
-Q_DECLARE_METATYPE(int16_t)
+Q_DECLARE_METATYPE ( int16_t )

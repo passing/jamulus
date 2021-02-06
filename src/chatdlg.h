@@ -24,37 +24,36 @@
 
 #pragma once
 
-#include <QLabel>
-#include <QString>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QMenuBar>
-#include <QWhatsThis>
-#include <QLayout>
+#include "global.h"
+#include "ui_chatdlgbase.h"
+#include "util.h"
 #include <QAccessible>
 #include <QDesktopServices>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QMenuBar>
 #include <QMessageBox>
-#include "global.h"
-#include "util.h"
-#include "ui_chatdlgbase.h"
-
+#include <QPushButton>
+#include <QString>
+#include <QWhatsThis>
 
 /* Classes ********************************************************************/
 class CChatDlg : public CBaseDlg, private Ui_CChatDlgBase
 {
     Q_OBJECT
 
-public:
+  public:
     CChatDlg ( QWidget* parent = nullptr );
 
     void AddChatText ( QString strChatText );
 
-public slots:
+  public slots:
     void OnSendText();
     void OnLocalInputTextTextChanged ( const QString& strNewText );
     void OnClearChatHistory();
     void OnAnchorClicked ( const QUrl& Url );
 
-signals:
+  signals:
     void NewLocalInputText ( QString strNewText );
 };

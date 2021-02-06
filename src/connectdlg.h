@@ -24,42 +24,43 @@
 
 #pragma once
 
+#include "global.h"
+#include "multicolorled.h"
+#include "settings.h"
+#include "ui_connectdlgbase.h"
+#include "util.h"
 #include <QLabel>
 #include <QLineEdit>
-#include <QPushButton>
-#include <QWhatsThis>
-#include <QTimer>
 #include <QLocale>
+#include <QPushButton>
+#include <QTimer>
+#include <QWhatsThis>
 #include <QtConcurrent>
-#include "global.h"
-#include "util.h"
-#include "settings.h"
-#include "multicolorled.h"
-#include "ui_connectdlgbase.h"
-
 
 /* Definitions ****************************************************************/
 // defines the time interval at which the request server list message is re-
 // transmitted until it is received
-#define SERV_LIST_REQ_UPDATE_TIME_MS       2000 // ms
-
+#define SERV_LIST_REQ_UPDATE_TIME_MS 2000 // ms
 
 /* Classes ********************************************************************/
 class CConnectDlg : public CBaseDlg, private Ui_CConnectDlgBase
 {
     Q_OBJECT
 
-public:
+  public:
     CConnectDlg ( CClientSettings* pNSetP,
                   const bool       bNewShowCompleteRegList,
                   QWidget*         parent = nullptr );
 
-    void SetShowAllMusicians ( const bool bState ) { ShowAllMusicians ( bState ); }
+    void SetShowAllMusicians ( const bool bState )
+    {
+        ShowAllMusicians ( bState );
+    }
     bool GetShowAllMusicians() { return bShowAllMusicians; }
 
     void SetServerList ( const CHostAddress&         InetAddr,
                          const CVector<CServerInfo>& vecServerInfo,
-                         const bool                  bIsReducedServerList = false );
+                         const bool bIsReducedServerList = false );
 
     void SetConnClientsList ( const CHostAddress&          InetAddr,
                               const CVector<CChannelInfo>& vecChanInfo );
@@ -68,11 +69,11 @@ public:
                                           const int           iPingTime,
                                           const int           iNumClients );
 
-    bool    GetServerListItemWasChosen() const { return bServerListItemWasChosen; }
+    bool GetServerListItemWasChosen() const { return bServerListItemWasChosen; }
     QString GetSelectedAddress() const { return strSelectedAddress; }
     QString GetSelectedServerName() const { return strSelectedServerName; }
 
-protected:
+  protected:
     virtual void showEvent ( QShowEvent* );
     virtual void hideEvent ( QHideEvent* );
 
@@ -82,35 +83,38 @@ protected:
     void             UpdateListFilter();
     void             ShowAllMusicians ( const bool bState );
     void             RequestServerList();
-    void             EmitCLServerListPingMes ( const CHostAddress& CurServerAddress );
+    void EmitCLServerListPingMes ( const CHostAddress& CurServerAddress );
 
     CClientSettings* pSettings;
 
-    QTimer           TimerPing;
-    QTimer           TimerReRequestServList;
-    QTimer           TimerInitialSort;
-    CHostAddress     CentralServerAddress;
-    QString          strSelectedAddress;
-    QString          strSelectedServerName;
-    bool             bShowCompleteRegList;
-    bool             bServerListReceived;
-    bool             bReducedServerListReceived;
-    bool             bServerListItemWasChosen;
-    bool             bListFilterWasActive;
-    bool             bShowAllMusicians;
+    QTimer       TimerPing;
+    QTimer       TimerReRequestServList;
+    QTimer       TimerInitialSort;
+    CHostAddress CentralServerAddress;
+    QString      strSelectedAddress;
+    QString      strSelectedServerName;
+    bool         bShowCompleteRegList;
+    bool         bServerListReceived;
+    bool         bReducedServerListReceived;
+    bool         bServerListItemWasChosen;
+    bool         bListFilterWasActive;
+    bool         bShowAllMusicians;
 
-public slots:
+  public slots:
     void OnServerListItemDoubleClicked ( QTreeWidgetItem* Item, int );
     void OnServerAddrEditTextChanged ( const QString& );
     void OnCentServAddrTypeChanged ( int iTypeIdx );
     void OnFilterTextEdited ( const QString& ) { UpdateListFilter(); }
-    void OnExpandAllStateChanged ( int value ) { ShowAllMusicians ( value == Qt::Checked ); }
+    void OnExpandAllStateChanged ( int value )
+    {
+        ShowAllMusicians ( value == Qt::Checked );
+    }
     void OnCustomCentralServerAddrChanged();
     void OnConnectClicked();
     void OnTimerPing();
     void OnTimerReRequestServList();
 
-signals:
+  signals:
     void ReqServerListQuery ( CHostAddress InetAddr );
     void CreateCLServerListPingMes ( CHostAddress InetAddr );
     void CreateCLServerListReqVerAndOSMes ( CHostAddress InetAddr );

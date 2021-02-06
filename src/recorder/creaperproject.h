@@ -24,39 +24,46 @@
 
 #pragma once
 
-#include <QUuid>
-#include <QFileInfo>
-#include <QDir>
 #include "util.h"
+#include <QDir>
+#include <QFileInfo>
+#include <QUuid>
 
 #include "cwavestream.h"
 
-namespace recorder {
+namespace recorder
+{
 
 class CReaperItem : public QObject
 {
     Q_OBJECT
 
-public:
-    CReaperItem( const QString& name, const STrackItem& trackItem, const qint32& iid, int frameSize );
+  public:
+    CReaperItem ( const QString&    name,
+                  const STrackItem& trackItem,
+                  const qint32&     iid,
+                  int               frameSize );
     QString toString() { return out; }
 
-private:
+  private:
     const QUuid iguid = QUuid::createUuid();
-    const QUuid guid = QUuid::createUuid();
-    QString out;
+    const QUuid guid  = QUuid::createUuid();
+    QString     out;
 };
 
 class CReaperTrack : public QObject
 {
     Q_OBJECT
 
-public:
-    CReaperTrack( QString name, qint32 &iid, QList<STrackItem> items, int frameSize );
+  public:
+    CReaperTrack ( QString           name,
+                   qint32&           iid,
+                   QList<STrackItem> items,
+                   int               frameSize );
     QString toString() { return out; }
 
-private:
-    QUuid trackId = QUuid::createUuid();
+  private:
+    QUuid   trackId = QUuid::createUuid();
     QString out;
 };
 
@@ -64,12 +71,12 @@ class CReaperProject : public QObject
 {
     Q_OBJECT
 
-public:
-    CReaperProject( QMap<QString, QList<STrackItem> > tracks, int frameSize );
+  public:
+    CReaperProject ( QMap<QString, QList<STrackItem>> tracks, int frameSize );
     QString toString() { return out; }
 
-private:
+  private:
     QString out;
 };
 
-}
+} // namespace recorder

@@ -61,27 +61,27 @@
 
 #pragma once
 
-#include <QtCore/QObject>
-#include <QtCore/QScopedPointer>
-#include <QtCore/QHash>
-#include <QtCore/QReadWriteLock>
-#include <QtCore/QSet>
 #include <QGlobalStatic>
+#include <QtCore/QHash>
+#include <QtCore/QObject>
+#include <QtCore/QReadWriteLock>
+#include <QtCore/QScopedPointer>
+#include <QtCore/QSet>
 
 #ifdef _WIN32
-#include <qt_windows.h>
 #include <QtCore/QCoreApplication>
+#include <QtCore/QDebug>
 #include <QtCore/QSemaphore>
 #include <QtCore/QThread>
-#include <QtCore/QDebug>
+#include <qt_windows.h>
 #else
-#include <QSocketNotifier>
-#include <QObject>
 #include <QCoreApplication>
+#include <QObject>
+#include <QSocketNotifier>
 #include <csignal>
 #include <signal.h>
-#include <unistd.h>
 #include <sys/socket.h>
+#include <unistd.h>
 #endif
 
 class CSignalBase;
@@ -93,20 +93,20 @@ class CSignalHandler : public QObject
     friend class CSignalBase;
     friend class CSignalHandlerSingleton;
 
-public:
+  public:
     static CSignalHandler* getSingletonP();
 
     bool emitSignal ( int );
 
 #ifndef _WIN32
-public slots:
+  public slots:
     void OnSocketNotify ( int socket );
 #endif
 
-signals:
+  signals:
     void HandledSignal ( int sigNum );
 
-private:
+  private:
     QScopedPointer<CSignalBase> pSignalBase;
 
     explicit CSignalHandler();
@@ -119,7 +119,7 @@ class CSignalBase
 {
     Q_DISABLE_COPY ( CSignalBase )
 
-public:
+  public:
     static CSignalBase* withSignalHandler ( CSignalHandler* );
     virtual ~CSignalBase();
 
@@ -127,30 +127,30 @@ public:
 
     QSet<int> sHandledSigNums;
 
-protected:
+  protected:
     CSignalBase ( CSignalHandler* );
 
     CSignalHandler* pSignalHandler;
 
-    template <typename T>
-    static T *getSelf()
+    template<typename T>
+    static T* getSelf()
     {
-        return static_cast<T*>( CSignalHandler::getSingletonP()->pSignalBase.data() );
+        return static_cast<T*> (
+            CSignalHandler::getSingletonP()->pSignalBase.data() );
     }
-
 };
 
 #ifdef _WIN32
 
 class CSignalWin : public CSignalBase
 {
-public:
+  public:
     CSignalWin ( CSignalHandler* );
     ~CSignalWin() override;
 
     virtual QReadWriteLock* getLock() const override;
 
-private:
+  private:
     mutable QReadWriteLock lock;
 
     static BOOL WINAPI signalHandler ( _In_ DWORD );
@@ -160,17 +160,17 @@ private:
 
 class CSignalUnix : public CSignalBase
 {
-public:
+  public:
     CSignalUnix ( CSignalHandler* );
     ~CSignalUnix() override;
 
     virtual QReadWriteLock* getLock() const override;
 
-private:
+  private:
     QSocketNotifier* socketNotifier = nullptr;
-    bool setSignalHandled ( int sigNum, bool state );
+    bool             setSignalHandled ( int sigNum, bool state );
 
-    static int socketPair[2];
+    static int  socketPair[2];
     static void signalHandler ( int sigNum );
 };
 

@@ -24,22 +24,19 @@
 
 #pragma once
 
-#include <QDateTime>
-#include <QHostAddress>
-#include <QFile>
-#include <QString>
-#include <QTimer>
 #include "global.h"
 #include "util.h"
-
+#include <QDateTime>
+#include <QFile>
+#include <QHostAddress>
+#include <QString>
+#include <QTimer>
 
 /* Classes ********************************************************************/
 class CServerLogging
 {
-public:
-    CServerLogging() :
-        bDoLogging ( false ),
-        File ( DEFAULT_LOG_FILE_NAME ) {}
+  public:
+    CServerLogging() : bDoLogging ( false ), File ( DEFAULT_LOG_FILE_NAME ) {}
 
     virtual ~CServerLogging();
 
@@ -49,8 +46,8 @@ public:
     void AddNewConnection ( const QHostAddress& ClientInetAddr,
                             const int           iNumberOfConnectedClients );
 
-protected:
-    void operator<< ( const QString& sNewStr );
+  protected:
+    void    operator<< ( const QString& sNewStr );
     QString CurTimeDatetoLogString();
 
     bool  bDoLogging;

@@ -25,17 +25,16 @@
 #include "socket.h"
 #include "server.h"
 
-
 /* Implementation *************************************************************/
 void CSocket::Init ( const quint16 iPortNumber )
 {
 #ifdef _WIN32
     // for the Windows socket usage we have to start it up first
 
-// TODO check for error and exit application on error
+    // TODO check for error and exit application on error
 
     WSADATA wsa;
-    WSAStartup ( MAKEWORD(1, 0), &wsa );
+    WSAStartup ( MAKEWORD ( 1, 0 ), &wsa );
 #endif
 
     // create the UDP socket
@@ -59,9 +58,9 @@ void CSocket::Init ( const quint16 iPortNumber )
             // if port number is 0, bind the client to a random available port
             UdpSocketInAddr.sin_port = htons ( 0 );
 
-            bSuccess = ( ::bind ( UdpSocket ,
-                                (sockaddr*) &UdpSocketInAddr,
-                                sizeof ( sockaddr_in ) ) == 0 );
+            bSuccess = ( ::bind ( UdpSocket,
+                                  (sockaddr*) &UdpSocketInAddr,
+                                  sizeof ( sockaddr_in ) ) == 0 );
         }
         else
         {
@@ -70,16 +69,19 @@ void CSocket::Init ( const quint16 iPortNumber )
             // faulty router gets stuck and confused by a particular port (like
             // the starting port). Might work around frustrating "cannot connect"
             // problems (#568)
-            const quint16 startingPortNumber = iPortNumber + rand() % NUM_SOCKET_PORTS_TO_TRY;
+            const quint16 startingPortNumber =
+                iPortNumber + rand() % NUM_SOCKET_PORTS_TO_TRY;
 
             quint16 iClientPortIncrement = 0;
-            bSuccess                     = false; // initialization for while loop
+            bSuccess = false; // initialization for while loop
 
-            while ( !bSuccess && ( iClientPortIncrement <= NUM_SOCKET_PORTS_TO_TRY ) )
+            while ( !bSuccess &&
+                    ( iClientPortIncrement <= NUM_SOCKET_PORTS_TO_TRY ) )
             {
-                UdpSocketInAddr.sin_port = htons ( startingPortNumber + iClientPortIncrement );
+                UdpSocketInAddr.sin_port =
+                    htons ( startingPortNumber + iClientPortIncrement );
 
-                bSuccess = ( ::bind ( UdpSocket ,
+                bSuccess = ( ::bind ( UdpSocket,
                                       (sockaddr*) &UdpSocketInAddr,
                                       sizeof ( sockaddr_in ) ) == 0 );
 
@@ -94,7 +96,7 @@ void CSocket::Init ( const quint16 iPortNumber )
         // gets the desired port number
         UdpSocketInAddr.sin_port = htons ( iPortNumber );
 
-        bSuccess = ( ::bind ( UdpSocket ,
+        bSuccess = ( ::bind ( UdpSocket,
                               (sockaddr*) &UdpSocketInAddr,
                               sizeof ( sockaddr_in ) ) == 0 );
     }
@@ -103,9 +105,9 @@ void CSocket::Init ( const quint16 iPortNumber )
     {
         // we cannot bind socket, throw error
         throw CGenErr ( "Cannot bind the socket (maybe "
-            "the software is already running).", "Network Error" );
+                        "the software is already running).",
+                        "Network Error" );
     }
-
 
     // Connections -------------------------------------------------------------
     // it is important to do the following connections in this class since we
@@ -116,30 +118,47 @@ void CSocket::Init ( const quint16 iPortNumber )
     {
         // client connections:
 
-        QObject::connect ( this, &CSocket::ProtcolMessageReceived,
-            pChannel, &CChannel::OnProtcolMessageReceived );
+        QObject::connect ( this,
+                           &CSocket::ProtcolMessageReceived,
+                           pChannel,
+                           &CChannel::OnProtcolMessageReceived );
 
-        QObject::connect ( this, &CSocket::ProtcolCLMessageReceived,
-            pChannel, &CChannel::OnProtcolCLMessageReceived );
+        QObject::connect ( this,
+                           &CSocket::ProtcolCLMessageReceived,
+                           pChannel,
+                           &CChannel::OnProtcolCLMessageReceived );
 
-        QObject::connect ( this, static_cast<void (CSocket::*)()> ( &CSocket::NewConnection ),
-            pChannel, &CChannel::OnNewConnection );
+        QObject::connect (
+            this,
+            static_cast<void ( CSocket::* )()> ( &CSocket::NewConnection ),
+            pChannel,
+            &CChannel::OnNewConnection );
     }
     else
     {
         // server connections:
 
-        QObject::connect ( this, &CSocket::ProtcolMessageReceived,
-            pServer, &CServer::OnProtcolMessageReceived );
+        QObject::connect ( this,
+                           &CSocket::ProtcolMessageReceived,
+                           pServer,
+                           &CServer::OnProtcolMessageReceived );
 
-        QObject::connect ( this, &CSocket::ProtcolCLMessageReceived,
-            pServer, &CServer::OnProtcolCLMessageReceived );
+        QObject::connect ( this,
+                           &CSocket::ProtcolCLMessageReceived,
+                           pServer,
+                           &CServer::OnProtcolCLMessageReceived );
 
-        QObject::connect ( this, static_cast<void (CSocket::*) ( int, CHostAddress )> ( &CSocket::NewConnection ),
-            pServer, &CServer::OnNewConnection );
+        QObject::connect (
+            this,
+            static_cast<void ( CSocket::* ) ( int, CHostAddress )> (
+                &CSocket::NewConnection ),
+            pServer,
+            &CServer::OnNewConnection );
 
-        QObject::connect ( this, &CSocket::ServerFull,
-            pServer, &CServer::OnServerFull );
+        QObject::connect ( this,
+                           &CSocket::ServerFull,
+                           pServer,
+                           &CServer::OnServerFull );
     }
 }
 
@@ -149,7 +168,7 @@ void CSocket::Close()
     // closesocket will cause recvfrom to return with an error because the
     // socket is closed -> then the thread can safely be shut down
     closesocket ( UdpSocket );
-#elif defined ( __APPLE__ ) || defined ( __MACOSX )
+#elif defined( __APPLE__ ) || defined( __MACOSX )
     // on Mac the general close has the same effect as closesocket on Windows
     close ( UdpSocket );
 #else
@@ -184,9 +203,10 @@ void CSocket::SendPacket ( const CVector<uint8_t>& vecbySendBuf,
         // const char*)
         sockaddr_in UdpSocketOutAddr;
 
-        UdpSocketOutAddr.sin_family      = AF_INET;
-        UdpSocketOutAddr.sin_port        = htons ( HostAddr.iPort );
-        UdpSocketOutAddr.sin_addr.s_addr = htonl ( HostAddr.InetAddr.toIPv4Address() );
+        UdpSocketOutAddr.sin_family = AF_INET;
+        UdpSocketOutAddr.sin_port   = htons ( HostAddr.iPort );
+        UdpSocketOutAddr.sin_addr.s_addr =
+            htonl ( HostAddr.InetAddr.toIPv4Address() );
 
         sendto ( UdpSocket,
                  (const char*) &( (CVector<uint8_t>) vecbySendBuf )[0],
@@ -214,7 +234,7 @@ bool CSocket::GetAndResetbJitterBufferOKFlag()
 
 void CSocket::OnDataReceived()
 {
-/*
+    /*
     The strategy of this function is that only the "put audio" function is
     called directly (i.e. the high thread priority is used) and all other less
     important things like protocol parsing and acting on protocol messages is
@@ -247,7 +267,6 @@ void CSocket::OnDataReceived()
     RecHostAddr.InetAddr.setAddress ( ntohl ( SenderAddr.sin_addr.s_addr ) );
     RecHostAddr.iPort = ntohs ( SenderAddr.sin_port );
 
-
     // check if this is a protocol message
     int              iRecCounter;
     int              iRecID;
@@ -263,16 +282,21 @@ void CSocket::OnDataReceived()
         if ( CProtocol::IsConnectionLessMessageID ( iRecID ) )
         {
 
-// TODO a copy of the vector is used -> avoid malloc in real-time routine
+            // TODO a copy of the vector is used -> avoid malloc in real-time routine
 
-            emit ProtcolCLMessageReceived ( iRecID, vecbyMesBodyData, RecHostAddr );
+            emit ProtcolCLMessageReceived ( iRecID,
+                                            vecbyMesBodyData,
+                                            RecHostAddr );
         }
         else
         {
 
-// TODO a copy of the vector is used -> avoid malloc in real-time routine
+            // TODO a copy of the vector is used -> avoid malloc in real-time routine
 
-            emit ProtcolMessageReceived ( iRecCounter, iRecID, vecbyMesBodyData, RecHostAddr );
+            emit ProtcolMessageReceived ( iRecCounter,
+                                          iRecID,
+                                          vecbyMesBodyData,
+                                          RecHostAddr );
         }
     }
     else
@@ -282,7 +306,9 @@ void CSocket::OnDataReceived()
         {
             // client:
 
-            switch ( pChannel->PutAudioData ( vecbyRecBuf, iNumBytesRead, RecHostAddr ) )
+            switch ( pChannel->PutAudioData ( vecbyRecBuf,
+                                              iNumBytesRead,
+                                              RecHostAddr ) )
             {
             case PS_AUDIO_ERR:
             case PS_GEN_ERROR:
@@ -310,7 +336,10 @@ void CSocket::OnDataReceived()
 
             int iCurChanID;
 
-            if ( pServer->PutAudioData ( vecbyRecBuf, iNumBytesRead, RecHostAddr, iCurChanID ) )
+            if ( pServer->PutAudioData ( vecbyRecBuf,
+                                         iNumBytesRead,
+                                         RecHostAddr,
+                                         iCurChanID ) )
             {
                 // we have a new connection, emit a signal
                 emit NewConnection ( iCurChanID, RecHostAddr );
@@ -319,7 +348,8 @@ void CSocket::OnDataReceived()
                 if ( !pServer->IsRunning() )
                 {
                     // (note that Qt will delete the event object when done)
-                    QCoreApplication::postEvent ( pServer,
+                    QCoreApplication::postEvent (
+                        pServer,
                         new CCustomEvent ( MS_PACKET_RECEIVED, 0, 0 ) );
                 }
             }

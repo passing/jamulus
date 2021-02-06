@@ -24,27 +24,27 @@
 
 #include "analyzerconsole.h"
 
-
 // Analyzer console implementation *********************************************
-CAnalyzerConsole::CAnalyzerConsole ( CClient* pNCliP,
-                                     QWidget* parent ) :
-    CBaseDlg               ( parent, Qt::Window ), // use Qt::Window to get min/max window buttons
-    pClient                ( pNCliP ),
-    GraphImage             ( 1, 1, QImage::Format_RGB32 ),
+CAnalyzerConsole::CAnalyzerConsole ( CClient* pNCliP, QWidget* parent ) :
+    CBaseDlg ( parent,
+               Qt::Window ), // use Qt::Window to get min/max window buttons
+    pClient ( pNCliP ),
+    GraphImage ( 1, 1, QImage::Format_RGB32 ),
     GraphErrRateCanvasRect ( 0, 0, 600, 450 ), // defines total size of graph
-    iGridFrameOffset       ( 10 ),
-    iLineWidth             ( 2 ),
-    iMarkerSize            ( 10 ),
-    iXAxisTextHeight       ( 22 ),
-    GraphBackgroundColor   ( Qt::white ), // background
-    GraphFrameColor        ( Qt::black ), // frame
-    GraphGridColor         ( Qt::gray ), // grid
-    LineColor              ( Qt::blue ),
-    LineLimitColor         ( Qt::green ),
-    LineMaxUpLimitColor    ( Qt::red )
+    iGridFrameOffset ( 10 ),
+    iLineWidth ( 2 ),
+    iMarkerSize ( 10 ),
+    iXAxisTextHeight ( 22 ),
+    GraphBackgroundColor ( Qt::white ), // background
+    GraphFrameColor ( Qt::black ),      // frame
+    GraphGridColor ( Qt::gray ),        // grid
+    LineColor ( Qt::blue ),
+    LineLimitColor ( Qt::green ),
+    LineMaxUpLimitColor ( Qt::red )
 {
     // set the window icon and title text
-    const QIcon icon = QIcon ( QString::fromUtf8 ( ":/png/main/res/fronticon.png" ) );
+    const QIcon icon =
+        QIcon ( QString::fromUtf8 ( ":/png/main/res/fronticon.png" ) );
     setWindowIcon ( icon );
     setWindowTitle ( tr ( "Analyzer Console" ) );
 
@@ -58,7 +58,7 @@ CAnalyzerConsole::CAnalyzerConsole ( CClient* pNCliP,
     setLayout ( pMainLayout );
 
     // error rate gaph tab
-    pTabWidgetBufErrRate = new QWidget();
+    pTabWidgetBufErrRate           = new QWidget();
     QVBoxLayout* pTabErrRateLayout = new QVBoxLayout ( pTabWidgetBufErrRate );
 
     pGraphErrRate = new QLabel ( this );
@@ -67,11 +67,12 @@ CAnalyzerConsole::CAnalyzerConsole ( CClient* pNCliP,
     pMainTabWidget->addTab ( pTabWidgetBufErrRate,
                              tr ( "Error Rate of Each Buffer Size" ) );
 
-
     // Connections -------------------------------------------------------------
     // timers
-    QObject::connect ( &TimerErrRateUpdate, &QTimer::timeout,
-        this, &CAnalyzerConsole::OnTimerErrRateUpdate );
+    QObject::connect ( &TimerErrRateUpdate,
+                       &QTimer::timeout,
+                       this,
+                       &CAnalyzerConsole::OnTimerErrRateUpdate );
 }
 
 void CAnalyzerConsole::showEvent ( QShowEvent* )
@@ -99,14 +100,16 @@ void CAnalyzerConsole::OnTimerErrRateUpdate()
 void CAnalyzerConsole::DrawFrame()
 {
     // scale image to correct size
-    GraphImage = GraphImage.scaled (
-        GraphErrRateCanvasRect.width(), GraphErrRateCanvasRect.height() );
+    GraphImage = GraphImage.scaled ( GraphErrRateCanvasRect.width(),
+                                     GraphErrRateCanvasRect.height() );
 
     // generate plot grid frame rectangle
     GraphGridFrame.setRect ( GraphErrRateCanvasRect.x() + iGridFrameOffset,
-        GraphErrRateCanvasRect.y() + iGridFrameOffset,
-        GraphErrRateCanvasRect.width() - 2 * iGridFrameOffset,
-        GraphErrRateCanvasRect.height() - 2 * iGridFrameOffset - iXAxisTextHeight );
+                             GraphErrRateCanvasRect.y() + iGridFrameOffset,
+                             GraphErrRateCanvasRect.width() -
+                                 2 * iGridFrameOffset,
+                             GraphErrRateCanvasRect.height() -
+                                 2 * iGridFrameOffset - iXAxisTextHeight );
 
     GraphImage.fill ( GraphBackgroundColor.rgb() ); // fill background
 
@@ -148,24 +151,25 @@ void CAnalyzerConsole::DrawErrorRateTrace()
     // plot the limit line as dashed line
     const double dYValLimitInGraph = CalcYPosInGraph ( dMin, dMax, dLogLimit );
 
-    GraphPainter.setPen ( QPen ( QBrush ( LineLimitColor ),
-                                 iLineWidth,
-                                 Qt::DashLine ) );
+    GraphPainter.setPen (
+        QPen ( QBrush ( LineLimitColor ), iLineWidth, Qt::DashLine ) );
 
-    GraphPainter.drawLine ( QPoint ( GraphGridFrame.x(), dYValLimitInGraph ),
-                            QPoint ( GraphGridFrame.x() +
-                                     GraphGridFrame.width(), dYValLimitInGraph ) );
+    GraphPainter.drawLine (
+        QPoint ( GraphGridFrame.x(), dYValLimitInGraph ),
+        QPoint ( GraphGridFrame.x() + GraphGridFrame.width(),
+                 dYValLimitInGraph ) );
 
     // plot the maximum upper limit line as a dashed line
-    const double dYValMaxUpLimitInGraph = CalcYPosInGraph ( dMin, dMax, dLogMaxUpLimit );
+    const double dYValMaxUpLimitInGraph =
+        CalcYPosInGraph ( dMin, dMax, dLogMaxUpLimit );
 
-    GraphPainter.setPen ( QPen ( QBrush ( LineMaxUpLimitColor ),
-                                 iLineWidth,
-                                 Qt::DashLine ) );
+    GraphPainter.setPen (
+        QPen ( QBrush ( LineMaxUpLimitColor ), iLineWidth, Qt::DashLine ) );
 
-    GraphPainter.drawLine ( QPoint ( GraphGridFrame.x(), dYValMaxUpLimitInGraph ),
-                            QPoint ( GraphGridFrame.x() +
-                                     GraphGridFrame.width(), dYValMaxUpLimitInGraph ) );
+    GraphPainter.drawLine (
+        QPoint ( GraphGridFrame.x(), dYValMaxUpLimitInGraph ),
+        QPoint ( GraphGridFrame.x() + GraphGridFrame.width(),
+                 dYValMaxUpLimitInGraph ) );
 
     // plot the data
     for ( int i = 0; i < iNumBuffers; i++ )
@@ -199,10 +203,10 @@ void CAnalyzerConsole::DrawErrorRateTrace()
 
         GraphPainter.setPen ( QPen ( QBrush ( LineColor ), iLineWidth ) );
 
-        GraphPainter.drawLine ( QPoint ( curPoint.x(),
-                                         GraphGridFrame.y() +
-                                         GraphGridFrame.height() ),
-                                curPoint );
+        GraphPainter.drawLine (
+            QPoint ( curPoint.x(),
+                     GraphGridFrame.y() + GraphGridFrame.height() ),
+            curPoint );
     }
 }
 
@@ -217,6 +221,7 @@ int CAnalyzerConsole::CalcYPosInGraph ( const double dAxisMin,
     const double dYValNorm = ( dValue - dAxisMin ) / dValRange;
 
     // consider the graph grid size to calculate the final y-axis value
-    return GraphGridFrame.y() + static_cast<int> (
-        static_cast<double> ( GraphGridFrame.height() ) * ( 1 - dYValNorm ) );
+    return GraphGridFrame.y() +
+           static_cast<int> ( static_cast<double> ( GraphGridFrame.height() ) *
+                              ( 1 - dYValNorm ) );
 }

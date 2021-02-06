@@ -24,7 +24,6 @@
 
 #include "settings.h"
 
-
 /* Implementation *************************************************************/
 void CSettings::Load ( const QList<QString> CommandLineOptions )
 {
@@ -87,7 +86,9 @@ void CSettings::SetFileName ( const QString& sNFiName,
         const QString sConfigDir = QFileInfo ( QSettings ( QSettings::IniFormat,
                                                            QSettings::UserScope,
                                                            APP_NAME,
-                                                           APP_NAME ).fileName() ).absolutePath();
+                                                           APP_NAME )
+                                                   .fileName() )
+                                       .absolutePath();
 
         // make sure the directory exists
         if ( !QFile::exists ( sConfigDir ) )
@@ -165,7 +166,6 @@ bool CSettings::GetFlagIniSet ( const QDomDocument& xmlFile,
     return bReturn;
 }
 
-
 // Init-file routines using XML ***********************************************
 QString CSettings::GetIniSetting ( const QDomDocument& xmlFile,
                                    const QString&      sSection,
@@ -222,7 +222,6 @@ void CSettings::PutIniSetting ( QDomDocument&  xmlFile,
     xmlKey.appendChild ( currentValue );
 }
 
-
 // Client settings -------------------------------------------------------------
 void CClientSettings::LoadFaderSettings ( const QString& strCurFileName )
 {
@@ -248,7 +247,7 @@ void CClientSettings::SaveFaderSettings ( const QString& strCurFileName )
     WriteToFile ( strCurFileName, IniXMLDocument );
 }
 
-void CClientSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument,
+void CClientSettings::ReadSettingsFromXML ( const QDomDocument& IniXMLDocument,
                                             const QList<QString>& )
 {
     int  iIdx;
@@ -259,58 +258,91 @@ void CClientSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument
     for ( iIdx = 0; iIdx < MAX_NUM_SERVER_ADDR_ITEMS; iIdx++ )
     {
         vstrIPAddress[iIdx] =
-            GetIniSetting ( IniXMLDocument, "client",
-                            QString ( "ipaddress%1" ).arg ( iIdx ), "" );
+            GetIniSetting ( IniXMLDocument,
+                            "client",
+                            QString ( "ipaddress%1" ).arg ( iIdx ),
+                            "" );
     }
 
     // new client level
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "newclientlevel",
-         0, 100, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "newclientlevel",
+                            0,
+                            100,
+                            iValue ) )
     {
         iNewClientFaderLevel = iValue;
     }
 
     // connect dialog show all musicians
-    if ( GetFlagIniSet ( IniXMLDocument, "client", "connectdlgshowallmusicians", bValue ) )
+    if ( GetFlagIniSet ( IniXMLDocument,
+                         "client",
+                         "connectdlgshowallmusicians",
+                         bValue ) )
     {
         bConnectDlgShowAllMusicians = bValue;
     }
 
     // language
-    strLanguage = GetIniSetting ( IniXMLDocument, "client", "language",
-                                  CLocale::FindSysLangTransFileName ( CLocale::GetAvailableTranslations() ).first );
+    strLanguage = GetIniSetting ( IniXMLDocument,
+                                  "client",
+                                  "language",
+                                  CLocale::FindSysLangTransFileName (
+                                      CLocale::GetAvailableTranslations() )
+                                      .first );
 
     // fader channel sorting
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "channelsort",
-         0, 4 /* ST_BY_CITY */, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "channelsort",
+                            0,
+                            4 /* ST_BY_CITY */,
+                            iValue ) )
     {
         eChannelSortType = static_cast<EChSortType> ( iValue );
     }
 
     // number of mixer panel rows
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "numrowsmixpan",
-         1, 2, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "numrowsmixpan",
+                            1,
+                            2,
+                            iValue ) )
     {
         iNumMixerPanelRows = iValue;
     }
 
     // name
-    pClient->ChannelInfo.strName = FromBase64ToString (
-        GetIniSetting ( IniXMLDocument, "client", "name_base64",
-                        ToBase64 ( QCoreApplication::translate ( "CMusProfDlg", "No Name" ) ) ) );
+    pClient->ChannelInfo.strName = FromBase64ToString ( GetIniSetting (
+        IniXMLDocument,
+        "client",
+        "name_base64",
+        ToBase64 (
+            QCoreApplication::translate ( "CMusProfDlg", "No Name" ) ) ) );
 
     // instrument
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "instrument",
-         0, CInstPictures::GetNumAvailableInst() - 1, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "instrument",
+                            0,
+                            CInstPictures::GetNumAvailableInst() - 1,
+                            iValue ) )
     {
         pClient->ChannelInfo.iInstrument = iValue;
     }
 
     // country
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "country",
-         0, static_cast<int> ( QLocale::LastCountry ), iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "country",
+                            0,
+                            static_cast<int> ( QLocale::LastCountry ),
+                            iValue ) )
     {
-        pClient->ChannelInfo.eCountry = static_cast<QLocale::Country> ( iValue );
+        pClient->ChannelInfo.eCountry =
+            static_cast<QLocale::Country> ( iValue );
     }
     else
     {
@@ -323,22 +355,34 @@ void CClientSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument
         GetIniSetting ( IniXMLDocument, "client", "city_base64" ) );
 
     // skill level
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "skill",
-         0, 3 /* SL_PROFESSIONAL */, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "skill",
+                            0,
+                            3 /* SL_PROFESSIONAL */,
+                            iValue ) )
     {
         pClient->ChannelInfo.eSkillLevel = static_cast<ESkillLevel> ( iValue );
     }
 
     // audio fader
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "audfad",
-         AUD_FADER_IN_MIN, AUD_FADER_IN_MAX, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "audfad",
+                            AUD_FADER_IN_MIN,
+                            AUD_FADER_IN_MAX,
+                            iValue ) )
     {
         pClient->SetAudioInFader ( iValue );
     }
 
     // reverberation level
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "revlev",
-         0, AUD_REVERB_MAX, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "revlev",
+                            0,
+                            AUD_REVERB_MAX,
+                            iValue ) )
     {
         pClient->SetReverbLevel ( iValue );
     }
@@ -350,7 +394,8 @@ void CClientSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument
     }
 
     // sound card selection
-    const QString strError = pClient->SetSndCrdDev ( FromBase64ToString ( GetIniSetting ( IniXMLDocument, "client", "auddev_base64", "" ) ) );
+    const QString strError = pClient->SetSndCrdDev ( FromBase64ToString (
+        GetIniSetting ( IniXMLDocument, "client", "auddev_base64", "" ) ) );
 
     if ( !strError.isEmpty() )
     {
@@ -366,36 +411,56 @@ void CClientSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument
     // overwritten by the defaults
     //
     // sound card left input channel mapping
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "sndcrdinlch",
-         0, MAX_NUM_IN_OUT_CHANNELS - 1, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "sndcrdinlch",
+                            0,
+                            MAX_NUM_IN_OUT_CHANNELS - 1,
+                            iValue ) )
     {
         pClient->SetSndCrdLeftInputChannel ( iValue );
     }
 
     // sound card right input channel mapping
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "sndcrdinrch",
-         0, MAX_NUM_IN_OUT_CHANNELS - 1, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "sndcrdinrch",
+                            0,
+                            MAX_NUM_IN_OUT_CHANNELS - 1,
+                            iValue ) )
     {
         pClient->SetSndCrdRightInputChannel ( iValue );
     }
 
     // sound card left output channel mapping
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "sndcrdoutlch",
-         0, MAX_NUM_IN_OUT_CHANNELS - 1, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "sndcrdoutlch",
+                            0,
+                            MAX_NUM_IN_OUT_CHANNELS - 1,
+                            iValue ) )
     {
         pClient->SetSndCrdLeftOutputChannel ( iValue );
     }
 
     // sound card right output channel mapping
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "sndcrdoutrch",
-         0, MAX_NUM_IN_OUT_CHANNELS - 1, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "sndcrdoutrch",
+                            0,
+                            MAX_NUM_IN_OUT_CHANNELS - 1,
+                            iValue ) )
     {
         pClient->SetSndCrdRightOutputChannel ( iValue );
     }
 
     // sound card preferred buffer size index
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "prefsndcrdbufidx",
-         FRAME_SIZE_FACTOR_PREFERRED, FRAME_SIZE_FACTOR_SAFE, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "prefsndcrdbufidx",
+                            FRAME_SIZE_FACTOR_PREFERRED,
+                            FRAME_SIZE_FACTOR_SAFE,
+                            iValue ) )
     {
         // additional check required since only a subset of factors are
         // defined
@@ -414,15 +479,23 @@ void CClientSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument
     }
 
     // network jitter buffer size
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "jitbuf",
-         MIN_NET_BUF_SIZE_NUM_BL, MAX_NET_BUF_SIZE_NUM_BL, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "jitbuf",
+                            MIN_NET_BUF_SIZE_NUM_BL,
+                            MAX_NET_BUF_SIZE_NUM_BL,
+                            iValue ) )
     {
         pClient->SetSockBufNumFrames ( iValue );
     }
 
     // network jitter buffer size for server
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "jitbufserver",
-         MIN_NET_BUF_SIZE_NUM_BL, MAX_NET_BUF_SIZE_NUM_BL, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "jitbufserver",
+                            MIN_NET_BUF_SIZE_NUM_BL,
+                            MAX_NET_BUF_SIZE_NUM_BL,
+                            iValue ) )
     {
         pClient->SetServerSockBufNumFrames ( iValue );
     }
@@ -434,35 +507,51 @@ void CClientSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument
     }
 
     // GUI design
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "guidesign",
-         0, 2 /* GD_SLIMFADER */, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "guidesign",
+                            0,
+                            2 /* GD_SLIMFADER */,
+                            iValue ) )
     {
         pClient->SetGUIDesign ( static_cast<EGUIDesign> ( iValue ) );
     }
 
     // audio channels
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "audiochannels",
-         0, 2 /* CC_STEREO */, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "audiochannels",
+                            0,
+                            2 /* CC_STEREO */,
+                            iValue ) )
     {
         pClient->SetAudioChannels ( static_cast<EAudChanConf> ( iValue ) );
     }
 
     // audio quality
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "audioquality",
-         0, 2 /* AQ_HIGH */, iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "audioquality",
+                            0,
+                            2 /* AQ_HIGH */,
+                            iValue ) )
     {
         pClient->SetAudioQuality ( static_cast<EAudioQuality> ( iValue ) );
     }
 
-// TODO compatibility to old version (< 3.6.1)
-// NOTE that the strCurAddr and "check for empty" can be removed if compatibility mode is removed
-vstrCentralServerAddress[0] = GetIniSetting ( IniXMLDocument, "client", "centralservaddr" );
+    // TODO compatibility to old version (< 3.6.1)
+    // NOTE that the strCurAddr and "check for empty" can be removed if compatibility mode is removed
+    vstrCentralServerAddress[0] =
+        GetIniSetting ( IniXMLDocument, "client", "centralservaddr" );
 
     // central server addresses
     for ( iIdx = 0; iIdx < MAX_NUM_SERVER_ADDR_ITEMS; iIdx++ )
     {
-        const QString strCurAddr = GetIniSetting ( IniXMLDocument, "client",
-                                                   QString ( "centralservaddr%1" ).arg ( iIdx ), "" );
+        const QString strCurAddr =
+            GetIniSetting ( IniXMLDocument,
+                            "client",
+                            QString ( "centralservaddr%1" ).arg ( iIdx ),
+                            "" );
 
         if ( !strCurAddr.isEmpty() )
         {
@@ -471,8 +560,12 @@ vstrCentralServerAddress[0] = GetIniSetting ( IniXMLDocument, "client", "central
     }
 
     // central server address type
-    if ( GetNumericIniSet ( IniXMLDocument, "client", "centservaddrtype",
-         0, static_cast<int> ( AT_CUSTOM ), iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "client",
+                            "centservaddrtype",
+                            0,
+                            static_cast<int> ( AT_CUSTOM ),
+                            iValue ) )
     {
         eCentralServerAddressType = static_cast<ECSAddType> ( iValue );
     }
@@ -482,15 +575,15 @@ vstrCentralServerAddress[0] = GetIniSetting ( IniXMLDocument, "client", "central
         eCentralServerAddressType = AT_DEFAULT;
     }
 
-// TODO compatibility to old version (<3.4.7)
-if ( GetFlagIniSet ( IniXMLDocument, "client", "defcentservaddr", bValue ) )
-{
-    // only the case that manual was set in old ini must be considered
-    if ( !bValue )
+    // TODO compatibility to old version (<3.4.7)
+    if ( GetFlagIniSet ( IniXMLDocument, "client", "defcentservaddr", bValue ) )
     {
-        eCentralServerAddressType = AT_CUSTOM;
+        // only the case that manual was set in old ini must be considered
+        if ( !bValue )
+        {
+            eCentralServerAddressType = AT_CUSTOM;
+        }
     }
-}
 
     // window position of the main window
     vecWindowPosMain = FromBase64ToByteArray (
@@ -540,7 +633,8 @@ if ( GetFlagIniSet ( IniXMLDocument, "client", "defcentservaddr", bValue ) )
     ReadFaderSettingsFromXML ( IniXMLDocument );
 }
 
-void CClientSettings::ReadFaderSettingsFromXML ( const QDomDocument& IniXMLDocument )
+void CClientSettings::ReadFaderSettingsFromXML (
+    const QDomDocument& IniXMLDocument )
 {
     int  iIdx;
     int  iValue;
@@ -550,27 +644,36 @@ void CClientSettings::ReadFaderSettingsFromXML ( const QDomDocument& IniXMLDocum
     {
         // stored fader tags
         vecStoredFaderTags[iIdx] = FromBase64ToString (
-            GetIniSetting ( IniXMLDocument, "client",
-                            QString ( "storedfadertag%1_base64" ).arg ( iIdx ), "" ) );
+            GetIniSetting ( IniXMLDocument,
+                            "client",
+                            QString ( "storedfadertag%1_base64" ).arg ( iIdx ),
+                            "" ) );
 
         // stored fader levels
-        if ( GetNumericIniSet ( IniXMLDocument, "client",
+        if ( GetNumericIniSet ( IniXMLDocument,
+                                "client",
                                 QString ( "storedfaderlevel%1" ).arg ( iIdx ),
-                                0, AUD_MIX_FADER_MAX, iValue ) )
+                                0,
+                                AUD_MIX_FADER_MAX,
+                                iValue ) )
         {
             vecStoredFaderLevels[iIdx] = iValue;
         }
 
         // stored pan values
-        if ( GetNumericIniSet ( IniXMLDocument, "client",
+        if ( GetNumericIniSet ( IniXMLDocument,
+                                "client",
                                 QString ( "storedpanvalue%1" ).arg ( iIdx ),
-                                0, AUD_MIX_PAN_MAX, iValue ) )
+                                0,
+                                AUD_MIX_PAN_MAX,
+                                iValue ) )
         {
             vecStoredPanValues[iIdx] = iValue;
         }
 
         // stored fader solo state
-        if ( GetFlagIniSet ( IniXMLDocument, "client",
+        if ( GetFlagIniSet ( IniXMLDocument,
+                             "client",
                              QString ( "storedfaderissolo%1" ).arg ( iIdx ),
                              bValue ) )
         {
@@ -578,7 +681,8 @@ void CClientSettings::ReadFaderSettingsFromXML ( const QDomDocument& IniXMLDocum
         }
 
         // stored fader muted state
-        if ( GetFlagIniSet ( IniXMLDocument, "client",
+        if ( GetFlagIniSet ( IniXMLDocument,
+                             "client",
                              QString ( "storedfaderismute%1" ).arg ( iIdx ),
                              bValue ) )
         {
@@ -586,9 +690,12 @@ void CClientSettings::ReadFaderSettingsFromXML ( const QDomDocument& IniXMLDocum
         }
 
         // stored fader group ID
-        if ( GetNumericIniSet ( IniXMLDocument, "client",
+        if ( GetNumericIniSet ( IniXMLDocument,
+                                "client",
                                 QString ( "storedgroupid%1" ).arg ( iIdx ),
-                                INVALID_INDEX, MAX_NUM_FADER_GROUPS - 1, iValue ) )
+                                INVALID_INDEX,
+                                MAX_NUM_FADER_GROUPS - 1,
+                                iValue ) )
         {
             vecStoredFaderGroupID[iIdx] = iValue;
         }
@@ -602,162 +709,233 @@ void CClientSettings::WriteSettingsToXML ( QDomDocument& IniXMLDocument )
     // IP addresses
     for ( iIdx = 0; iIdx < MAX_NUM_SERVER_ADDR_ITEMS; iIdx++ )
     {
-        PutIniSetting ( IniXMLDocument, "client",
+        PutIniSetting ( IniXMLDocument,
+                        "client",
                         QString ( "ipaddress%1" ).arg ( iIdx ),
                         vstrIPAddress[iIdx] );
     }
 
     // new client level
-    SetNumericIniSet ( IniXMLDocument, "client", "newclientlevel",
-        iNewClientFaderLevel );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "newclientlevel",
+                       iNewClientFaderLevel );
 
     // connect dialog show all musicians
-    SetFlagIniSet ( IniXMLDocument, "client", "connectdlgshowallmusicians",
-        bConnectDlgShowAllMusicians );
+    SetFlagIniSet ( IniXMLDocument,
+                    "client",
+                    "connectdlgshowallmusicians",
+                    bConnectDlgShowAllMusicians );
 
     // language
-    PutIniSetting ( IniXMLDocument, "client", "language",
-        strLanguage );
+    PutIniSetting ( IniXMLDocument, "client", "language", strLanguage );
 
     // fader channel sorting
-    SetNumericIniSet ( IniXMLDocument, "client", "channelsort",
-        static_cast<int> ( eChannelSortType ) );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "channelsort",
+                       static_cast<int> ( eChannelSortType ) );
 
     // number of mixer panel rows
-    SetNumericIniSet ( IniXMLDocument, "client", "numrowsmixpan",
-        iNumMixerPanelRows );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "numrowsmixpan",
+                       iNumMixerPanelRows );
 
     // name
-    PutIniSetting ( IniXMLDocument, "client", "name_base64",
-        ToBase64 ( pClient->ChannelInfo.strName ) );
+    PutIniSetting ( IniXMLDocument,
+                    "client",
+                    "name_base64",
+                    ToBase64 ( pClient->ChannelInfo.strName ) );
 
     // instrument
-    SetNumericIniSet ( IniXMLDocument, "client", "instrument",
-        pClient->ChannelInfo.iInstrument );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "instrument",
+                       pClient->ChannelInfo.iInstrument );
 
     // country
-    SetNumericIniSet ( IniXMLDocument, "client", "country",
-        static_cast<int> ( pClient->ChannelInfo.eCountry ) );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "country",
+                       static_cast<int> ( pClient->ChannelInfo.eCountry ) );
 
     // city
-    PutIniSetting ( IniXMLDocument, "client", "city_base64",
-        ToBase64 ( pClient->ChannelInfo.strCity ) );
+    PutIniSetting ( IniXMLDocument,
+                    "client",
+                    "city_base64",
+                    ToBase64 ( pClient->ChannelInfo.strCity ) );
 
     // skill level
-    SetNumericIniSet ( IniXMLDocument, "client", "skill",
-        static_cast<int> ( pClient->ChannelInfo.eSkillLevel ) );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "skill",
+                       static_cast<int> ( pClient->ChannelInfo.eSkillLevel ) );
 
     // audio fader
-    SetNumericIniSet ( IniXMLDocument, "client", "audfad",
-        pClient->GetAudioInFader() );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "audfad",
+                       pClient->GetAudioInFader() );
 
     // reverberation level
-    SetNumericIniSet ( IniXMLDocument, "client", "revlev",
-        pClient->GetReverbLevel() );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "revlev",
+                       pClient->GetReverbLevel() );
 
     // reverberation channel assignment
-    SetFlagIniSet ( IniXMLDocument, "client", "reverblchan",
-        pClient->IsReverbOnLeftChan() );
+    SetFlagIniSet ( IniXMLDocument,
+                    "client",
+                    "reverblchan",
+                    pClient->IsReverbOnLeftChan() );
 
     // sound card selection
-    PutIniSetting ( IniXMLDocument, "client", "auddev_base64",
-        ToBase64 ( pClient->GetSndCrdDev() ) );
+    PutIniSetting ( IniXMLDocument,
+                    "client",
+                    "auddev_base64",
+                    ToBase64 ( pClient->GetSndCrdDev() ) );
 
     // sound card left input channel mapping
-    SetNumericIniSet ( IniXMLDocument, "client", "sndcrdinlch",
-        pClient->GetSndCrdLeftInputChannel() );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "sndcrdinlch",
+                       pClient->GetSndCrdLeftInputChannel() );
 
     // sound card right input channel mapping
-    SetNumericIniSet ( IniXMLDocument, "client", "sndcrdinrch",
-        pClient->GetSndCrdRightInputChannel() );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "sndcrdinrch",
+                       pClient->GetSndCrdRightInputChannel() );
 
     // sound card left output channel mapping
-    SetNumericIniSet ( IniXMLDocument, "client", "sndcrdoutlch",
-        pClient->GetSndCrdLeftOutputChannel() );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "sndcrdoutlch",
+                       pClient->GetSndCrdLeftOutputChannel() );
 
     // sound card right output channel mapping
-    SetNumericIniSet ( IniXMLDocument, "client", "sndcrdoutrch",
-        pClient->GetSndCrdRightOutputChannel() );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "sndcrdoutrch",
+                       pClient->GetSndCrdRightOutputChannel() );
 
     // sound card preferred buffer size index
-    SetNumericIniSet ( IniXMLDocument, "client", "prefsndcrdbufidx",
-        pClient->GetSndCrdPrefFrameSizeFactor() );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "prefsndcrdbufidx",
+                       pClient->GetSndCrdPrefFrameSizeFactor() );
 
     // automatic network jitter buffer size setting
-    SetFlagIniSet ( IniXMLDocument, "client", "autojitbuf",
-        pClient->GetDoAutoSockBufSize() );
+    SetFlagIniSet ( IniXMLDocument,
+                    "client",
+                    "autojitbuf",
+                    pClient->GetDoAutoSockBufSize() );
 
     // network jitter buffer size
-    SetNumericIniSet ( IniXMLDocument, "client", "jitbuf",
-        pClient->GetSockBufNumFrames() );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "jitbuf",
+                       pClient->GetSockBufNumFrames() );
 
     // network jitter buffer size for server
-    SetNumericIniSet ( IniXMLDocument, "client", "jitbufserver",
-        pClient->GetServerSockBufNumFrames() );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "jitbufserver",
+                       pClient->GetServerSockBufNumFrames() );
 
     // enable OPUS64 setting
-    SetFlagIniSet ( IniXMLDocument, "client", "enableopussmall",
-        pClient->GetEnableOPUS64() );
+    SetFlagIniSet ( IniXMLDocument,
+                    "client",
+                    "enableopussmall",
+                    pClient->GetEnableOPUS64() );
 
     // GUI design
-    SetNumericIniSet ( IniXMLDocument, "client", "guidesign",
-        static_cast<int> ( pClient->GetGUIDesign() ) );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "guidesign",
+                       static_cast<int> ( pClient->GetGUIDesign() ) );
 
     // audio channels
-    SetNumericIniSet ( IniXMLDocument, "client", "audiochannels",
-        static_cast<int> ( pClient->GetAudioChannels() ) );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "audiochannels",
+                       static_cast<int> ( pClient->GetAudioChannels() ) );
 
     // audio quality
-    SetNumericIniSet ( IniXMLDocument, "client", "audioquality",
-        static_cast<int> ( pClient->GetAudioQuality() ) );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "audioquality",
+                       static_cast<int> ( pClient->GetAudioQuality() ) );
 
     // central server addresses
     for ( iIdx = 0; iIdx < MAX_NUM_SERVER_ADDR_ITEMS; iIdx++ )
     {
-        PutIniSetting ( IniXMLDocument, "client",
+        PutIniSetting ( IniXMLDocument,
+                        "client",
                         QString ( "centralservaddr%1" ).arg ( iIdx ),
                         vstrCentralServerAddress[iIdx] );
     }
 
     // central server address type
-    SetNumericIniSet ( IniXMLDocument, "client", "centservaddrtype",
-        static_cast<int> ( eCentralServerAddressType ) );
+    SetNumericIniSet ( IniXMLDocument,
+                       "client",
+                       "centservaddrtype",
+                       static_cast<int> ( eCentralServerAddressType ) );
 
     // window position of the main window
-    PutIniSetting ( IniXMLDocument, "client", "winposmain_base64",
-        ToBase64 ( vecWindowPosMain ) );
+    PutIniSetting ( IniXMLDocument,
+                    "client",
+                    "winposmain_base64",
+                    ToBase64 ( vecWindowPosMain ) );
 
     // window position of the settings window
-    PutIniSetting ( IniXMLDocument, "client", "winposset_base64",
-        ToBase64 ( vecWindowPosSettings ) );
+    PutIniSetting ( IniXMLDocument,
+                    "client",
+                    "winposset_base64",
+                    ToBase64 ( vecWindowPosSettings ) );
 
     // window position of the chat window
-    PutIniSetting ( IniXMLDocument, "client", "winposchat_base64",
-        ToBase64 ( vecWindowPosChat ) );
+    PutIniSetting ( IniXMLDocument,
+                    "client",
+                    "winposchat_base64",
+                    ToBase64 ( vecWindowPosChat ) );
 
     // window position of the musician profile window
-    PutIniSetting ( IniXMLDocument, "client", "winposprofile_base64",
-        ToBase64 ( vecWindowPosProfile ) );
+    PutIniSetting ( IniXMLDocument,
+                    "client",
+                    "winposprofile_base64",
+                    ToBase64 ( vecWindowPosProfile ) );
 
     // window position of the connect window
-    PutIniSetting ( IniXMLDocument, "client", "winposcon_base64",
-        ToBase64 ( vecWindowPosConnect ) );
+    PutIniSetting ( IniXMLDocument,
+                    "client",
+                    "winposcon_base64",
+                    ToBase64 ( vecWindowPosConnect ) );
 
     // visibility state of the settings window
-    SetFlagIniSet ( IniXMLDocument, "client", "winvisset",
-        bWindowWasShownSettings );
+    SetFlagIniSet ( IniXMLDocument,
+                    "client",
+                    "winvisset",
+                    bWindowWasShownSettings );
 
     // visibility state of the chat window
-    SetFlagIniSet ( IniXMLDocument, "client", "winvischat",
-        bWindowWasShownChat );
+    SetFlagIniSet ( IniXMLDocument,
+                    "client",
+                    "winvischat",
+                    bWindowWasShownChat );
 
     // visibility state of the musician profile window
-    SetFlagIniSet ( IniXMLDocument, "client", "winvisprofile",
-        bWindowWasShownProfile );
+    SetFlagIniSet ( IniXMLDocument,
+                    "client",
+                    "winvisprofile",
+                    bWindowWasShownProfile );
 
     // visibility state of the connect window
-    SetFlagIniSet ( IniXMLDocument, "client", "winviscon",
-        bWindowWasShownConnect );
+    SetFlagIniSet ( IniXMLDocument,
+                    "client",
+                    "winviscon",
+                    bWindowWasShownConnect );
 
     // fader settings
     WriteFaderSettingsToXML ( IniXMLDocument );
@@ -770,51 +948,62 @@ void CClientSettings::WriteFaderSettingsToXML ( QDomDocument& IniXMLDocument )
     for ( iIdx = 0; iIdx < MAX_NUM_STORED_FADER_SETTINGS; iIdx++ )
     {
         // stored fader tags
-        PutIniSetting ( IniXMLDocument, "client",
+        PutIniSetting ( IniXMLDocument,
+                        "client",
                         QString ( "storedfadertag%1_base64" ).arg ( iIdx ),
                         ToBase64 ( vecStoredFaderTags[iIdx] ) );
 
         // stored fader levels
-        SetNumericIniSet ( IniXMLDocument, "client",
+        SetNumericIniSet ( IniXMLDocument,
+                           "client",
                            QString ( "storedfaderlevel%1" ).arg ( iIdx ),
                            vecStoredFaderLevels[iIdx] );
 
         // stored pan values
-        SetNumericIniSet ( IniXMLDocument, "client",
+        SetNumericIniSet ( IniXMLDocument,
+                           "client",
                            QString ( "storedpanvalue%1" ).arg ( iIdx ),
                            vecStoredPanValues[iIdx] );
 
         // stored fader solo states
-        SetFlagIniSet ( IniXMLDocument, "client",
+        SetFlagIniSet ( IniXMLDocument,
+                        "client",
                         QString ( "storedfaderissolo%1" ).arg ( iIdx ),
                         vecStoredFaderIsSolo[iIdx] != 0 );
 
         // stored fader muted states
-        SetFlagIniSet ( IniXMLDocument, "client",
+        SetFlagIniSet ( IniXMLDocument,
+                        "client",
                         QString ( "storedfaderismute%1" ).arg ( iIdx ),
                         vecStoredFaderIsMute[iIdx] != 0 );
 
         // stored fader group ID
-        SetNumericIniSet ( IniXMLDocument, "client",
+        SetNumericIniSet ( IniXMLDocument,
+                           "client",
                            QString ( "storedgroupid%1" ).arg ( iIdx ),
                            vecStoredFaderGroupID[iIdx] );
     }
 }
 
-
 // Server settings -------------------------------------------------------------
-void CServerSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument,
-                                            const QList<QString>& CommandLineOptions )
+void CServerSettings::ReadSettingsFromXML (
+    const QDomDocument&   IniXMLDocument,
+    const QList<QString>& CommandLineOptions )
 {
     int  iValue;
     bool bValue;
 
     // central server address type (note that it is important
     // to set this setting prior to the "central server address")
-    if ( GetNumericIniSet ( IniXMLDocument, "server", "centservaddrtype",
-         0, static_cast<int> ( AT_CUSTOM ), iValue ) )
+    if ( GetNumericIniSet ( IniXMLDocument,
+                            "server",
+                            "centservaddrtype",
+                            0,
+                            static_cast<int> ( AT_CUSTOM ),
+                            iValue ) )
     {
-        pServer->SetCentralServerAddressType ( static_cast<ECSAddType> ( iValue ) );
+        pServer->SetCentralServerAddressType (
+            static_cast<ECSAddType> ( iValue ) );
     }
     else
     {
@@ -822,15 +1011,15 @@ void CServerSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument
         pServer->SetCentralServerAddressType ( AT_DEFAULT );
     }
 
-// TODO compatibility to old version
-if ( GetFlagIniSet ( IniXMLDocument, "server", "defcentservaddr", bValue ) )
-{
-    // only the case that manual was set in old ini must be considered
-    if ( !bValue )
+    // TODO compatibility to old version
+    if ( GetFlagIniSet ( IniXMLDocument, "server", "defcentservaddr", bValue ) )
     {
-        pServer->SetCentralServerAddressType ( AT_CUSTOM );
+        // only the case that manual was set in old ini must be considered
+        if ( !bValue )
+        {
+            pServer->SetCentralServerAddressType ( AT_CUSTOM );
+        }
     }
-}
 
     if ( !CommandLineOptions.contains ( "--centralserver" ) )
     {
@@ -847,39 +1036,54 @@ if ( GetFlagIniSet ( IniXMLDocument, "server", "defcentservaddr", bValue ) )
     }
 
     // language
-    strLanguage = GetIniSetting ( IniXMLDocument, "server", "language",
-                                  CLocale::FindSysLangTransFileName ( CLocale::GetAvailableTranslations() ).first );
+    strLanguage = GetIniSetting ( IniXMLDocument,
+                                  "server",
+                                  "language",
+                                  CLocale::FindSysLangTransFileName (
+                                      CLocale::GetAvailableTranslations() )
+                                      .first );
 
     // name/city/country
     if ( !CommandLineOptions.contains ( "--serverinfo" ) )
     {
         // name
-        pServer->SetServerName ( GetIniSetting ( IniXMLDocument, "server", "name" ) );
+        pServer->SetServerName (
+            GetIniSetting ( IniXMLDocument, "server", "name" ) );
 
         // city
-        pServer->SetServerCity ( GetIniSetting ( IniXMLDocument, "server", "city" ) );
+        pServer->SetServerCity (
+            GetIniSetting ( IniXMLDocument, "server", "city" ) );
 
         // country
-        if ( GetNumericIniSet ( IniXMLDocument, "server", "country",
-             0, static_cast<int> ( QLocale::LastCountry ), iValue ) )
+        if ( GetNumericIniSet ( IniXMLDocument,
+                                "server",
+                                "country",
+                                0,
+                                static_cast<int> ( QLocale::LastCountry ),
+                                iValue ) )
         {
-            pServer->SetServerCountry ( static_cast<QLocale::Country> ( iValue ) );
+            pServer->SetServerCountry (
+                static_cast<QLocale::Country> ( iValue ) );
         }
     }
 
     // start minimized on OS start
     if ( !CommandLineOptions.contains ( "--startminimized" ) )
     {
-         if ( GetFlagIniSet ( IniXMLDocument, "server", "autostartmin", bValue ) )
-         {
-             pServer->SetAutoRunMinimized ( bValue );
-         }
+        if ( GetFlagIniSet ( IniXMLDocument,
+                             "server",
+                             "autostartmin",
+                             bValue ) )
+        {
+            pServer->SetAutoRunMinimized ( bValue );
+        }
     }
 
     // welcome message
     if ( !CommandLineOptions.contains ( "--welcomemessage" ) )
     {
-        pServer->SetWelcomeMessage ( FromBase64ToString ( GetIniSetting ( IniXMLDocument, "server", "welcome" ) ) );
+        pServer->SetWelcomeMessage ( FromBase64ToString (
+            GetIniSetting ( IniXMLDocument, "server", "welcome" ) ) );
     }
 
     // window position of the main window
@@ -889,66 +1093,91 @@ if ( GetFlagIniSet ( IniXMLDocument, "server", "defcentservaddr", bValue ) )
     // base recording directory
     if ( !CommandLineOptions.contains ( "--recording" ) )
     {
-        pServer->SetRecordingDir ( FromBase64ToString ( GetIniSetting ( IniXMLDocument, "server", "recordingdir_base64" ) ) );
+        pServer->SetRecordingDir (
+            FromBase64ToString ( GetIniSetting ( IniXMLDocument,
+                                                 "server",
+                                                 "recordingdir_base64" ) ) );
     }
 
     // norecord flag
     if ( !CommandLineOptions.contains ( "--norecord" ) )
     {
-         if ( GetFlagIniSet ( IniXMLDocument, "server", "norecord", bValue ) )
-         {
-             pServer->SetEnableRecording ( !bValue );
-         }
+        if ( GetFlagIniSet ( IniXMLDocument, "server", "norecord", bValue ) )
+        {
+            pServer->SetEnableRecording ( !bValue );
+        }
     }
 }
 
 void CServerSettings::WriteSettingsToXML ( QDomDocument& IniXMLDocument )
 {
     // central server address
-    PutIniSetting ( IniXMLDocument, "server", "centralservaddr",
-        pServer->GetServerListCentralServerAddress() );
+    PutIniSetting ( IniXMLDocument,
+                    "server",
+                    "centralservaddr",
+                    pServer->GetServerListCentralServerAddress() );
 
     // central server address type
-    SetNumericIniSet ( IniXMLDocument, "server", "centservaddrtype",
+    SetNumericIniSet (
+        IniXMLDocument,
+        "server",
+        "centservaddrtype",
         static_cast<int> ( pServer->GetCentralServerAddressType() ) );
 
     // server list enabled flag
-    SetFlagIniSet ( IniXMLDocument, "server", "servlistenabled",
-        pServer->GetServerListEnabled() );
+    SetFlagIniSet ( IniXMLDocument,
+                    "server",
+                    "servlistenabled",
+                    pServer->GetServerListEnabled() );
 
     // language
-    PutIniSetting ( IniXMLDocument, "server", "language",
-        strLanguage );
+    PutIniSetting ( IniXMLDocument, "server", "language", strLanguage );
 
     // name
-    PutIniSetting ( IniXMLDocument, "server", "name",
-        pServer->GetServerName() );
+    PutIniSetting ( IniXMLDocument,
+                    "server",
+                    "name",
+                    pServer->GetServerName() );
 
     // city
-    PutIniSetting ( IniXMLDocument, "server", "city",
-        pServer->GetServerCity() );
+    PutIniSetting ( IniXMLDocument,
+                    "server",
+                    "city",
+                    pServer->GetServerCity() );
 
     // country
-    SetNumericIniSet ( IniXMLDocument, "server", "country",
-        static_cast<int> ( pServer->GetServerCountry() ) );
+    SetNumericIniSet ( IniXMLDocument,
+                       "server",
+                       "country",
+                       static_cast<int> ( pServer->GetServerCountry() ) );
 
     // start minimized on OS start
-    SetFlagIniSet ( IniXMLDocument, "server", "autostartmin",
-        pServer->GetAutoRunMinimized() );
+    SetFlagIniSet ( IniXMLDocument,
+                    "server",
+                    "autostartmin",
+                    pServer->GetAutoRunMinimized() );
 
     // welcome message
-    PutIniSetting ( IniXMLDocument, "server", "welcome",
-        ToBase64 ( pServer->GetWelcomeMessage() ) );
+    PutIniSetting ( IniXMLDocument,
+                    "server",
+                    "welcome",
+                    ToBase64 ( pServer->GetWelcomeMessage() ) );
 
     // window position of the main window
-    PutIniSetting ( IniXMLDocument, "server", "winposmain_base64",
-        ToBase64 ( vecWindowPosMain ) );
+    PutIniSetting ( IniXMLDocument,
+                    "server",
+                    "winposmain_base64",
+                    ToBase64 ( vecWindowPosMain ) );
 
     // base recording directory
-    PutIniSetting ( IniXMLDocument, "server", "recordingdir_base64",
-        ToBase64 ( pServer->GetRecordingDir() ) );
+    PutIniSetting ( IniXMLDocument,
+                    "server",
+                    "recordingdir_base64",
+                    ToBase64 ( pServer->GetRecordingDir() ) );
 
     // norecord flag
-    SetFlagIniSet ( IniXMLDocument, "server", "norecord",
-        pServer->GetDisableRecording() );
+    SetFlagIniSet ( IniXMLDocument,
+                    "server",
+                    "norecord",
+                    pServer->GetDisableRecording() );
 }

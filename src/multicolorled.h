@@ -31,16 +31,15 @@
 
 #pragma once
 
+#include "global.h"
+#include <QIcon>
 #include <QLabel>
 #include <QPixmap>
-#include <QIcon>
-#include "global.h"
-
 
 /* Classes ********************************************************************/
 class CMultiColorLED : public QLabel
 {
-public:
+  public:
     enum ELightColor
     {
         RL_DISABLED,
@@ -62,11 +61,11 @@ public:
     void SetLight ( const ELightColor eNewStatus );
     void SetType ( const EType eNType );
 
-protected:
+  protected:
     ELightColor eColorFlag;
 
     virtual void changeEvent ( QEvent* curEvent );
-    void SetColor ( const ELightColor eNewColorFlag );
+    void         SetColor ( const ELightColor eNewColorFlag );
 
     QPixmap BitmCubeDisabled;
     QPixmap BitmCubeGrey;
@@ -77,10 +76,10 @@ protected:
     QPixmap BitmIndicatorYellow;
     QPixmap BitmIndicatorRed;
 
-    int     iUpdateTime;
-    EType   eType;
+    int   iUpdateTime;
+    EType eType;
 
-    bool    bFlagRedLi;
-    bool    bFlagGreenLi;
-    bool    bFlagYellowLi;
+    bool bFlagRedLi;
+    bool bFlagGreenLi;
+    bool bFlagYellowLi;
 };

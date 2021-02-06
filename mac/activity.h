@@ -32,14 +32,14 @@ class CActivityId;
 // that we are Latency Critical and are not performing background tasks.
 class CActivity
 {
-private:
-    CActivityId *pActivity;
-    
-public:
+  private:
+    CActivityId* pActivity;
+
+  public:
     CActivity();
-    
+
     ~CActivity();
-    
+
     void BeginActivity();
 
     void EndActivity();

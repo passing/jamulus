@@ -25,79 +25,83 @@
 #pragma once
 
 #include <QCloseEvent>
-#include <QLabel>
-#include <QListView>
-#include <QTimer>
-#include <QPixmap>
-#include <QThread>
-#include <QSlider>
-#include <QMenuBar>
-#include <QLayout>
-#include <QSystemTrayIcon>
-#include <QSettings>
 #include <QFileDialog>
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-# include <QVersionNumber>
+#include <QLabel>
+#include <QLayout>
+#include <QListView>
+#include <QMenuBar>
+#include <QPixmap>
+#include <QSettings>
+#include <QSlider>
+#include <QSystemTrayIcon>
+#include <QThread>
+#include <QTimer>
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 6, 0 )
+#include <QVersionNumber>
 #endif
 #include "global.h"
-#include "util.h"
 #include "server.h"
 #include "settings.h"
 #include "ui_serverdlgbase.h"
-
+#include "util.h"
 
 /* Definitions ****************************************************************/
 // update time for GUI controls
-#define GUI_CONTRL_UPDATE_TIME      1000 // ms
+#define GUI_CONTRL_UPDATE_TIME 1000 // ms
 
 // Strings used in multiple places
 #define SREC_NOT_INITIALISED CServerDlg::tr ( "Not initialised" )
-#define SREC_NOT_ENABLED     CServerDlg::tr ( "Not enabled" )
-#define SREC_NOT_RECORDING   CServerDlg::tr ( "Not recording" )
-#define SREC_RECORDING       CServerDlg::tr ( "Recording" )
-
+#define SREC_NOT_ENABLED CServerDlg::tr ( "Not enabled" )
+#define SREC_NOT_RECORDING CServerDlg::tr ( "Not recording" )
+#define SREC_RECORDING CServerDlg::tr ( "Recording" )
 
 /* Classes ********************************************************************/
 class CServerDlg : public CBaseDlg, private Ui_CServerDlgBase
 {
     Q_OBJECT
 
-public:
+  public:
     CServerDlg ( CServer*         pNServP,
                  CServerSettings* pNSetP,
                  const bool       bStartMinimized,
                  QWidget*         parent = nullptr );
 
-protected:
+  protected:
     virtual void changeEvent ( QEvent* pEvent );
     virtual void closeEvent ( QCloseEvent* Event );
 
-    void         UpdateGUIDependencies();
-    void         UpdateSystemTrayIcon ( const bool bIsActive );
-    void         ShowWindowInForeground() { showNormal(); raise(); }
-    void         ModifyAutoStartEntry ( const bool bDoAutoStart );
-    void         UpdateRecorderStatus( QString sessionDir );
+    void UpdateGUIDependencies();
+    void UpdateSystemTrayIcon ( const bool bIsActive );
+    void ShowWindowInForeground()
+    {
+        showNormal();
+        raise();
+    }
+    void ModifyAutoStartEntry ( const bool bDoAutoStart );
+    void UpdateRecorderStatus ( QString sessionDir );
 
-    QTimer                    Timer;
-    CServer*                  pServer;
-    CServerSettings*          pSettings;
+    QTimer           Timer;
+    CServer*         pServer;
+    CServerSettings* pSettings;
 
     CVector<QTreeWidgetItem*> vecpListViewItems;
     QMutex                    ListViewMutex;
 
-    QMenuBar*                 pMenu;
+    QMenuBar* pMenu;
 
-    bool                      bSystemTrayIconAvaialbe;
-    QSystemTrayIcon           SystemTrayIcon;
-    QPixmap                   BitmapSystemTrayInactive;
-    QPixmap                   BitmapSystemTrayActive;
-    QMenu*                    pSystemTrayIconMenu;
+    bool            bSystemTrayIconAvaialbe;
+    QSystemTrayIcon SystemTrayIcon;
+    QPixmap         BitmapSystemTrayInactive;
+    QPixmap         BitmapSystemTrayActive;
+    QMenu*          pSystemTrayIconMenu;
 
-public slots:
+  public slots:
     void OnRegisterServerStateChanged ( int value );
     void OnStartOnOSStartStateChanged ( int value );
     void OnEnableRecorderStateChanged ( int value )
-        { pServer->SetEnableRecording ( Qt::CheckState::Checked == value ); }
+    {
+        pServer->SetEnableRecording ( Qt::CheckState::Checked == value );
+    }
 
     void OnCentralServerAddressEditingFinished();
     void OnServerNameTextChanged ( const QString& strNewName );
@@ -113,15 +117,23 @@ public slots:
     void OnSysTrayMenuHide() { hide(); }
     void OnSysTrayMenuExit() { close(); }
     void OnSysTrayActivated ( QSystemTrayIcon::ActivationReason ActReason );
-    void OnWelcomeMessageChanged() { pServer->SetWelcomeMessage ( tedWelcomeMessage->toPlainText() ); }
-    void OnLanguageChanged ( QString strLanguage ) { pSettings->strLanguage = strLanguage; }
+    void OnWelcomeMessageChanged()
+    {
+        pServer->SetWelcomeMessage ( tedWelcomeMessage->toPlainText() );
+    }
+    void OnLanguageChanged ( QString strLanguage )
+    {
+        pSettings->strLanguage = strLanguage;
+    }
     void OnNewRecordingClicked() { pServer->RequestNewRecording(); }
     void OnRecordingDirClicked();
     void OnClearRecordingDirClicked();
     void OnRecordingSessionStarted ( QString sessionDir )
-        { UpdateRecorderStatus ( sessionDir ); }
+    {
+        UpdateRecorderStatus ( sessionDir );
+    }
 
-    void OnCLVersionAndOSReceived ( CHostAddress           ,
-                                    COSUtil::EOpSystemType ,
-                                    QString                strVersion );
+    void OnCLVersionAndOSReceived ( CHostAddress,
+                                    COSUtil::EOpSystemType,
+                                    QString strVersion );
 };

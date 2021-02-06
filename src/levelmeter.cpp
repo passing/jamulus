@@ -27,7 +27,6 @@
 
 #include "levelmeter.h"
 
-
 /* Implementation *************************************************************/
 CLevelMeter::CLevelMeter ( QWidget* parent ) :
     QWidget ( parent ),
@@ -37,8 +36,8 @@ CLevelMeter::CLevelMeter ( QWidget* parent ) :
     QWidget*     pLEDMeter  = new QWidget();
     QVBoxLayout* pLEDLayout = new QVBoxLayout ( pLEDMeter );
     pLEDLayout->setAlignment ( Qt::AlignHCenter );
-    pLEDLayout->setMargin    ( 0 );
-    pLEDLayout->setSpacing   ( 0 );
+    pLEDLayout->setMargin ( 0 );
+    pLEDLayout->setSpacing ( 0 );
 
     // create LEDs plus the clip LED
     vecpLEDs.Init ( NUM_LEDS_INCL_CLIP_LED );
@@ -60,7 +59,10 @@ CLevelMeter::CLevelMeter ( QWidget* parent ) :
     // initialize bar meter
     pBarMeter = new QProgressBar();
     pBarMeter->setOrientation ( Qt::Vertical );
-    pBarMeter->setRange ( 0, 100 * NUM_STEPS_LED_BAR ); // use factor 100 to reduce quantization (bar is continuous)
+    pBarMeter->setRange (
+        0,
+        100 *
+            NUM_STEPS_LED_BAR ); // use factor 100 to reduce quantization (bar is continuous)
     pBarMeter->setFormat ( "" ); // suppress percent numbers
 
     // setup stacked layout for meter type switching mechanism
@@ -81,10 +83,11 @@ CLevelMeter::CLevelMeter ( QWidget* parent ) :
     TimerClip.setSingleShot ( true );
     TimerClip.setInterval ( CLIP_IND_TIME_OUT_MS );
 
-
     // Connections -------------------------------------------------------------
-    QObject::connect ( &TimerClip, &QTimer::timeout,
-        this, &CLevelMeter::ClipReset );
+    QObject::connect ( &TimerClip,
+                       &QTimer::timeout,
+                       this,
+                       &CLevelMeter::ClipReset );
 }
 
 CLevelMeter::~CLevelMeter()
@@ -131,7 +134,7 @@ void CLevelMeter::SetLevelMeterType ( const ELevelMeterType eNType )
 }
 
 void CLevelMeter::SetBarMeterStyleAndClipStatus ( const ELevelMeterType eNType,
-                                                  const bool            bIsClip )
+                                                  const bool bIsClip )
 {
     switch ( eNType )
     {
@@ -267,12 +270,14 @@ void CLevelMeter::ClipReset()
     }
 }
 
-
 CLevelMeter::cLED::cLED ( QWidget* parent ) :
-    BitmCubeRoundBlack  ( QString::fromUtf8 ( ":/png/LEDs/res/HLEDBlackSmall.png" ) ),
-    BitmCubeRoundGreen  ( QString::fromUtf8 ( ":/png/LEDs/res/HLEDGreenSmall.png" ) ),
-    BitmCubeRoundYellow ( QString::fromUtf8 ( ":/png/LEDs/res/HLEDYellowSmall.png" ) ),
-    BitmCubeRoundRed    ( QString::fromUtf8 ( ":/png/LEDs/res/HLEDRedSmall.png" ) )
+    BitmCubeRoundBlack (
+        QString::fromUtf8 ( ":/png/LEDs/res/HLEDBlackSmall.png" ) ),
+    BitmCubeRoundGreen (
+        QString::fromUtf8 ( ":/png/LEDs/res/HLEDGreenSmall.png" ) ),
+    BitmCubeRoundYellow (
+        QString::fromUtf8 ( ":/png/LEDs/res/HLEDYellowSmall.png" ) ),
+    BitmCubeRoundRed ( QString::fromUtf8 ( ":/png/LEDs/res/HLEDRedSmall.png" ) )
 {
     // create LED label
     pLEDLabel = new QLabel ( "", parent );

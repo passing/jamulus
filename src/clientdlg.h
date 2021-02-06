@@ -24,57 +24,55 @@
 
 #pragma once
 
-#include <QLabel>
-#include <QString>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QProgressBar>
-#include <QWhatsThis>
-#include <QTimer>
-#include <QSlider>
-#include <QRadioButton>
-#include <QMenuBar>
-#include <QLayout>
-#include <QMessageBox>
 #include <QFileDialog>
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-# include <QVersionNumber>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QProgressBar>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSlider>
+#include <QString>
+#include <QTimer>
+#include <QWhatsThis>
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 6, 0 )
+#include <QVersionNumber>
 #endif
-#include "global.h"
-#include "util.h"
-#include "client.h"
-#include "settings.h"
-#include "multicolorled.h"
-#include "audiomixerboard.h"
-#include "clientsettingsdlg.h"
-#include "chatdlg.h"
-#include "connectdlg.h"
 #include "analyzerconsole.h"
+#include "audiomixerboard.h"
+#include "chatdlg.h"
+#include "client.h"
+#include "clientsettingsdlg.h"
+#include "connectdlg.h"
+#include "global.h"
+#include "multicolorled.h"
+#include "settings.h"
 #include "ui_clientdlgbase.h"
-#if defined ( __APPLE__ ) || defined ( __MACOSX )
-# if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-#  include <QtMac>
-# endif
+#include "util.h"
+#if defined( __APPLE__ ) || defined( __MACOSX )
+#if QT_VERSION >= QT_VERSION_CHECK( 5, 2, 0 )
+#include <QtMac>
 #endif
-
+#endif
 
 /* Definitions ****************************************************************/
 // update time for GUI controls
-#define LEVELMETER_UPDATE_TIME_MS   100   // ms
-#define BUFFER_LED_UPDATE_TIME_MS   300   // ms
-#define LED_BAR_UPDATE_TIME_MS      1000  // ms
-#define CHECK_AUDIO_DEV_OK_TIME_MS  5000  // ms
+#define LEVELMETER_UPDATE_TIME_MS 100   // ms
+#define BUFFER_LED_UPDATE_TIME_MS 300   // ms
+#define LED_BAR_UPDATE_TIME_MS 1000     // ms
+#define CHECK_AUDIO_DEV_OK_TIME_MS 5000 // ms
 
 // number of ping times > upper bound until error message is shown
-#define NUM_HIGH_PINGS_UNTIL_ERROR  5
-
+#define NUM_HIGH_PINGS_UNTIL_ERROR 5
 
 /* Classes ********************************************************************/
 class CClientDlg : public CBaseDlg, private Ui_CClientDlgBase
 {
     Q_OBJECT
 
-public:
+  public:
     CClientDlg ( CClient*         pNCliP,
                  CClientSettings* pNSetP,
                  const QString&   strConnOnStartupAddress,
@@ -84,38 +82,43 @@ public:
                  const bool       bMuteStream,
                  QWidget*         parent = nullptr );
 
-protected:
-    void               SetGUIDesign ( const EGUIDesign eNewDesign );
-    void               SetMyWindowTitle ( const int iNumClients );
-    void               ShowConnectionSetupDialog();
-    void               ShowMusicianProfileDialog();
-    void               ShowGeneralSettings();
-    void               ShowChatWindow ( const bool bForceRaise = true );
-    void               ShowAnalyzerConsole();
-    void               UpdateAudioFaderSlider();
-    void               UpdateRevSelection();
-    void               Connect ( const QString& strSelectedAddress,
-                                 const QString& strMixerBoardLabel );
-    void               Disconnect();
-    void               ManageDragNDrop ( QDropEvent* Event,
-                                         const bool  bCheckAccept );
+  protected:
+    void SetGUIDesign ( const EGUIDesign eNewDesign );
+    void SetMyWindowTitle ( const int iNumClients );
+    void ShowConnectionSetupDialog();
+    void ShowMusicianProfileDialog();
+    void ShowGeneralSettings();
+    void ShowChatWindow ( const bool bForceRaise = true );
+    void ShowAnalyzerConsole();
+    void UpdateAudioFaderSlider();
+    void UpdateRevSelection();
+    void Connect ( const QString& strSelectedAddress,
+                   const QString& strMixerBoardLabel );
+    void Disconnect();
+    void ManageDragNDrop ( QDropEvent* Event, const bool bCheckAccept );
 
-    CClient*           pClient;
-    CClientSettings*   pSettings;
+    CClient*         pClient;
+    CClientSettings* pSettings;
 
-    bool               bConnected;
-    bool               bConnectDlgWasShown;
-    bool               bMIDICtrlUsed;
-    QTimer             TimerSigMet;
-    QTimer             TimerBuffersLED;
-    QTimer             TimerStatus;
-    QTimer             TimerPing;
-    QTimer             TimerCheckAudioDeviceOk;
+    bool   bConnected;
+    bool   bConnectDlgWasShown;
+    bool   bMIDICtrlUsed;
+    QTimer TimerSigMet;
+    QTimer TimerBuffersLED;
+    QTimer TimerStatus;
+    QTimer TimerPing;
+    QTimer TimerCheckAudioDeviceOk;
 
-    virtual void       closeEvent     ( QCloseEvent*     Event );
-    virtual void       dragEnterEvent ( QDragEnterEvent* Event ) { ManageDragNDrop ( Event, true ); }
-    virtual void       dropEvent      ( QDropEvent*      Event ) { ManageDragNDrop ( Event, false ); }
-    void               UpdateDisplay();
+    virtual void closeEvent ( QCloseEvent* Event );
+    virtual void dragEnterEvent ( QDragEnterEvent* Event )
+    {
+        ManageDragNDrop ( Event, true );
+    }
+    virtual void dropEvent ( QDropEvent* Event )
+    {
+        ManageDragNDrop ( Event, false );
+    }
+    void UpdateDisplay();
 
     CClientSettingsDlg ClientSettingsDlg;
     CChatDlg           ChatDlg;
@@ -123,7 +126,7 @@ protected:
     CAnalyzerConsole   AnalyzerConsole;
     CMusProfDlg        MusicianProfileDlg;
 
-public slots:
+  public slots:
     void OnConnectDisconBut();
     void OnTimerSigMet();
     void OnTimerBuffersLED();
@@ -137,16 +140,16 @@ public slots:
                                               int          iPingTime,
                                               int          iNumClients );
 
-    void OnControllerInFaderLevel ( const int iChannelIdx,
-                                    const int iValue ) { MainMixerBoard->SetFaderLevel ( iChannelIdx,
-                                                                                         iValue ); }
+    void OnControllerInFaderLevel ( const int iChannelIdx, const int iValue )
+    {
+        MainMixerBoard->SetFaderLevel ( iChannelIdx, iValue );
+    }
 
-    void OnVersionAndOSReceived ( COSUtil::EOpSystemType ,
-                                  QString                strVersion );
+    void OnVersionAndOSReceived ( COSUtil::EOpSystemType, QString strVersion );
 
-    void OnCLVersionAndOSReceived ( CHostAddress           ,
-                                    COSUtil::EOpSystemType ,
-                                    QString                strVersion );
+    void OnCLVersionAndOSReceived ( CHostAddress,
+                                    COSUtil::EOpSystemType,
+                                    QString strVersion );
 
     void OnLoadChannelSetup();
     void OnSaveChannelSetup();
@@ -155,14 +158,32 @@ public slots:
     void OnOpenGeneralSettings() { ShowGeneralSettings(); }
     void OnOpenChatDialog() { ShowChatWindow(); }
     void OnOpenAnalyzerConsole() { ShowAnalyzerConsole(); }
-    void OnNoSortChannels()           { MainMixerBoard->SetFaderSorting ( ST_NO_SORT ); }
-    void OnSortChannelsByName()       { MainMixerBoard->SetFaderSorting ( ST_BY_NAME ); }
-    void OnSortChannelsByInstrument() { MainMixerBoard->SetFaderSorting ( ST_BY_INSTRUMENT ); }
-    void OnSortChannelsByGroupID()    { MainMixerBoard->SetFaderSorting ( ST_BY_GROUPID ); }
-    void OnSortChannelsByCity()       { MainMixerBoard->SetFaderSorting ( ST_BY_CITY ); }
-    void OnUseTowRowsForMixerPanel ( bool Checked ) { MainMixerBoard->SetNumMixerPanelRows ( Checked ? 2 : 1 ); }
+    void OnNoSortChannels() { MainMixerBoard->SetFaderSorting ( ST_NO_SORT ); }
+    void OnSortChannelsByName()
+    {
+        MainMixerBoard->SetFaderSorting ( ST_BY_NAME );
+    }
+    void OnSortChannelsByInstrument()
+    {
+        MainMixerBoard->SetFaderSorting ( ST_BY_INSTRUMENT );
+    }
+    void OnSortChannelsByGroupID()
+    {
+        MainMixerBoard->SetFaderSorting ( ST_BY_GROUPID );
+    }
+    void OnSortChannelsByCity()
+    {
+        MainMixerBoard->SetFaderSorting ( ST_BY_CITY );
+    }
+    void OnUseTowRowsForMixerPanel ( bool Checked )
+    {
+        MainMixerBoard->SetNumMixerPanelRows ( Checked ? 2 : 1 );
+    }
     void OnClearAllStoredSoloMuteSettings();
-    void OnSetAllFadersToNewClientLevel() { MainMixerBoard->SetAllFaderLevelsToNewClientLevel(); }
+    void OnSetAllFadersToNewClientLevel()
+    {
+        MainMixerBoard->SetAllFaderLevelsToNewClientLevel();
+    }
 
     void OnSettingsStateChanged ( int value );
     void OnChatStateChanged ( int value );
@@ -171,13 +192,13 @@ public slots:
     void OnAudioPanValueChanged ( int value );
 
     void OnAudioReverbValueChanged ( int value )
-        { pClient->SetReverbLevel ( value ); }
+    {
+        pClient->SetReverbLevel ( value );
+    }
 
-    void OnReverbSelLClicked()
-        { pClient->SetReverbOnLeftChan ( true ); }
+    void OnReverbSelLClicked() { pClient->SetReverbOnLeftChan ( true ); }
 
-    void OnReverbSelRClicked()
-        { pClient->SetReverbOnLeftChan ( false ); }
+    void OnReverbSelRClicked() { pClient->SetReverbOnLeftChan ( false ); }
 
     void OnConClientListMesReceived ( CVector<CChannelInfo> vecChanInfo );
     void OnChatTextReceived ( QString strChatText );
@@ -185,54 +206,82 @@ public slots:
     void OnSoundDeviceChanged ( QString strError );
 
     void OnChangeChanGain ( int iId, float fGain, bool bIsMyOwnFader )
-        { pClient->SetRemoteChanGain ( iId, fGain, bIsMyOwnFader ); }
+    {
+        pClient->SetRemoteChanGain ( iId, fGain, bIsMyOwnFader );
+    }
 
     void OnChangeChanPan ( int iId, float fPan )
-        { pClient->SetRemoteChanPan ( iId, fPan ); }
+    {
+        pClient->SetRemoteChanPan ( iId, fPan );
+    }
 
     void OnNewLocalInputText ( QString strChatText )
-        { pClient->CreateChatTextMes ( strChatText ); }
+    {
+        pClient->CreateChatTextMes ( strChatText );
+    }
 
     void OnReqServerListQuery ( CHostAddress InetAddr )
-        { pClient->CreateCLReqServerListMes ( InetAddr ); }
+    {
+        pClient->CreateCLReqServerListMes ( InetAddr );
+    }
 
     void OnCreateCLServerListPingMes ( CHostAddress InetAddr )
-        { pClient->CreateCLServerListPingMes ( InetAddr ); }
+    {
+        pClient->CreateCLServerListPingMes ( InetAddr );
+    }
 
     void OnCreateCLServerListReqVerAndOSMes ( CHostAddress InetAddr )
-        { pClient->CreateCLServerListReqVerAndOSMes ( InetAddr ); }
+    {
+        pClient->CreateCLServerListReqVerAndOSMes ( InetAddr );
+    }
 
     void OnCreateCLServerListReqConnClientsListMes ( CHostAddress InetAddr )
-        { pClient->CreateCLServerListReqConnClientsListMes ( InetAddr ); }
+    {
+        pClient->CreateCLServerListReqConnClientsListMes ( InetAddr );
+    }
 
     void OnCLServerListReceived ( CHostAddress         InetAddr,
                                   CVector<CServerInfo> vecServerInfo )
-        { ConnectDlg.SetServerList ( InetAddr, vecServerInfo ); }
+    {
+        ConnectDlg.SetServerList ( InetAddr, vecServerInfo );
+    }
 
     void OnCLRedServerListReceived ( CHostAddress         InetAddr,
                                      CVector<CServerInfo> vecServerInfo )
-        { ConnectDlg.SetServerList ( InetAddr, vecServerInfo, true ); }
+    {
+        ConnectDlg.SetServerList ( InetAddr, vecServerInfo, true );
+    }
 
     void OnCLConnClientsListMesReceived ( CHostAddress          InetAddr,
                                           CVector<CChannelInfo> vecChanInfo )
-        { ConnectDlg.SetConnClientsList ( InetAddr, vecChanInfo ); }
+    {
+        ConnectDlg.SetConnClientsList ( InetAddr, vecChanInfo );
+    }
 
     void OnClientIDReceived ( int iChanID )
-        { MainMixerBoard->SetMyChannelID ( iChanID ); }
+    {
+        MainMixerBoard->SetMyChannelID ( iChanID );
+    }
 
     void OnMuteStateHasChangedReceived ( int iChanID, bool bIsMuted )
-        { MainMixerBoard->SetRemoteFaderIsMute ( iChanID, bIsMuted ); }
+    {
+        MainMixerBoard->SetRemoteFaderIsMute ( iChanID, bIsMuted );
+    }
 
-    void OnCLChannelLevelListReceived ( CHostAddress      /* unused */,
+    void OnCLChannelLevelListReceived ( CHostAddress /* unused */,
                                         CVector<uint16_t> vecLevelList )
-        { MainMixerBoard->SetChannelLevels ( vecLevelList ); }
+    {
+        MainMixerBoard->SetChannelLevels ( vecLevelList );
+    }
 
     void OnConnectDlgAccepted();
     void OnDisconnected() { Disconnect(); }
     void OnGUIDesignChanged() { SetGUIDesign ( pClient->GetGUIDesign() ); }
 
     void OnRecorderStateReceived ( ERecorderState eRecorderState )
-        { MainMixerBoard->SetRecorderState ( eRecorderState ); }
+    {
+        MainMixerBoard->SetRecorderState ( eRecorderState );
+    }
 
     void OnAudioChannelsChanged() { UpdateRevSelection(); }
     void OnNumClientsChanged ( int iNewNumClients );
