@@ -34,8 +34,8 @@ CClient::CClient ( const quint16  iPortNumber,
     ChannelInfo(),
     strClientName ( strNClientName ),
     Channel ( false ), /* we need a client channel -> "false" */
-    CurOpusEncoder (nullptr),
-    CurOpusDecoder ( nullptr ),      
+    CurOpusEncoder ( nullptr ),
+    CurOpusDecoder ( nullptr ),
     eAudioCompressionType ( CT_OPUS ),
     iCeltNumCodedBytes ( OPUS_NUM_BYTES_MONO_LOW_QUALITY ),
     iOPUSFrameSizeSamples ( DOUBLE_SYSTEM_FRAME_SIZE_SAMPLES ),
@@ -53,9 +53,7 @@ CClient::CClient ( const quint16  iPortNumber,
             strNClientName ),
     iAudioInFader ( AUD_FADER_IN_MIDDLE ),
     bReverbOnLeftChan ( false ),
-    iReverbLevel (
-      0 
-                 ),
+    iReverbLevel ( 0 ),
     iSndCrdPrefFrameSizeFactor ( FRAME_SIZE_FACTOR_DEFAULT ),
     iSndCrdFrameSizeFactor ( FRAME_SIZE_FACTOR_DEFAULT ),
     bSndCrdConversionBufferRequired ( false ),
@@ -153,7 +151,8 @@ CClient::CClient ( const quint16  iPortNumber,
 
     QObject::connect ( &Channel,
                        &CChannel::DetectedCLMessage,
-                       this, &CClient::OnDetectedCLMessage );
+                       this,
+                       &CClient::OnDetectedCLMessage );
 
     QObject::connect ( &Channel,
                        &CChannel::ReqJittBufSize,
@@ -292,8 +291,7 @@ CClient::CClient ( const quint16  iPortNumber,
     if ( !strConnOnStartupAddress.isEmpty() )
     {
         SetServerAddr ( strConnOnStartupAddress );
-       
-      
+
         Start();
     }
 }
@@ -317,7 +315,7 @@ CClient::~CClient()
     opus_custom_decoder_destroy ( Opus64DecoderStereo );
 
     // free audio modes
-    opus_custom_mode_destroy(OpusMode);
+    opus_custom_mode_destroy ( OpusMode );
     opus_custom_mode_destroy ( Opus64Mode );
 }
 
@@ -457,10 +455,12 @@ void CClient::SetDoAutoSockBufSize ( const bool bValue )
 
 void CClient::SetRemoteChanGain ( const int   iId,
                                   const float fGain,
-                                  const bool  bIsMyOwnFader ) {
+                                  const bool  bIsMyOwnFader )
+{
     // if this gain is for my own channel, apply the value for the Mute Myself function
-    if (bIsMyOwnFader) {
-      fMuteOutStreamGain = fGain;
+    if ( bIsMyOwnFader )
+    {
+        fMuteOutStreamGain = fGain;
     }
 
     Channel.SetRemoteChanGain ( iId, fGain );
