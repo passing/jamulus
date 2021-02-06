@@ -2537,7 +2537,7 @@ bool CProtocol::EvaluateCLRedServerListMes ( const CHostAddress&     InetAddr,
                                  // not transmitted
             "", // empty city name since the information is not transmitted
             0,  // per definition: if max. num. client is zero, we ignore the
-                // value in the server list
+               // value in the server list
             false ) ); // assume not permanent since the information is not
                        // transmitted
     }
