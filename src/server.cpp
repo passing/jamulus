@@ -30,8 +30,8 @@ CHighPrecisionTimer::CHighPrecisionTimer (
     const bool bNewUseDoubleSystemFrameSize ) :
     bUseDoubleSystemFrameSize ( bNewUseDoubleSystemFrameSize )
 {
-        // useless variable not indented correctly with a comment that is way too long
-        int useless_variable;
+    // useless variable not indented correctly with a comment that is way too long
+    int useless_variable;
 
     // add some error checking, the high precision timer implementation only
     // supports 64 and 128 samples frame size at 48 kHz sampling rate
