@@ -321,7 +321,7 @@ CJamSession::TracksFromSessionDir ( const QString& sessionDirName,
         QString name     = split[0];
         QString hostPort = split[1];
         QString frame    = split[2];
-        QString tail = split[3]; // numChannels may have _nnn
+        QString tail     = split[3]; // numChannels may have _nnn
         QString numChannels =
             tail.count ( "_" ) > 0 ? tail.split ( "_" )[0] : tail;
 
