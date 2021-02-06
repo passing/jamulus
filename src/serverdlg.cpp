@@ -24,95 +24,71 @@
 
 #include "serverdlg.h"
 
+
 /* Implementation *************************************************************/
 CServerDlg::CServerDlg ( CServer*         pNServP,
                          CServerSettings* pNSetP,
                          const bool       bStartMinimized,
-                         QWidget*         parent ) :
-    CBaseDlg ( parent,
-               Qt::Window ), // use Qt::Window to get min/max window buttons
-    pServer ( pNServP ),
-    pSettings ( pNSetP ),
-    BitmapSystemTrayInactive (
-        QString::fromUtf8 ( ":/png/LEDs/res/CLEDGreyArrow.png" ) ),
-    BitmapSystemTrayActive (
-        QString::fromUtf8 ( ":/png/LEDs/res/CLEDGreenArrow.png" ) )
+                         QWidget*         parent )
+    : CBaseDlg                 ( parent, Qt::Window ), // use Qt::Window to get min/max window buttons
+      pServer                  ( pNServP ),
+      pSettings                ( pNSetP ),
+      BitmapSystemTrayInactive ( QString::fromUtf8 ( ":/png/LEDs/res/CLEDGreyArrow.png" ) ),
+      BitmapSystemTrayActive   ( QString::fromUtf8 ( ":/png/LEDs/res/CLEDGreenArrow.png" ) )
 {
     // check if system tray icon can be used
     bSystemTrayIconAvaialbe = SystemTrayIcon.isSystemTrayAvailable();
 
     setupUi ( this );
 
+
     // Add help text to controls -----------------------------------------------
     // client list
-    lvwClients->setWhatsThis ( "<b>" + tr ( "Client List" ) + ":</b> " +
-                               tr ( "The client list shows all clients which "
-                                    "are currently connected to this "
-                                    "server. Some information about the "
-                                    "clients like the IP address and name "
-                                    "are given for each connected client." ) );
+    lvwClients->setWhatsThis ( "<b>" + tr ( "Client List" ) + ":</b> " + tr (
+        "The client list shows all clients which are currently connected to this "
+        "server. Some information about the clients like the IP address and name "
+        "are given for each connected client." ) );
 
     lvwClients->setAccessibleName ( tr ( "Connected clients list view" ) );
 
     // start minimized on operating system start
-    chbStartOnOSStart->setWhatsThis (
-        "<b>" +
-        tr ( "Start Minimized on Operating "
-             "System Start" ) +
-        ":</b> " +
-        tr ( "If the start minimized on operating system start "
-             "check box is checked, the server will be "
-             "started when the operating system starts up and is automatically "
-             "minimized to a system task bar icon." ) );
+    chbStartOnOSStart->setWhatsThis ( "<b>" + tr ( "Start Minimized on Operating "
+        "System Start" ) + ":</b> " + tr ( "If the start minimized on operating system start "
+        "check box is checked, the server will be "
+        "started when the operating system starts up and is automatically "
+        "minimized to a system task bar icon." ) );
 
     // Make My Server Public flag
-    chbRegisterServer->setWhatsThis (
-        "<b>" + tr ( "Make My Server Public" ) + ":</b> " +
-        tr (
-            "If the Make My Server Public check box is checked, this server "
-            "registers "
-            "itself at the central server so that all users of the application "
-            "can see the server in the connect dialog server list and "
-            "connect to it. The registration of the server is renewed "
-            "periodically "
-            "to make sure that all servers in the connect dialog server list "
-            "are "
-            "actually available." ) );
+    chbRegisterServer->setWhatsThis ( "<b>" + tr ( "Make My Server Public" ) + ":</b> " +
+        tr ( "If the Make My Server Public check box is checked, this server registers "
+        "itself at the central server so that all users of the application "
+        "can see the server in the connect dialog server list and "
+        "connect to it. The registration of the server is renewed periodically "
+        "to make sure that all servers in the connect dialog server list are "
+        "actually available." ) );
 
     // register server status label
-    lblRegSvrStatus->setWhatsThis (
-        "<b>" + tr ( "Register Server Status" ) + ":</b> " +
-        tr (
-            "If the Make My Server Public check box is checked, this will show "
-            "whether registration with the central server is successful. If "
-            "the "
-            "registration failed, please choose another server list." ) );
+    lblRegSvrStatus->setWhatsThis ( "<b>" + tr ( "Register Server Status" ) + ":</b> " +
+        tr ( "If the Make My Server Public check box is checked, this will show "
+        "whether registration with the central server is successful. If the "
+        "registration failed, please choose another server list." ) );
 
     // custom central server address
-    QString strCentrServAddr = "<b>" + tr ( "Custom Central Server Address" ) +
-                               ":</b> " +
-                               tr ( "The custom central server address is the "
-                                    "IP address or URL of the central "
-                                    "server at which the server list of the "
-                                    "connection dialog is managed." );
+    QString strCentrServAddr = "<b>" + tr ( "Custom Central Server Address" ) + ":</b> " +
+        tr ( "The custom central server address is the IP address or URL of the central "
+        "server at which the server list of the connection dialog is managed." );
 
     lblCentralServerAddress->setWhatsThis ( strCentrServAddr );
     edtCentralServerAddress->setWhatsThis ( strCentrServAddr );
-    edtCentralServerAddress->setAccessibleName (
-        tr ( "Central server address line edit" ) );
+    edtCentralServerAddress->setAccessibleName ( tr ( "Central server address line edit" ) );
 
-    cbxCentServAddrType->setWhatsThis (
-        "<b>" + tr ( "Server List Selection" ) + ":</b> " +
-        tr ( "Selects the server list (i.e. central server address) in which "
-             "your server will be added." ) );
-    cbxCentServAddrType->setAccessibleName (
-        tr ( "Server list selection combo box" ) );
+    cbxCentServAddrType->setWhatsThis ( "<b>" + tr ( "Server List Selection" ) + ":</b> " + tr (
+        "Selects the server list (i.e. central server address) in which your server will be added." ) );
+    cbxCentServAddrType->setAccessibleName ( tr ( "Server list selection combo box" ) );
 
     // server name
-    QString strServName =
-        "<b>" + tr ( "Server Name" ) + ":</b> " +
-        tr ( "The server name identifies "
-             "your server in the connect dialog server list at the clients." );
+    QString strServName = "<b>" + tr ( "Server Name" ) + ":</b> " + tr ( "The server name identifies "
+        "your server in the connect dialog server list at the clients." );
 
     lblServerName->setWhatsThis ( strServName );
     edtServerName->setWhatsThis ( strServName );
@@ -120,125 +96,91 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
     edtServerName->setAccessibleName ( tr ( "Server name line edit" ) );
 
     // location city
-    QString strLocCity =
-        "<b>" + tr ( "Location City" ) + ":</b> " +
-        tr (
-            "The city in which this "
-            "server is located can be set here. If a city name is entered, it "
-            "will be shown in the connect dialog server list at the clients." );
+    QString strLocCity = "<b>" + tr ( "Location City" ) + ":</b> " + tr ( "The city in which this "
+        "server is located can be set here. If a city name is entered, it "
+        "will be shown in the connect dialog server list at the clients." );
 
     lblLocationCity->setWhatsThis ( strLocCity );
     edtLocationCity->setWhatsThis ( strLocCity );
 
-    edtLocationCity->setAccessibleName (
-        tr ( "City where the server is located line edit" ) );
+    edtLocationCity->setAccessibleName ( tr ( "City where the server is located line edit" ) );
 
     // location country
-    QString strLocCountry =
-        "<b>" + tr ( "Location country" ) + ":</b> " +
-        tr ( "The country in "
-             "which this server is located can be set here. If a country is "
-             "entered, it will be shown in the connect dialog server list at "
-             "the "
-             "clients." );
+    QString strLocCountry = "<b>" + tr ( "Location country" ) + ":</b> " + tr ( "The country in "
+        "which this server is located can be set here. If a country is "
+        "entered, it will be shown in the connect dialog server list at the "
+        "clients." );
 
     lblLocationCountry->setWhatsThis ( strLocCountry );
     cbxLocationCountry->setWhatsThis ( strLocCountry );
 
-    cbxLocationCountry->setAccessibleName (
-        tr ( "Country where the server is located combo box" ) );
+    cbxLocationCountry->setAccessibleName ( tr (
+        "Country where the server is located combo box" ) );
 
     // recording directory
-    pbtRecordingDir->setAccessibleName (
-        tr ( "Display dialog to select recording directory button" ) );
-    pbtRecordingDir->setWhatsThis (
-        "<b>" + tr ( "Main Recording Directory" ) + ":</b> " +
-        tr ( "Click the button to open the dialog that allows the main "
-             "recording directory to be selected."
-             "The chosen value must exist and be writeable (allow creation of "
-             "sub-directories "
-             "by the user Jamulus is running as). " ) );
+    pbtRecordingDir->setAccessibleName ( tr ( "Display dialog to select recording directory button" ) );
+    pbtRecordingDir->setWhatsThis ( "<b>" + tr ( "Main Recording Directory" ) + ":</b> "
+        +  tr ( "Click the button to open the dialog that allows the main recording directory to be selected."
+                "The chosen value must exist and be writeable (allow creation of sub-directories "
+                "by the user Jamulus is running as). " ) );
 
-    edtRecordingDir->setAccessibleName (
-        tr ( "Main recording directory text box (read-only)" ) );
-    edtRecordingDir->setWhatsThis (
-        "<b>" + tr ( "Main Recording Directory" ) + ":</b> " +
-        tr ( "The current value of the main recording directory. "
-             "The chosen value must exist and be writeable (allow creation of "
-             "sub-directories "
-             "by the user Jamulus is running as). "
-             "Click the button to open the dialog that allows the main "
-             "recording directory to be selected." ) );
+    edtRecordingDir->setAccessibleName ( tr ( "Main recording directory text box (read-only)" ) );
+    edtRecordingDir->setWhatsThis ( "<b>" + tr ( "Main Recording Directory" ) + ":</b> "
+        +  tr ( "The current value of the main recording directory. "
+                "The chosen value must exist and be writeable (allow creation of sub-directories "
+                "by the user Jamulus is running as). "
+                "Click the button to open the dialog that allows the main recording directory to be selected." ) );
 
-    tbtClearRecordingDir->setAccessibleName (
-        tr ( "Clear the recording directory button" ) );
-    tbtClearRecordingDir->setWhatsThis (
-        "<b>" + tr ( "Clear Recording Directory" ) + ":</b> " +
-        tr ( "Click the button to clear the currently selected recording "
-             "directory. "
-             "This will prevent recording until a new value is selected." ) );
+    tbtClearRecordingDir->setAccessibleName ( tr ( "Clear the recording directory button" ) );
+    tbtClearRecordingDir->setWhatsThis ( "<b>" + tr ( "Clear Recording Directory" ) + ":</b> "
+        +  tr ( "Click the button to clear the currently selected recording directory. "
+                "This will prevent recording until a new value is selected.") );
 
     // enable recorder
-    chbEnableRecorder->setAccessibleName (
-        tr ( "Checkbox to turn on or off server recording" ) );
-    chbEnableRecorder->setWhatsThis (
-        "<b>" + tr ( "Enable Recorder" ) + ":</b> " +
-        tr ( "Checked when the recorder is enabled, otherwise unchecked. "
-             "The recorder will run when a session is in progress, if (set up "
-             "correctly and) enabled." ) );
+    chbEnableRecorder->setAccessibleName( tr ( "Checkbox to turn on or off server recording" ) );
+    chbEnableRecorder->setWhatsThis( "<b>" + tr ( "Enable Recorder" ) + ":</b> "
+        + tr ( "Checked when the recorder is enabled, otherwise unchecked. "
+               "The recorder will run when a session is in progress, if (set up correctly and) enabled." ) );
 
     // current session directory
-    edtCurrentSessionDir->setAccessibleName (
-        tr ( "Current session directory text box (read-only)" ) );
-    edtCurrentSessionDir->setWhatsThis (
-        "<b>" + tr ( "Current Session Directory" ) + ":</b> " +
-        tr (
-            "Enabled during recording and holds the current recording session "
-            "directory. "
-            "Disabled after recording or when the recorder is not enabled." ) );
+    edtCurrentSessionDir->setAccessibleName( tr ( "Current session directory text box (read-only)" ) );
+    edtCurrentSessionDir->setWhatsThis( "<b>" + tr ( "Current Session Directory" ) + ":</b> "
+        + tr ( "Enabled during recording and holds the current recording session directory. "
+               "Disabled after recording or when the recorder is not enabled." ) );
 
     // recorder status
     lblRecorderStatus->setAccessibleName ( tr ( "Recorder status label" ) );
-    lblRecorderStatus->setWhatsThis (
-        "<b>" + tr ( "Recorder Status" ) + ":</b> " +
-        tr ( "Displays the current status of the recorder.  The following "
-             "values are possible:" ) +
-        "<dl>" + "<dt>" + SREC_NOT_INITIALISED + "</dt>" + "<dd>" +
-        tr ( "No recording directory has been set or the value is not "
-             "useable" ) +
-        "</dd>" + "<dt>" + SREC_NOT_ENABLED + "</dt>" + "<dd>" +
-        tr ( "Recording has been switched off" )
+    lblRecorderStatus->setWhatsThis ( "<b>" + tr ( "Recorder Status" ) + ":</b> "
+        + tr ( "Displays the current status of the recorder.  The following values are possible:" )
+        + "<dl>"
+        + "<dt>" + SREC_NOT_INITIALISED + "</dt>"
+        + "<dd>" + tr ( "No recording directory has been set or the value is not useable" ) + "</dd>"
+        + "<dt>" + SREC_NOT_ENABLED + "</dt>"
+        + "<dd>" + tr ( "Recording has been switched off" )
 #ifdef _WIN32
         + tr ( " by the UI checkbox" )
 #else
         + tr ( ", either by the UI checkbox or SIGUSR2 being received" )
 #endif
-        + "</dd>" + "<dt>" + SREC_NOT_RECORDING + "</dt>" + "<dd>" +
-        tr ( "There is no one connected to the server to record" ) + "</dd>" +
-        "<dt>" + SREC_RECORDING + "</dt>" + "<dd>" +
-        tr ( "The performers are being recorded to the specified session "
-             "directory" ) +
-        "</dd>" + "</dl>" + "<br/><b>" + tr ( "NOTE" ) + ":</b> " +
-        tr ( "If the recording directory is not useable, the problem will be "
-             "displayed in place of the directory." ) );
+        + "</dd>"
+        + "<dt>" + SREC_NOT_RECORDING + "</dt>"
+        + "<dd>" + tr ( "There is no one connected to the server to record" ) + "</dd>"
+        + "<dt>" + SREC_RECORDING + "</dt>"
+        + "<dd>" + tr ( "The performers are being recorded to the specified session directory" ) + "</dd>"
+        + "</dl>"
+        + "<br/><b>" + tr ( "NOTE" ) + ":</b> "
+        + tr ( "If the recording directory is not useable, the problem will be displayed in place of the directory." ) );
 
     // new recording
-    pbtNewRecording->setAccessibleName (
-        tr ( "Request new recording button" ) );
-    pbtNewRecording->setWhatsThis (
-        "<b>" + tr ( "New Recording" ) + ":</b> " +
-        tr ( "During a recording session, the button can be used to start a "
-             "new recording." ) );
+    pbtNewRecording->setAccessibleName ( tr ( "Request new recording button" ) );
+    pbtNewRecording->setWhatsThis ( "<b>" + tr ( "New Recording" ) + ":</b> "
+        +  tr ( "During a recording session, the button can be used to start a new recording." ) );
 
     // welcome message
-    tedWelcomeMessage->setAccessibleName (
-        tr ( "Server welcome message edit box" ) );
-    tedWelcomeMessage->setWhatsThis (
-        "<b>" + tr ( "Server Welcome Message" ) + ":</b> " +
-        tr ( "A server welcome message text is displayed in the chat window if "
-             "a "
-             "musician enters the server. If no message is set, the server "
-             "welcome is disabled." ) );
+    tedWelcomeMessage->setAccessibleName ( tr ( "Server welcome message edit box" ) );
+    tedWelcomeMessage->setWhatsThis ( "<b>" + tr ( "Server Welcome Message" ) + ":</b> "
+        +  tr ( "A server welcome message text is displayed in the chat window if a "
+        "musician enters the server. If no message is set, the server welcome is disabled." ) );
 
     // init system tray icon
     if ( bSystemTrayIconAvaialbe )
@@ -247,20 +189,17 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
         pSystemTrayIconMenu = new QMenu ( this );
 
         pSystemTrayIconMenu->addAction ( tr ( "E&xit" ),
-                                         this,
-                                         SLOT ( OnSysTrayMenuExit() ) );
+            this, SLOT ( OnSysTrayMenuExit() ) );
 
         pSystemTrayIconMenu->addSeparator();
 
-        pSystemTrayIconMenu->addAction ( tr ( "&Hide " ) + APP_NAME +
-                                             tr ( " server" ),
-                                         this,
-                                         SLOT ( OnSysTrayMenuHide() ) );
+        pSystemTrayIconMenu->addAction (
+            tr ( "&Hide " ) + APP_NAME + tr ( " server" ),
+            this, SLOT ( OnSysTrayMenuHide() ) );
 
         pSystemTrayIconMenu->setDefaultAction ( pSystemTrayIconMenu->addAction (
             tr ( "&Open " ) + APP_NAME + tr ( " server" ),
-            this,
-            SLOT ( OnSysTrayMenuOpen() ) ) );
+            this, SLOT ( OnSysTrayMenuOpen() ) ) );
 
         SystemTrayIcon.setContextMenu ( pSystemTrayIconMenu );
 
@@ -284,9 +223,11 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
     lvwClients->setColumnWidth ( 1, 200 );
     lvwClients->clear();
 
-    // TEST workaround for resize problem of window after iconize in task bar
-    lvwClients->setMinimumWidth ( 170 + 130 + 60 + 205 );
-    lvwClients->setMinimumHeight ( 140 );
+
+// TEST workaround for resize problem of window after iconize in task bar
+lvwClients->setMinimumWidth ( 170 + 130 + 60 + 205 );
+lvwClients->setMinimumHeight ( 140 );
+
 
     // insert items in reverse order because in Windows all of them are
     // always visible -> put first item on the top
@@ -301,25 +242,17 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
     // central server address type combo box
     cbxCentServAddrType->clear();
     cbxCentServAddrType->addItem ( csCentServAddrTypeToString ( AT_DEFAULT ) );
-    cbxCentServAddrType->addItem (
-        csCentServAddrTypeToString ( AT_ANY_GENRE2 ) );
-    cbxCentServAddrType->addItem (
-        csCentServAddrTypeToString ( AT_ANY_GENRE3 ) );
-    cbxCentServAddrType->addItem (
-        csCentServAddrTypeToString ( AT_GENRE_ROCK ) );
-    cbxCentServAddrType->addItem (
-        csCentServAddrTypeToString ( AT_GENRE_JAZZ ) );
-    cbxCentServAddrType->addItem (
-        csCentServAddrTypeToString ( AT_GENRE_CLASSICAL_FOLK ) );
-    cbxCentServAddrType->addItem (
-        csCentServAddrTypeToString ( AT_GENRE_CHORAL ) );
+    cbxCentServAddrType->addItem ( csCentServAddrTypeToString ( AT_ANY_GENRE2 ) );
+    cbxCentServAddrType->addItem ( csCentServAddrTypeToString ( AT_ANY_GENRE3 ) );
+    cbxCentServAddrType->addItem ( csCentServAddrTypeToString ( AT_GENRE_ROCK ) );
+    cbxCentServAddrType->addItem ( csCentServAddrTypeToString ( AT_GENRE_JAZZ ) );
+    cbxCentServAddrType->addItem ( csCentServAddrTypeToString ( AT_GENRE_CLASSICAL_FOLK ) );
+    cbxCentServAddrType->addItem ( csCentServAddrTypeToString ( AT_GENRE_CHORAL ) );
     cbxCentServAddrType->addItem ( csCentServAddrTypeToString ( AT_CUSTOM ) );
-    cbxCentServAddrType->setCurrentIndex (
-        static_cast<int> ( pServer->GetCentralServerAddressType() ) );
+    cbxCentServAddrType->setCurrentIndex ( static_cast<int> ( pServer->GetCentralServerAddressType() ) );
 
     // custom central server address
-    edtCentralServerAddress->setText (
-        pServer->GetServerListCentralServerAddress() );
+    edtCentralServerAddress->setText ( pServer->GetServerListCentralServerAddress() );
 
     // update server name line edit
     edtServerName->setText ( pServer->GetServerName() );
@@ -332,19 +265,15 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
     cbxLocationCountry->clear();
 
     for ( int iCurCntry = static_cast<int> ( QLocale::AnyCountry );
-          iCurCntry < static_cast<int> ( QLocale::LastCountry );
-          iCurCntry++ )
+          iCurCntry < static_cast<int> ( QLocale::LastCountry ); iCurCntry++ )
     {
         // add all countries except of the "Default" country
-        if ( static_cast<QLocale::Country> ( iCurCntry ) !=
-             QLocale::AnyCountry )
+        if ( static_cast<QLocale::Country> ( iCurCntry ) != QLocale::AnyCountry )
         {
             // store the country enum index together with the string (this is
             // important since we sort the combo box items later on)
-            cbxLocationCountry->addItem (
-                QLocale::countryToString (
-                    static_cast<QLocale::Country> ( iCurCntry ) ),
-                iCurCntry );
+            cbxLocationCountry->addItem ( QLocale::countryToString (
+                static_cast<QLocale::Country> ( iCurCntry ) ), iCurCntry );
         }
     }
 
@@ -352,7 +281,8 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
     cbxLocationCountry->model()->sort ( 0, Qt::AscendingOrder );
 
     // select current country
-    cbxLocationCountry->setCurrentIndex ( cbxLocationCountry->findData (
+    cbxLocationCountry->setCurrentIndex (
+        cbxLocationCountry->findData (
         static_cast<int> ( pServer->GetServerCountry() ) ) );
 
     // update register server check box
@@ -399,19 +329,14 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
     cbxLanguage->Init ( pSettings->strLanguage );
 
     // setup welcome message GUI control
-    tedWelcomeMessage->setPlaceholderText (
-        tr ( "Type a message here. If no message is set, the server welcome is "
-             "disabled." ) );
+    tedWelcomeMessage->setPlaceholderText ( tr (
+        "Type a message here. If no message is set, the server welcome is disabled." ) );
 
     tedWelcomeMessage->setText ( pServer->GetWelcomeMessage() );
 
     // prepare update check info label (invisible by default)
-    lblUpdateCheck->setText ( "<font color="
-                              "red"
-                              "><b>" +
-                              QString ( APP_NAME ) + " " +
-                              tr ( "software upgrade available" ) +
-                              "</b></font>" );
+    lblUpdateCheck->setText ( "<font color=""red""><b>" + QString ( APP_NAME ) + " " +
+                              tr ( "software upgrade available" ) + "</b></font>" );
     lblUpdateCheck->hide();
 
     // update GUI dependencies
@@ -420,13 +345,13 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
     // set window title
     setWindowTitle ( APP_NAME + tr ( " Server" ) );
 
+
     // View menu  --------------------------------------------------------------
     QMenu* pViewMenu = new QMenu ( tr ( "&Window" ), this );
 
-    pViewMenu->addAction ( tr ( "E&xit" ),
-                           this,
-                           SLOT ( close() ),
-                           QKeySequence ( Qt::CTRL + Qt::Key_Q ) );
+    pViewMenu->addAction ( tr ( "E&xit" ), this,
+        SLOT ( close() ), QKeySequence ( Qt::CTRL + Qt::Key_Q ) );
+
 
     // Main menu bar -----------------------------------------------------------
     pMenu = new QMenuBar ( this );
@@ -437,125 +362,86 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
     // Now tell the layout about the menu
     layout()->setMenuBar ( pMenu );
 
+
     // Window positions --------------------------------------------------------
     // main window
-    if ( !pSettings->vecWindowPosMain.isEmpty() &&
-         !pSettings->vecWindowPosMain.isNull() )
+    if ( !pSettings->vecWindowPosMain.isEmpty() && !pSettings->vecWindowPosMain.isNull() )
     {
         restoreGeometry ( pSettings->vecWindowPosMain );
     }
 
+
     // Connections -------------------------------------------------------------
     // check boxes
-    QObject::connect ( chbRegisterServer,
-                       &QCheckBox::stateChanged,
-                       this,
-                       &CServerDlg::OnRegisterServerStateChanged );
+    QObject::connect ( chbRegisterServer, &QCheckBox::stateChanged,
+        this, &CServerDlg::OnRegisterServerStateChanged );
 
-    QObject::connect ( chbStartOnOSStart,
-                       &QCheckBox::stateChanged,
-                       this,
-                       &CServerDlg::OnStartOnOSStartStateChanged );
+    QObject::connect ( chbStartOnOSStart, &QCheckBox::stateChanged,
+        this, &CServerDlg::OnStartOnOSStartStateChanged );
 
-    QObject::connect ( chbEnableRecorder,
-                       &QCheckBox::stateChanged,
-                       this,
-                       &CServerDlg::OnEnableRecorderStateChanged );
+    QObject::connect ( chbEnableRecorder, &QCheckBox::stateChanged,
+        this, &CServerDlg::OnEnableRecorderStateChanged );
 
     // line edits
-    QObject::connect ( edtCentralServerAddress,
-                       &QLineEdit::editingFinished,
-                       this,
-                       &CServerDlg::OnCentralServerAddressEditingFinished );
+    QObject::connect ( edtCentralServerAddress, &QLineEdit::editingFinished,
+        this, &CServerDlg::OnCentralServerAddressEditingFinished );
 
-    QObject::connect ( edtServerName,
-                       &QLineEdit::textChanged,
-                       this,
-                       &CServerDlg::OnServerNameTextChanged );
+    QObject::connect ( edtServerName, &QLineEdit::textChanged,
+        this, &CServerDlg::OnServerNameTextChanged );
 
-    QObject::connect ( edtLocationCity,
-                       &QLineEdit::textChanged,
-                       this,
-                       &CServerDlg::OnLocationCityTextChanged );
+    QObject::connect ( edtLocationCity, &QLineEdit::textChanged,
+        this, &CServerDlg::OnLocationCityTextChanged );
 
     // combo boxes
-    QObject::connect (
-        cbxLocationCountry,
-        static_cast<void ( QComboBox::* ) ( int )> ( &QComboBox::activated ),
-        this,
-        &CServerDlg::OnLocationCountryActivated );
+    QObject::connect ( cbxLocationCountry, static_cast<void (QComboBox::*) ( int )> ( &QComboBox::activated ),
+        this, &CServerDlg::OnLocationCountryActivated );
 
-    QObject::connect (
-        cbxCentServAddrType,
-        static_cast<void ( QComboBox::* ) ( int )> ( &QComboBox::activated ),
-        this,
-        &CServerDlg::OnCentServAddrTypeActivated );
+    QObject::connect ( cbxCentServAddrType, static_cast<void (QComboBox::*) ( int )> ( &QComboBox::activated ),
+        this, &CServerDlg::OnCentServAddrTypeActivated );
 
-    QObject::connect ( cbxLanguage,
-                       &CLanguageComboBox::LanguageChanged,
-                       this,
-                       &CServerDlg::OnLanguageChanged );
+    QObject::connect ( cbxLanguage, &CLanguageComboBox::LanguageChanged,
+        this, &CServerDlg::OnLanguageChanged );
 
     // push buttons
-    QObject::connect ( pbtRecordingDir,
-                       &QPushButton::released,
-                       this,
-                       &CServerDlg::OnRecordingDirClicked );
+    QObject::connect ( pbtRecordingDir, &QPushButton::released,
+        this, &CServerDlg::OnRecordingDirClicked );
 
-    QObject::connect ( pbtNewRecording,
-                       &QPushButton::released,
-                       this,
-                       &CServerDlg::OnNewRecordingClicked );
+    QObject::connect ( pbtNewRecording, &QPushButton::released,
+        this, &CServerDlg::OnNewRecordingClicked );
 
     // tool buttons
-    QObject::connect ( tbtClearRecordingDir,
-                       &QToolButton::released,
-                       this,
-                       &CServerDlg::OnClearRecordingDirClicked );
+    QObject::connect ( tbtClearRecordingDir, &QToolButton::released,
+        this, &CServerDlg::OnClearRecordingDirClicked );
 
     // timers
-    QObject::connect ( &Timer, &QTimer::timeout, this, &CServerDlg::OnTimer );
+    QObject::connect ( &Timer, &QTimer::timeout,
+        this, &CServerDlg::OnTimer );
 
     // other
-    QObject::connect ( tedWelcomeMessage,
-                       &QTextEdit::textChanged,
-                       this,
-                       &CServerDlg::OnWelcomeMessageChanged );
+    QObject::connect ( tedWelcomeMessage, &QTextEdit::textChanged,
+        this, &CServerDlg::OnWelcomeMessageChanged );
 
-    QObject::connect ( pServer,
-                       &CServer::Started,
-                       this,
-                       &CServerDlg::OnServerStarted );
+    QObject::connect ( pServer, &CServer::Started,
+        this, &CServerDlg::OnServerStarted );
 
-    QObject::connect ( pServer,
-                       &CServer::Stopped,
-                       this,
-                       &CServerDlg::OnServerStopped );
+    QObject::connect ( pServer, &CServer::Stopped,
+        this, &CServerDlg::OnServerStopped );
 
-    QObject::connect ( pServer,
-                       &CServer::SvrRegStatusChanged,
-                       this,
-                       &CServerDlg::OnSvrRegStatusChanged );
+    QObject::connect ( pServer, &CServer::SvrRegStatusChanged,
+        this, &CServerDlg::OnSvrRegStatusChanged );
 
-    QObject::connect ( pServer,
-                       &CServer::RecordingSessionStarted,
-                       this,
-                       &CServerDlg::OnRecordingSessionStarted );
+    QObject::connect ( pServer, &CServer::RecordingSessionStarted,
+        this, &CServerDlg::OnRecordingSessionStarted );
 
-    QObject::connect ( pServer,
-                       &CServer::StopRecorder,
-                       this,
-                       &CServerDlg::OnStopRecorder );
+    QObject::connect ( pServer, &CServer::StopRecorder,
+        this, &CServerDlg::OnStopRecorder );
 
-    QObject::connect ( pServer,
-                       &CServer::CLVersionAndOSReceived,
-                       this,
-                       &CServerDlg::OnCLVersionAndOSReceived );
+    QObject::connect ( pServer, &CServer::CLVersionAndOSReceived,
+        this, &CServerDlg::OnCLVersionAndOSReceived );
 
-    QObject::connect ( &SystemTrayIcon,
-                       &QSystemTrayIcon::activated,
-                       this,
-                       &CServerDlg::OnSysTrayActivated );
+    QObject::connect ( &SystemTrayIcon, &QSystemTrayIcon::activated,
+        this, &CServerDlg::OnSysTrayActivated );
+
 
     // Initializations which have to be done after the signals are connected ---
     // start timer for GUI controls
@@ -567,8 +453,7 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
     // chance and the update check is not time-critical at all)
     CHostAddress CentServerHostAddress;
 
-    if ( NetworkUtil().ParseNetworkAddress ( DEFAULT_SERVER_ADDRESS,
-                                             CentServerHostAddress ) )
+    if ( NetworkUtil().ParseNetworkAddress ( DEFAULT_SERVER_ADDRESS, CentServerHostAddress ) )
     {
         pServer->CreateCLServerListReqVerAndOSMes ( CentServerHostAddress );
     }
@@ -589,7 +474,7 @@ void CServerDlg::OnStartOnOSStartStateChanged ( int value )
 
     // update registry and server setting (for ini file)
     pServer->SetAutoRunMinimized ( bCurAutoStartMinState );
-    ModifyAutoStartEntry ( bCurAutoStartMinState );
+    ModifyAutoStartEntry         ( bCurAutoStartMinState );
 }
 
 void CServerDlg::OnRegisterServerStateChanged ( int value )
@@ -670,8 +555,7 @@ void CServerDlg::OnCentServAddrTypeActivated ( int iTypeIdx )
     }
 
     // apply new setting to the server and update it
-    pServer->SetCentralServerAddressType (
-        static_cast<ECSAddType> ( iTypeIdx ) );
+    pServer->SetCentralServerAddressType ( static_cast<ECSAddType> ( iTypeIdx ) );
     pServer->UpdateServerList();
 
     // update GUI dependencies
@@ -690,17 +574,19 @@ void CServerDlg::OnServerStopped()
     UpdateRecorderStatus ( QString::null );
 }
 
-void CServerDlg::OnStopRecorder() { UpdateRecorderStatus ( QString::null ); }
+void CServerDlg::OnStopRecorder()
+{
+    UpdateRecorderStatus ( QString::null );
+}
 
 void CServerDlg::OnRecordingDirClicked()
 {
     // get the current value from pServer
     QString currentValue    = pServer->GetRecordingDir();
-    QString newRecordingDir = QFileDialog::getExistingDirectory (
-        this,
-        tr ( "Select Main Recording Directory" ),
-        currentValue,
-        QFileDialog::ShowDirsOnly | QFileDialog::DontUseNativeDialog );
+    QString newRecordingDir = QFileDialog::getExistingDirectory ( this,
+                                                                  tr ( "Select Main Recording Directory" ),
+                                                                  currentValue,
+                                                                  QFileDialog::ShowDirsOnly | QFileDialog::DontUseNativeDialog );
 
     if ( newRecordingDir != currentValue )
     {
@@ -711,16 +597,14 @@ void CServerDlg::OnRecordingDirClicked()
 
 void CServerDlg::OnClearRecordingDirClicked()
 {
-    if ( pServer->GetRecorderErrMsg() != QString::null ||
-         pServer->GetRecordingDir() != "" )
+    if ( pServer->GetRecorderErrMsg() != QString::null || pServer->GetRecordingDir() != "" )
     {
         pServer->SetRecordingDir ( "" );
         UpdateRecorderStatus ( QString::null );
     }
 }
 
-void CServerDlg::OnSysTrayActivated (
-    QSystemTrayIcon::ActivationReason ActReason )
+void CServerDlg::OnSysTrayActivated ( QSystemTrayIcon::ActivationReason ActReason )
 {
     // on double click on the icon, show window in fore ground
     if ( ActReason == QSystemTrayIcon::DoubleClick )
@@ -729,15 +613,13 @@ void CServerDlg::OnSysTrayActivated (
     }
 }
 
-void CServerDlg::OnCLVersionAndOSReceived ( CHostAddress,
-                                            COSUtil::EOpSystemType,
-                                            QString strVersion )
+void CServerDlg::OnCLVersionAndOSReceived ( CHostAddress           ,
+                                            COSUtil::EOpSystemType ,
+                                            QString                strVersion )
 {
     // update check
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 6, 0 )
-    if ( QVersionNumber::compare ( QVersionNumber::fromString ( strVersion ),
-                                   QVersionNumber::fromString ( VERSION ) ) >
-         0 )
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+    if ( QVersionNumber::compare ( QVersionNumber::fromString ( strVersion ), QVersionNumber::fromString ( VERSION ) ) > 0 )
     {
         lblUpdateCheck->show();
     }
@@ -764,20 +646,17 @@ void CServerDlg::OnTimer()
         // fill list with connected clients
         for ( int i = 0; i < iNumChannels; i++ )
         {
-            if ( !( vecHostAddresses[i].InetAddr ==
-                    QHostAddress ( static_cast<quint32> ( 0 ) ) ) )
+            if ( !( vecHostAddresses[i].InetAddr == QHostAddress ( static_cast<quint32> ( 0 ) ) ) )
             {
                 // IP, port number
-                vecpListViewItems[i]->setText (
-                    0,
+                vecpListViewItems[i]->setText ( 0,
                     vecHostAddresses[i].toString ( CHostAddress::SM_IP_PORT ) );
 
                 // name
                 vecpListViewItems[i]->setText ( 1, vecsName[i] );
 
                 // jitter buffer size (polling for updates)
-                vecpListViewItems[i]->setText (
-                    2,
+                vecpListViewItems[i]->setText ( 2,
                     QString().setNum ( veciJitBufNumFrames[i] ) );
 
                 vecpListViewItems[i]->setHidden ( false );
@@ -800,7 +679,7 @@ void CServerDlg::UpdateGUIDependencies()
     // if register server is not enabled, we disable all the configuration
     // controls for the server list
     cbxCentServAddrType->setEnabled ( bCurSerListEnabled );
-    grbServerInfo->setEnabled ( bCurSerListEnabled );
+    grbServerInfo->setEnabled       ( bCurSerListEnabled );
 
     QString strStatus = svrRegStatusToString ( eSvrRegStatus );
 
@@ -811,17 +690,11 @@ void CServerDlg::UpdateGUIDependencies()
     case SRS_CENTRAL_SVR_FULL:
     case SRS_VERSION_TOO_OLD:
     case SRS_NOT_FULFILL_REQUIREMENTS:
-        strStatus = "<font color="
-                    "red"
-                    "><b>" +
-                    strStatus + "</b></font>";
+        strStatus = "<font color=""red""><b>" + strStatus + "</b></font>";
         break;
 
     case SRS_REGISTERED:
-        strStatus = "<font color="
-                    "darkGreen"
-                    "><b>" +
-                    strStatus + "</b></font>";
+        strStatus = "<font color=""darkGreen""><b>" + strStatus + "</b></font>";
         break;
 
     default:
@@ -852,9 +725,8 @@ void CServerDlg::ModifyAutoStartEntry ( const bool bDoAutoStart )
 #ifdef _WIN32
     // init settings object so that it points to the correct place in the
     // Windows registry for the auto run entry
-    QSettings RegSettings (
-        "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
-        QSettings::NativeFormat );
+    QSettings RegSettings ( "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+                            QSettings::NativeFormat );
 
     // create start string of auto run entry
     QString strRegValue =
@@ -905,8 +777,7 @@ void CServerDlg::UpdateRecorderStatus ( QString sessionDir )
         {
             if ( pServer->IsRunning() )
             {
-                edtCurrentSessionDir->setText (
-                    sessionDir != QString::null ? sessionDir : "" );
+                edtCurrentSessionDir->setText ( sessionDir != QString::null ? sessionDir : "" );
 
                 strRecorderStatus = SREC_RECORDING;
                 bIsRecording      = true;

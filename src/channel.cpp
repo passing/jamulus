@@ -8,38 +8,37 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
 
 #include "channel.h"
 
+
 // CChannel implementation *****************************************************
 CChannel::CChannel ( const bool bNIsServer ) :
-    vecfGains ( MAX_NUM_CHANNELS, 1.0f ),
-    vecfPannings ( MAX_NUM_CHANNELS, 0.5f ),
-    iCurSockBufNumFrames ( INVALID_INDEX ),
-    bDoAutoSockBufSize ( true ),
-    bUseSequenceNumber ( false ), // this is important since in the client we
-                                  // reset on Channel.SetEnable ( false )
-    iSendSequenceNumber ( 0 ),
-    iFadeInCnt ( 0 ),
-    iFadeInCntMax ( FADE_IN_NUM_FRAMES_DBLE_FRAMESIZE ),
-    bIsEnabled ( false ),
-    bIsServer ( bNIsServer ),
+    vecfGains              ( MAX_NUM_CHANNELS, 1.0f ),
+    vecfPannings           ( MAX_NUM_CHANNELS, 0.5f ),
+    iCurSockBufNumFrames   ( INVALID_INDEX ),
+    bDoAutoSockBufSize     ( true ),
+    bUseSequenceNumber     ( false ), // this is important since in the client we reset on Channel.SetEnable ( false )
+    iSendSequenceNumber    ( 0 ),
+    iFadeInCnt             ( 0 ),
+    iFadeInCntMax          ( FADE_IN_NUM_FRAMES_DBLE_FRAMESIZE ),
+    bIsEnabled             ( false ),
+    bIsServer              ( bNIsServer ),
     iAudioFrameSizeSamples ( DOUBLE_SYSTEM_FRAME_SIZE_SAMPLES ),
-    SignalLevelMeter ( false,
-                       0.5 ) // server mode with mono out and faster smoothing
+    SignalLevelMeter       ( false, 0.5 ) // server mode with mono out and faster smoothing
 {
     // reset network transport properties
     ResetNetworkTransportProperties();
@@ -58,107 +57,69 @@ CChannel::CChannel ( const bool bNIsServer ) :
     // initialize channel info
     ResetInfo();
 
+
     // Connections -------------------------------------------------------------
 
-    // TODO if we later do not fire vectors in the emits, we can remove this
-    // again
-    qRegisterMetaType<CVector<uint8_t>> ( "CVector<uint8_t>" );
-    qRegisterMetaType<CHostAddress> ( "CHostAddress" );
+// TODO if we later do not fire vectors in the emits, we can remove this again
+qRegisterMetaType<CVector<uint8_t> > ( "CVector<uint8_t>" );
+qRegisterMetaType<CHostAddress> ( "CHostAddress" );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::MessReadyForSending,
-                       this,
-                       &CChannel::OnSendProtMessage );
+    QObject::connect ( &Protocol, &CProtocol::MessReadyForSending,
+        this, &CChannel::OnSendProtMessage );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::ChangeJittBufSize,
-                       this,
-                       &CChannel::OnJittBufSizeChange );
+    QObject::connect ( &Protocol, &CProtocol::ChangeJittBufSize,
+        this, &CChannel::OnJittBufSizeChange );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::ReqJittBufSize,
-                       this,
-                       &CChannel::ReqJittBufSize );
+    QObject::connect ( &Protocol, &CProtocol::ReqJittBufSize,
+        this, &CChannel::ReqJittBufSize );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::ReqChanInfo,
-                       this,
-                       &CChannel::ReqChanInfo );
+    QObject::connect ( &Protocol, &CProtocol::ReqChanInfo,
+        this, &CChannel::ReqChanInfo );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::ReqConnClientsList,
-                       this,
-                       &CChannel::ReqConnClientsList );
+    QObject::connect ( &Protocol, &CProtocol::ReqConnClientsList,
+        this, &CChannel::ReqConnClientsList );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::ConClientListMesReceived,
-                       this,
-                       &CChannel::ConClientListMesReceived );
+    QObject::connect ( &Protocol, &CProtocol::ConClientListMesReceived,
+        this, &CChannel::ConClientListMesReceived );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::ChangeChanGain,
-                       this,
-                       &CChannel::OnChangeChanGain );
+    QObject::connect ( &Protocol, &CProtocol::ChangeChanGain,
+        this, &CChannel::OnChangeChanGain );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::ChangeChanPan,
-                       this,
-                       &CChannel::OnChangeChanPan );
+    QObject::connect ( &Protocol, &CProtocol::ChangeChanPan,
+        this, &CChannel::OnChangeChanPan );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::ClientIDReceived,
-                       this,
-                       &CChannel::ClientIDReceived );
+    QObject::connect ( &Protocol, &CProtocol::ClientIDReceived,
+        this, &CChannel::ClientIDReceived );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::MuteStateHasChangedReceived,
-                       this,
-                       &CChannel::MuteStateHasChangedReceived );
+    QObject::connect ( &Protocol, &CProtocol::MuteStateHasChangedReceived,
+        this, &CChannel::MuteStateHasChangedReceived );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::ChangeChanInfo,
-                       this,
-                       &CChannel::OnChangeChanInfo );
+    QObject::connect ( &Protocol, &CProtocol::ChangeChanInfo,
+        this, &CChannel::OnChangeChanInfo );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::ChatTextReceived,
-                       this,
-                       &CChannel::ChatTextReceived );
+    QObject::connect ( &Protocol, &CProtocol::ChatTextReceived,
+        this, &CChannel::ChatTextReceived );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::NetTranspPropsReceived,
-                       this,
-                       &CChannel::OnNetTranspPropsReceived );
+    QObject::connect ( &Protocol, &CProtocol::NetTranspPropsReceived,
+        this, &CChannel::OnNetTranspPropsReceived );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::ReqNetTranspProps,
-                       this,
-                       &CChannel::OnReqNetTranspProps );
+    QObject::connect ( &Protocol, &CProtocol::ReqNetTranspProps,
+        this, &CChannel::OnReqNetTranspProps );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::ReqSplitMessSupport,
-                       this,
-                       &CChannel::OnReqSplitMessSupport );
+    QObject::connect ( &Protocol, &CProtocol::ReqSplitMessSupport,
+        this, &CChannel::OnReqSplitMessSupport );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::SplitMessSupported,
-                       this,
-                       &CChannel::OnSplitMessSupported );
+    QObject::connect ( &Protocol, &CProtocol::SplitMessSupported,
+        this, &CChannel::OnSplitMessSupported );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::LicenceRequired,
-                       this,
-                       &CChannel::LicenceRequired );
+    QObject::connect ( &Protocol, &CProtocol::LicenceRequired,
+        this, &CChannel::LicenceRequired );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::VersionAndOSReceived,
-                       this,
-                       &CChannel::OnVersionAndOSReceived );
+    QObject::connect ( &Protocol, &CProtocol::VersionAndOSReceived,
+        this, &CChannel::OnVersionAndOSReceived );
 
-    QObject::connect ( &Protocol,
-                       &CProtocol::RecorderStateReceived,
-                       this,
-                       &CChannel::RecorderStateReceived );
+    QObject::connect ( &Protocol, &CProtocol::RecorderStateReceived,
+        this, &CChannel::RecorderStateReceived );
 }
 
 bool CChannel::ProtocolIsEnabled()
@@ -188,9 +149,9 @@ void CChannel::SetEnable ( const bool bNEnStat )
     // disconnects from a server since we do not yet know if the next server we
     // connect to will support the sequence number. We use the SetEnable call in
     // the client for this task since at every start/stop it will call this
-    // function. NOTE that it is important to reset this parameter on
-    // SetEnable(false) since the SetEnable(true) is set AFTER the Init() in the
-    // client -> we simply set it regardless of the state which does not hurt.
+    // function. NOTE that it is important to reset this parameter on SetEnable(false)
+    // since the SetEnable(true) is set AFTER the Init() in the client -> we
+    // simply set it regardless of the state which does not hurt.
     bUseSequenceNumber = false;
 
     // if channel is not enabled, reset time out count and protocol
@@ -204,15 +165,12 @@ void CChannel::SetEnable ( const bool bNEnStat )
 void CChannel::OnVersionAndOSReceived ( COSUtil::EOpSystemType eOSType,
                                         QString                strVersion )
 {
-    // check if audio packet counter is supported by the server (minimum version
-    // is 3.6.0)
-#if QT_VERSION >= QT_VERSION_CHECK( 5, 6, 0 )
-    if ( QVersionNumber::compare ( QVersionNumber::fromString ( strVersion ),
-                                   QVersionNumber ( 3, 6, 0 ) ) >= 0 )
+    // check if audio packet counter is supported by the server (minimum version is 3.6.0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+    if ( QVersionNumber::compare ( QVersionNumber::fromString ( strVersion ), QVersionNumber ( 3, 6, 0 ) ) >= 0 )
     {
-        // activate sequence counter and update the audio stream properties
-        // (which does all the initialization and tells the server about the
-        // change)
+        // activate sequence counter and update the audio stream properties (which
+        // does all the initialization and tells the server about the change)
         bUseSequenceNumber = true;
 
         SetAudioStreamProperties ( eAudioCompressionType,
@@ -226,13 +184,13 @@ void CChannel::OnVersionAndOSReceived ( COSUtil::EOpSystemType eOSType,
 }
 
 void CChannel::SetAudioStreamProperties ( const EAudComprType eNewAudComprType,
-                                          const int iNewCeltNumCodedBytes,
-                                          const int iNewNetwFrameSizeFact,
-                                          const int iNewNumAudioChannels )
+                                          const int           iNewCeltNumCodedBytes,
+                                          const int           iNewNetwFrameSizeFact,
+                                          const int           iNewNumAudioChannels )
 {
-    /*
-        this function is intended for the client (not the server)
-    */
+/*
+    this function is intended for the client (not the server)
+*/
     CNetworkTransportProps NetworkTransportProps;
 
     Mutex.lock();
@@ -246,8 +204,7 @@ void CChannel::SetAudioStreamProperties ( const EAudComprType eNewAudComprType,
         // add the size of the optional packet counter
         if ( bUseSequenceNumber )
         {
-            iNetwFrameSize =
-                iCeltNumCodedBytes + 1; // per definition 1 byte counter
+            iNetwFrameSize = iCeltNumCodedBytes + 1; // per definition 1 byte counter
         }
         else
         {
@@ -267,20 +224,15 @@ void CChannel::SetAudioStreamProperties ( const EAudComprType eNewAudComprType,
         MutexSocketBuf.lock();
         {
             // init socket buffer
-            SockBuf.SetUseDoubleSystemFrameSize (
-                eAudioCompressionType ==
-                CT_OPUS ); // NOTE must be set BEFORE the init()
-            SockBuf.Init ( iCeltNumCodedBytes,
-                           iCurSockBufNumFrames,
-                           bUseSequenceNumber );
+            SockBuf.SetUseDoubleSystemFrameSize ( eAudioCompressionType == CT_OPUS ); // NOTE must be set BEFORE the init()
+            SockBuf.Init ( iCeltNumCodedBytes, iCurSockBufNumFrames, bUseSequenceNumber );
         }
         MutexSocketBuf.unlock();
 
         MutexConvBuf.lock();
         {
             // init conversion buffer
-            ConvBuf.Init ( iNetwFrameSize * iNetwFrameSizeFact,
-                           bUseSequenceNumber );
+            ConvBuf.Init ( iNetwFrameSize * iNetwFrameSizeFact, bUseSequenceNumber );
         }
         MutexConvBuf.unlock();
 
@@ -296,9 +248,8 @@ void CChannel::SetAudioStreamProperties ( const EAudComprType eNewAudComprType,
 bool CChannel::SetSockBufNumFrames ( const int  iNewNumFrames,
                                      const bool bPreserve )
 {
-    bool ReturnValue = true; // init with error
-    bool bCurDoAutoSockBufSize =
-        false; // we have to init but init values does not matter
+    bool ReturnValue           = true;  // init with error
+    bool bCurDoAutoSockBufSize = false; // we have to init but init values does not matter
 
     // first check for valid input parameter range
     if ( ( iNewNumFrames >= MIN_NET_BUF_SIZE_NUM_BL ) &&
@@ -314,10 +265,7 @@ bool CChannel::SetSockBufNumFrames ( const int  iNewNumFrames,
 
                 // the network block size is a multiple of the minimum network
                 // block size
-                SockBuf.Init ( iCeltNumCodedBytes,
-                               iNewNumFrames,
-                               bUseSequenceNumber,
-                               bPreserve );
+                SockBuf.Init ( iCeltNumCodedBytes, iNewNumFrames, bUseSequenceNumber, bPreserve );
 
                 // store current auto socket buffer size setting in the mutex
                 // region since if we use the current parameter below in the
@@ -346,7 +294,8 @@ bool CChannel::SetSockBufNumFrames ( const int  iNewNumFrames,
     return ReturnValue; // set error flag
 }
 
-void CChannel::SetGain ( const int iChanID, const float fNewGain )
+void CChannel::SetGain ( const int   iChanID,
+                         const float fNewGain )
 {
     QMutexLocker locker ( &Mutex );
 
@@ -382,7 +331,8 @@ float CChannel::GetGain ( const int iChanID )
     }
 }
 
-void CChannel::SetPan ( const int iChanID, const float fNewPan )
+void CChannel::SetPan ( const int   iChanID,
+                        const float fNewPan )
 {
     QMutexLocker locker ( &Mutex );
 
@@ -457,8 +407,7 @@ void CChannel::OnJittBufSizeChange ( int iNewJitBufSize )
         }
         else
         {
-            // manual setting is received, turn OFF auto setting and apply new
-            // value
+            // manual setting is received, turn OFF auto setting and apply new value
             SetDoAutoSockBufSize ( false );
             SetSockBufNumFrames ( iNewJitBufSize, true );
         }
@@ -469,12 +418,14 @@ void CChannel::OnJittBufSizeChange ( int iNewJitBufSize )
     }
 }
 
-void CChannel::OnChangeChanGain ( int iChanID, float fNewGain )
+void CChannel::OnChangeChanGain ( int   iChanID,
+                                  float fNewGain )
 {
     SetGain ( iChanID, fNewGain );
 }
 
-void CChannel::OnChangeChanPan ( int iChanID, float fNewPan )
+void CChannel::OnChangeChanPan ( int   iChanID,
+                                 float fNewPan )
 {
     SetPan ( iChanID, fNewPan );
 }
@@ -500,8 +451,7 @@ bool CChannel::GetAddress ( CHostAddress& RetAddr )
     }
 }
 
-void CChannel::OnNetTranspPropsReceived (
-    CNetworkTransportProps NetworkTransportProps )
+void CChannel::OnNetTranspPropsReceived ( CNetworkTransportProps NetworkTransportProps )
 {
     // only the server shall act on network transport properties message
     if ( bIsServer )
@@ -518,60 +468,50 @@ void CChannel::OnNetTranspPropsReceived (
         {
             // store received parameters
             eAudioCompressionType = NetworkTransportProps.eAudioCodingType;
-            iNumAudioChannels =
-                static_cast<int> ( NetworkTransportProps.iNumAudioChannels );
-            iNetwFrameSizeFact = NetworkTransportProps.iBlockSizeFact;
-            iNetwFrameSize     = static_cast<int> (
-                NetworkTransportProps.iBaseNetworkPacketSize );
-            bUseSequenceNumber =
-                ( NetworkTransportProps.eFlags == NF_WITH_COUNTER );
+            iNumAudioChannels     = static_cast<int> ( NetworkTransportProps.iNumAudioChannels );
+            iNetwFrameSizeFact    = NetworkTransportProps.iBlockSizeFact;
+            iNetwFrameSize        = static_cast<int> ( NetworkTransportProps.iBaseNetworkPacketSize );
+            bUseSequenceNumber    = ( NetworkTransportProps.eFlags == NF_WITH_COUNTER );
 
             if ( bUseSequenceNumber )
             {
-                iCeltNumCodedBytes =
-                    iNetwFrameSize - 1; // per definition 1 byte counter
+                iCeltNumCodedBytes = iNetwFrameSize - 1; // per definition 1 byte counter
             }
             else
             {
                 iCeltNumCodedBytes = iNetwFrameSize;
             }
 
-            // update maximum number of frames for fade in counter (only needed
-            // for server) and audio frame size
+            // update maximum number of frames for fade in counter (only needed for server)
+            // and audio frame size
             if ( eAudioCompressionType == CT_OPUS )
             {
-                iFadeInCntMax =
-                    FADE_IN_NUM_FRAMES_DBLE_FRAMESIZE / iNetwFrameSizeFact;
+                iFadeInCntMax          = FADE_IN_NUM_FRAMES_DBLE_FRAMESIZE / iNetwFrameSizeFact;
                 iAudioFrameSizeSamples = DOUBLE_SYSTEM_FRAME_SIZE_SAMPLES;
             }
             else
             {
-                iFadeInCntMax = FADE_IN_NUM_FRAMES / iNetwFrameSizeFact;
+                iFadeInCntMax          = FADE_IN_NUM_FRAMES / iNetwFrameSizeFact;
                 iAudioFrameSizeSamples = SYSTEM_FRAME_SIZE_SAMPLES;
             }
 
-            // the fade-in counter maximum value may have changed, make sure the
-            // fade-in counter is not larger than the allowed maximum value
+            // the fade-in counter maximum value may have changed, make sure the fade-in counter
+            // is not larger than the allowed maximum value
             iFadeInCnt = std::min ( iFadeInCnt, iFadeInCntMax );
 
             MutexSocketBuf.lock();
             {
-                // update socket buffer (the network block size is a multiple of
-                // the minimum network frame size)
-                SockBuf.SetUseDoubleSystemFrameSize (
-                    eAudioCompressionType ==
-                    CT_OPUS ); // NOTE must be set BEFORE the init()
-                SockBuf.Init ( iCeltNumCodedBytes,
-                               iCurSockBufNumFrames,
-                               bUseSequenceNumber );
+                // update socket buffer (the network block size is a multiple of the
+                // minimum network frame size)
+                SockBuf.SetUseDoubleSystemFrameSize ( eAudioCompressionType == CT_OPUS ); // NOTE must be set BEFORE the init()
+                SockBuf.Init ( iCeltNumCodedBytes, iCurSockBufNumFrames, bUseSequenceNumber );
             }
             MutexSocketBuf.unlock();
 
             MutexConvBuf.lock();
             {
                 // init conversion buffer
-                ConvBuf.Init ( iNetwFrameSize * iNetwFrameSizeFact,
-                               bUseSequenceNumber );
+                ConvBuf.Init ( iNetwFrameSize * iNetwFrameSizeFact, bUseSequenceNumber );
             }
             MutexConvBuf.unlock();
         }
@@ -581,16 +521,13 @@ void CChannel::OnNetTranspPropsReceived (
 
 void CChannel::OnReqNetTranspProps()
 {
-    // fill network transport properties struct from current settings and send
-    // it
-    Protocol.CreateNetwTranspPropsMes (
-        GetNetworkTransportPropsFromCurrentSettings() );
+    // fill network transport properties struct from current settings and send it
+    Protocol.CreateNetwTranspPropsMes ( GetNetworkTransportPropsFromCurrentSettings() );
 }
 
 void CChannel::OnReqSplitMessSupport()
 {
-    // activate split messages in our protocol (client) and return answer
-    // message to the server
+    // activate split messages in our protocol (client) and return answer message to the server
     Protocol.SetSplitMessageSupported ( true );
     Protocol.CreateSplitMessSupportedMes();
 }
@@ -607,14 +544,13 @@ CNetworkTransportProps CChannel::GetNetworkTransportPropsFromCurrentSettings()
 
     // use current stored settings of the channel to fill the network transport
     // properties structure
-    return CNetworkTransportProps (
-        static_cast<uint32_t> ( iNetwFrameSize ),
-        static_cast<uint16_t> ( iNetwFrameSizeFact ),
-        static_cast<uint32_t> ( iNumAudioChannels ),
-        SYSTEM_SAMPLE_RATE_HZ,
-        eAudioCompressionType,
-        eFlags,
-        0 );
+    return CNetworkTransportProps ( static_cast<uint32_t> ( iNetwFrameSize ),
+                                    static_cast<uint16_t> ( iNetwFrameSizeFact ),
+                                    static_cast<uint32_t> ( iNumAudioChannels ),
+                                    SYSTEM_SAMPLE_RATE_HZ,
+                                    eAudioCompressionType,
+                                    eFlags,
+                                    0 );
 }
 
 void CChannel::Disconnect()
@@ -638,7 +574,8 @@ void CChannel::PutProtcolData ( const int               iRecCounter,
     // - for client only: the packet comes from the server we want to talk to
     // - the channel is enabled
     // - the protocol mechanism is enabled
-    if ( ( bIsServer || ( GetAddress() == RecHostAddr ) ) && IsEnabled() &&
+    if ( ( bIsServer || ( GetAddress() == RecHostAddr ) ) &&
+         IsEnabled() &&
          ProtocolIsEnabled() )
     {
         // parse the message assuming this is a regular protocol message
@@ -656,7 +593,8 @@ EPutDataStat CChannel::PutAudioData ( const CVector<uint8_t>& vecbyData,
     // Only process audio data if:
     // - for client only: the packet comes from the server we want to talk to
     // - the channel is enabled
-    if ( ( bIsServer || ( GetAddress() == RecHostAddr ) ) && IsEnabled() )
+    if ( ( bIsServer || ( GetAddress() == RecHostAddr ) ) &&
+         IsEnabled() )
     {
         MutexSocketBuf.lock();
         {
@@ -800,10 +738,12 @@ void CChannel::PrepAndSendPacket ( CHighPrioSocket*        pSocket,
 
 double CChannel::UpdateAndGetLevelForMeterdB ( const CVector<short>& vecsAudio,
                                                const int             iInSize,
-                                               const bool bIsStereoIn )
+                                               const bool            bIsStereoIn )
 {
     // update the signal level meter and immediately return the current value
-    SignalLevelMeter.Update ( vecsAudio, iInSize, bIsStereoIn );
+    SignalLevelMeter.Update ( vecsAudio,
+                              iInSize,
+                              bIsStereoIn );
 
     return SignalLevelMeter.GetLevelForMeterdBLeftOrMono();
 }
@@ -819,7 +759,8 @@ int CChannel::GetUploadRateKbps()
     // 2 (PPP) + 6 (PPPoE) + 18 (MAC)            = 26 bytes
     // 5 (RFC1483B) + 8 (AAL) + 10 (ATM)         = 23 bytes
     return ( iNetwFrameSize * iNetwFrameSizeFact + 28 + 26 + 23 /* header */ ) *
-           8 /* bits per byte */ * SYSTEM_SAMPLE_RATE_HZ / iAudioSizeOut / 1000;
+        8 /* bits per byte */ *
+        SYSTEM_SAMPLE_RATE_HZ / iAudioSizeOut / 1000;
 }
 
 void CChannel::UpdateSocketBufferSize()

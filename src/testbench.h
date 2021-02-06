@@ -8,41 +8,42 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
 
 #pragma once
 
-#include "global.h"
-#include "protocol.h"
-#include "socket.h"
-#include "util.h"
-#include <QDateTime>
-#include <QHostAddress>
 #include <QObject>
 #include <QTimer>
+#include <QDateTime>
 #include <QUdpSocket>
+#include <QHostAddress>
+#include "global.h"
+#include "socket.h"
+#include "protocol.h"
+#include "util.h"
+
 
 /* Classes ********************************************************************/
 class CTestbench : public QObject
 {
     Q_OBJECT
 
-  public:
+public:
     CTestbench ( QString sNewAddress, quint16 iNewPort ) :
         sAddress ( sNewAddress ),
-        iPort ( iNewPort )
+        iPort    ( iNewPort )
     {
         sLAddress = GenRandomIPv4Address().toString();
         iLPort    = static_cast<quint16> ( GenRandomIntInRange ( -2, 10000 ) );
@@ -53,38 +54,31 @@ class CTestbench : public QObject
 
         while ( !bSuccess && ( iPortIncrement <= 100 ) )
         {
-            bSuccess = UdpSocket.bind ( QHostAddress ( QHostAddress::Any ),
+            bSuccess = UdpSocket.bind ( QHostAddress( QHostAddress::Any ),
                                         22222 + iPortIncrement );
 
             iPortIncrement++;
         }
 
         // connect protocol signals
-        QObject::connect ( &Protocol,
-                           &CProtocol::MessReadyForSending,
-                           this,
-                           &CTestbench::OnSendProtMessage );
+        QObject::connect ( &Protocol, &CProtocol::MessReadyForSending,
+            this, &CTestbench::OnSendProtMessage );
 
-        QObject::connect ( &Protocol,
-                           &CProtocol::CLMessReadyForSending,
-                           this,
-                           &CTestbench::OnSendCLMessage );
+        QObject::connect ( &Protocol, &CProtocol::CLMessReadyForSending,
+            this, &CTestbench::OnSendCLMessage );
 
         // connect and start the timer (testbench heartbeat)
-        QObject::connect ( &Timer,
-                           &QTimer::timeout,
-                           this,
-                           &CTestbench::OnTimer );
+        QObject::connect ( &Timer, &QTimer::timeout,
+            this, &CTestbench::OnTimer );
 
         Timer.start ( 1 ); // 1 ms
     }
 
-  protected:
+protected:
     int GenRandomIntInRange ( const int iStart, const int iEnd ) const
     {
-        return static_cast<int> (
-            iStart + ( ( static_cast<double> ( iEnd - iStart + 1 ) * rand() ) /
-                       RAND_MAX ) );
+        return static_cast<int> ( iStart +
+            ( ( static_cast<double> ( iEnd - iStart + 1 ) * rand() ) / RAND_MAX ) );
     }
 
     QString GenRandomString() const
@@ -106,7 +100,7 @@ class CTestbench : public QObject
         quint32 b = static_cast<quint32> ( 168 );
         quint32 c = static_cast<quint32> ( GenRandomIntInRange ( 1, 253 ) );
         quint32 d = static_cast<quint32> ( GenRandomIntInRange ( 1, 253 ) );
-        return QHostAddress ( a << 24 | b << 16 | c << 8 | d );
+        return QHostAddress( a << 24 | b << 16 | c << 8 | d );
     }
 
     QString    sAddress;
@@ -117,7 +111,7 @@ class CTestbench : public QObject
     CProtocol  Protocol;
     QUdpSocket UdpSocket;
 
-  public slots:
+public slots:
     void OnTimer()
     {
         CVector<CChannelInfo>  vecChanInfo ( 1 );
@@ -125,11 +119,11 @@ class CTestbench : public QObject
         CServerCoreInfo        ServerInfo;
         CVector<CServerInfo>   vecServerInfo ( 1 );
         CVector<uint16_t>      vecLevelList ( 1 );
-        CHostAddress     CurHostAddress ( QHostAddress ( sAddress ), iPort );
-        CHostAddress     CurLocalAddress ( QHostAddress ( sLAddress ), iLPort );
-        CChannelCoreInfo ChannelCoreInfo;
-        ELicenceType     eLicenceType;
-        ESvrRegResult    eSvrRegResult;
+        CHostAddress           CurHostAddress ( QHostAddress ( sAddress ), iPort );
+        CHostAddress           CurLocalAddress ( QHostAddress ( sLAddress ), iLPort );
+        CChannelCoreInfo       ChannelCoreInfo;
+        ELicenceType           eLicenceType;
+        ESvrRegResult          eSvrRegResult;
 
         // generate random protocol message
         switch ( GenRandomIntInRange ( 0, 34 ) )
@@ -160,10 +154,8 @@ class CTestbench : public QObject
             break;
 
         case 7: // PROTMESSID_CHANNEL_INFOS
-            ChannelCoreInfo.eCountry = static_cast<QLocale::Country> (
-                GenRandomIntInRange ( 0, 100 ) );
-            ChannelCoreInfo.eSkillLevel =
-                static_cast<ESkillLevel> ( GenRandomIntInRange ( 0, 3 ) );
+            ChannelCoreInfo.eCountry    = static_cast<QLocale::Country> ( GenRandomIntInRange ( 0, 100 ) );
+            ChannelCoreInfo.eSkillLevel = static_cast<ESkillLevel> ( GenRandomIntInRange ( 0, 3 ) );
             ChannelCoreInfo.iInstrument = GenRandomIntInRange ( 0, 100 );
             ChannelCoreInfo.strCity     = GenRandomString();
             ChannelCoreInfo.strName     = GenRandomString();
@@ -187,16 +179,13 @@ class CTestbench : public QObject
             break;
 
         case 11: // PROTMESSID_NETW_TRANSPORT_PROPS
-            NetTrProps.eAudioCodingType =
-                static_cast<EAudComprType> ( GenRandomIntInRange ( 0, 2 ) );
-            NetTrProps.iAudioCodingArg = GenRandomIntInRange ( -100, 100 );
-            NetTrProps.iBaseNetworkPacketSize =
-                GenRandomIntInRange ( -2, 1000 );
-            NetTrProps.iBlockSizeFact    = GenRandomIntInRange ( -2, 100 );
-            NetTrProps.iNumAudioChannels = GenRandomIntInRange ( -2, 10 );
-            NetTrProps.iSampleRate       = GenRandomIntInRange ( -2, 10000 );
-            NetTrProps.eFlags =
-                static_cast<ENetwFlags> ( GenRandomIntInRange ( 0, 1 ) );
+            NetTrProps.eAudioCodingType       = static_cast<EAudComprType> ( GenRandomIntInRange ( 0, 2 ) );
+            NetTrProps.iAudioCodingArg        = GenRandomIntInRange ( -100, 100 );
+            NetTrProps.iBaseNetworkPacketSize = GenRandomIntInRange ( -2, 1000 );
+            NetTrProps.iBlockSizeFact         = GenRandomIntInRange ( -2, 100 );
+            NetTrProps.iNumAudioChannels      = GenRandomIntInRange ( -2, 10 );
+            NetTrProps.iSampleRate            = GenRandomIntInRange ( -2, 10000 );
+            NetTrProps.eFlags                 = static_cast<ENetwFlags> ( GenRandomIntInRange ( 0, 1 ) );
 
             Protocol.CreateNetwTranspPropsMes ( NetTrProps );
             break;
@@ -211,10 +200,9 @@ class CTestbench : public QObject
             break;
 
         case 15: // PROTMESSID_CLM_PING_MS_WITHNUMCLIENTS
-            Protocol.CreateCLPingWithNumClientsMes (
-                CurHostAddress,
-                GenRandomIntInRange ( -2, 1000 ),
-                GenRandomIntInRange ( -2, 1000 ) );
+            Protocol.CreateCLPingWithNumClientsMes ( CurHostAddress,
+                                                     GenRandomIntInRange ( -2, 1000 ),
+                                                     GenRandomIntInRange ( -2, 1000 ) );
             break;
 
         case 16: // PROTMESSID_CLM_SERVER_FULL
@@ -222,13 +210,11 @@ class CTestbench : public QObject
             break;
 
         case 17: // PROTMESSID_CLM_REGISTER_SERVER
-            ServerInfo.bPermanentOnline =
-                static_cast<bool> ( GenRandomIntInRange ( 0, 1 ) );
-            ServerInfo.eCountry = static_cast<QLocale::Country> (
-                GenRandomIntInRange ( 0, 100 ) );
-            ServerInfo.iMaxNumClients = GenRandomIntInRange ( -2, 10000 );
-            ServerInfo.strCity        = GenRandomString();
-            ServerInfo.strName        = GenRandomString();
+            ServerInfo.bPermanentOnline = static_cast<bool> ( GenRandomIntInRange ( 0, 1 ) );
+            ServerInfo.eCountry         = static_cast<QLocale::Country> ( GenRandomIntInRange ( 0, 100 ) );
+            ServerInfo.iMaxNumClients   = GenRandomIntInRange ( -2, 10000 );
+            ServerInfo.strCity          = GenRandomString();
+            ServerInfo.strName          = GenRandomString();
 
             Protocol.CreateCLRegisterServerMes ( CurHostAddress,
                                                  CurLocalAddress,
@@ -240,17 +226,16 @@ class CTestbench : public QObject
             break;
 
         case 19: // PROTMESSID_CLM_SERVER_LIST
-            vecServerInfo[0].bPermanentOnline =
-                static_cast<bool> ( GenRandomIntInRange ( 0, 1 ) );
-            vecServerInfo[0].eCountry = static_cast<QLocale::Country> (
-                GenRandomIntInRange ( 0, 100 ) );
-            vecServerInfo[0].HostAddr       = CurHostAddress;
-            vecServerInfo[0].LHostAddr      = CurLocalAddress;
-            vecServerInfo[0].iMaxNumClients = GenRandomIntInRange ( -2, 10000 );
-            vecServerInfo[0].strCity        = GenRandomString();
-            vecServerInfo[0].strName        = GenRandomString();
+            vecServerInfo[0].bPermanentOnline = static_cast<bool> ( GenRandomIntInRange ( 0, 1 ) );
+            vecServerInfo[0].eCountry         = static_cast<QLocale::Country> ( GenRandomIntInRange ( 0, 100 ) );
+            vecServerInfo[0].HostAddr         = CurHostAddress;
+            vecServerInfo[0].LHostAddr        = CurLocalAddress;
+            vecServerInfo[0].iMaxNumClients   = GenRandomIntInRange ( -2, 10000 );
+            vecServerInfo[0].strCity          = GenRandomString();
+            vecServerInfo[0].strName          = GenRandomString();
 
-            Protocol.CreateCLServerListMes ( CurHostAddress, vecServerInfo );
+            Protocol.CreateCLServerListMes ( CurHostAddress,
+                                             vecServerInfo );
             break;
 
         case 20: // PROTMESSID_CLM_REQ_SERVER_LIST
@@ -258,7 +243,8 @@ class CTestbench : public QObject
             break;
 
         case 21: // PROTMESSID_CLM_SEND_EMPTY_MESSAGE
-            Protocol.CreateCLSendEmptyMesMes ( CurHostAddress, CurHostAddress );
+            Protocol.CreateCLSendEmptyMesMes ( CurHostAddress,
+                                               CurHostAddress );
             break;
 
         case 22: // PROTMESSID_CLM_EMPTY_MESSAGE
@@ -278,9 +264,8 @@ class CTestbench : public QObject
             break;
 
         case 26: // PROTMESSID_ACKN
-            Protocol.CreateAndImmSendAcknMess (
-                GenRandomIntInRange ( -10, 100 ),
-                GenRandomIntInRange ( -100, 100 ) );
+            Protocol.CreateAndImmSendAcknMess ( GenRandomIntInRange ( -10, 100 ),
+                                                GenRandomIntInRange ( -100, 100 ) );
             break;
 
         case 27:
@@ -325,9 +310,8 @@ class CTestbench : public QObject
             break;
 
         case 33: // PROTMESSID_MUTE_STATE_CHANGED
-            Protocol.CreateMuteStateHasChangedMes (
-                GenRandomIntInRange ( -2, 20 ),
-                GenRandomIntInRange ( 0, 1 ) );
+            Protocol.CreateMuteStateHasChangedMes ( GenRandomIntInRange ( -2, 20 ),
+                                                    GenRandomIntInRange ( 0, 1 ) );
             break;
 
         case 34: // PROTMESSID_CLIENT_ID
@@ -340,9 +324,7 @@ class CTestbench : public QObject
     {
         UdpSocket.writeDatagram (
             (const char*) &( (CVector<uint8_t>) vecMessage )[0],
-            vecMessage.Size(),
-            QHostAddress ( sAddress ),
-            iPort );
+            vecMessage.Size(), QHostAddress ( sAddress ), iPort );
 
         // reset protocol so that we do not have to wait for an acknowledge to
         // send the next message

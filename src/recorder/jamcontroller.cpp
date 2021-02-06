@@ -28,9 +28,9 @@ using namespace recorder;
 
 CJamController::CJamController() :
     bRecorderInitialised ( false ),
-    bEnableRecording ( false ),
-    strRecordingDir ( "" ),
-    pthJamRecorder ( nullptr )
+    bEnableRecording     ( false ),
+    strRecordingDir      ( "" ),
+    pthJamRecorder       ( nullptr )
 {
 }
 
@@ -43,8 +43,7 @@ void CJamController::RequestNewRecording()
     }
 }
 
-void CJamController::SetEnableRecording ( bool bNewEnableRecording,
-                                          bool isRunning )
+void CJamController::SetEnableRecording  ( bool bNewEnableRecording, bool isRunning )
 {
 
     if ( bRecorderInitialised )
@@ -53,9 +52,8 @@ void CJamController::SetEnableRecording ( bool bNewEnableRecording,
         // message only if the state appears to change
         if ( bEnableRecording != bNewEnableRecording )
         {
-            qInfo() << qUtf8Printable (
-                QString ( "Recording state: %1" )
-                    .arg ( bNewEnableRecording ? "enabled" : "disabled" ) );
+            qInfo() << qUtf8Printable( QString( "Recording state: %1" )
+                .arg( bNewEnableRecording ? "enabled" : "disabled" ) );
         }
 
         // note that this block executes regardless of whether
@@ -84,8 +82,7 @@ void CJamController::SetRecordingDir ( QString newRecordingDir,
         // We have a thread and we want to start a new one.
         // We only want one running.
         // This could take time, unfortunately.
-        // Hopefully changing recording directory will NOT happen during a long
-        // jam...
+        // Hopefully changing recording directory will NOT happen during a long jam...
         emit EndRecorderThread();
         pthJamRecorder->wait();
         pthJamRecorder = nullptr;
@@ -93,22 +90,20 @@ void CJamController::SetRecordingDir ( QString newRecordingDir,
 
     if ( !newRecordingDir.isEmpty() )
     {
-        pJamRecorder         = new recorder::CJamRecorder ( newRecordingDir,
-                                                    iServerFrameSizeSamples );
-        strRecorderErrMsg    = pJamRecorder->Init();
+        pJamRecorder = new recorder::CJamRecorder ( newRecordingDir, iServerFrameSizeSamples );
+        strRecorderErrMsg = pJamRecorder->Init();
         bRecorderInitialised = ( strRecorderErrMsg == QString::null );
-        bEnableRecording     = bRecorderInitialised && !bDisableRecording;
+        bEnableRecording = bRecorderInitialised && !bDisableRecording;
 
-        qInfo() << qUtf8Printable (
-            QString ( "Recording state: %1" )
-                .arg ( bEnableRecording ? "enabled" : "disabled" ) );
+        qInfo() << qUtf8Printable( QString( "Recording state: %1" )
+            .arg( bEnableRecording ? "enabled" : "disabled" ) );
     }
     else
     {
         // This is the only time this is ever true - UI needs to handle it
-        strRecorderErrMsg    = QString::null;
+        strRecorderErrMsg = QString::null;
         bRecorderInitialised = false;
-        bEnableRecording     = false;
+        bEnableRecording = false;
 
         qInfo() << "Recording state not initialised";
     }
@@ -123,58 +118,41 @@ void CJamController::SetRecordingDir ( QString newRecordingDir,
         pJamRecorder->moveToThread ( pthJamRecorder );
 
         // QT signals
-        QObject::connect ( pthJamRecorder,
-                           &QThread::finished,
-                           pJamRecorder,
-                           &QObject::deleteLater );
+        QObject::connect ( pthJamRecorder, &QThread::finished,
+            pJamRecorder, &QObject::deleteLater );
 
-        QObject::connect ( QCoreApplication::instance(),
-                           &QCoreApplication::aboutToQuit,
-                           pJamRecorder,
-                           &CJamRecorder::OnAboutToQuit,
-                           Qt::ConnectionType::BlockingQueuedConnection );
+        QObject::connect( QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
+            pJamRecorder, &CJamRecorder::OnAboutToQuit,
+            Qt::ConnectionType::BlockingQueuedConnection );
 
         // from the controller to the recorder
-        QObject::connect ( this,
-                           &CJamController::RestartRecorder,
-                           pJamRecorder,
-                           &CJamRecorder::OnTriggerSession );
+        QObject::connect( this, &CJamController::RestartRecorder,
+            pJamRecorder, &CJamRecorder::OnTriggerSession );
 
-        QObject::connect ( this,
-                           &CJamController::StopRecorder,
-                           pJamRecorder,
-                           &CJamRecorder::OnEnd );
+        QObject::connect( this, &CJamController::StopRecorder,
+            pJamRecorder, &CJamRecorder::OnEnd );
 
-        QObject::connect ( this,
-                           &CJamController::EndRecorderThread,
-                           pJamRecorder,
-                           &CJamRecorder::OnAboutToQuit,
-                           Qt::ConnectionType::BlockingQueuedConnection );
+        QObject::connect( this, &CJamController::EndRecorderThread,
+            pJamRecorder, &CJamRecorder::OnAboutToQuit,
+            Qt::ConnectionType::BlockingQueuedConnection );
 
         // from the server to the recorder
-        QObject::connect ( this,
-                           &CJamController::Stopped,
-                           pJamRecorder,
-                           &CJamRecorder::OnEnd );
+        QObject::connect( this, &CJamController::Stopped,
+            pJamRecorder, &CJamRecorder::OnEnd );
 
-        QObject::connect ( this,
-                           &CJamController::ClientDisconnected,
-                           pJamRecorder,
-                           &CJamRecorder::OnDisconnected );
+        QObject::connect( this, &CJamController::ClientDisconnected,
+            pJamRecorder, &CJamRecorder::OnDisconnected );
 
         qRegisterMetaType<CVector<int16_t>> ( "CVector<int16_t>" );
-        QObject::connect ( this,
-                           &CJamController::AudioFrame,
-                           pJamRecorder,
-                           &CJamRecorder::OnFrame );
+        QObject::connect( this, &CJamController::AudioFrame,
+            pJamRecorder, &CJamRecorder::OnFrame );
 
         // from the recorder to the server
-        QObject::connect ( pJamRecorder,
-                           &CJamRecorder::RecordingSessionStarted,
-                           this,
-                           &CJamController::RecordingSessionStarted );
+        QObject::connect ( pJamRecorder, &CJamRecorder::RecordingSessionStarted,
+            this, &CJamController::RecordingSessionStarted );
 
         pthJamRecorder->start ( QThread::NormalPriority );
+
     }
     else
     {

@@ -8,33 +8,34 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
 
 #pragma once
 
+#include <QObject>
+#include <QThread>
+#include <QMutex>
+#include <vector>
 #include "global.h"
 #include "protocol.h"
 #include "util.h"
-#include <QMutex>
-#include <QObject>
-#include <QThread>
-#include <vector>
 #ifndef _WIN32
-#include <netinet/in.h>
-#include <sys/socket.h>
+# include <netinet/in.h>
+# include <sys/socket.h>
 #endif
+
 
 // The header files channel.h and server.h require to include this header file
 // so we get a cyclic dependency. To solve this issue, a prototype of the
@@ -42,9 +43,11 @@
 class CServer;  // forward declaration of CServer
 class CChannel; // forward declaration of CChannel
 
+
 /* Definitions ****************************************************************/
 // number of ports we try to bind until we give up
-#define NUM_SOCKET_PORTS_TO_TRY 100
+#define NUM_SOCKET_PORTS_TO_TRY         100
+
 
 /* Classes ********************************************************************/
 /* Base socket class -------------------------------------------------------- */
@@ -52,22 +55,18 @@ class CSocket : public QObject
 {
     Q_OBJECT
 
-  public:
-    CSocket ( CChannel* pNewChannel, const quint16 iPortNumber ) :
-        pChannel ( pNewChannel ),
-        bIsClient ( true ),
-        bJitterBufferOK ( true )
-    {
-        Init ( iPortNumber );
-    }
+public:
+    CSocket ( CChannel*     pNewChannel,
+              const quint16 iPortNumber )
+        : pChannel ( pNewChannel ),
+          bIsClient ( true ),
+          bJitterBufferOK ( true ) { Init ( iPortNumber ); }
 
-    CSocket ( CServer* pNServP, const quint16 iPortNumber ) :
-        pServer ( pNServP ),
-        bIsClient ( false ),
-        bJitterBufferOK ( true )
-    {
-        Init ( iPortNumber );
-    }
+    CSocket ( CServer*      pNServP,
+              const quint16 iPortNumber )
+        : pServer ( pNServP ),
+          bIsClient ( false ),
+          bJitterBufferOK ( true ) { Init ( iPortNumber ); }
 
     virtual ~CSocket();
 
@@ -77,33 +76,33 @@ class CSocket : public QObject
     bool GetAndResetbJitterBufferOKFlag();
     void Close();
 
-  protected:
+protected:
     void Init ( const quint16 iPortNumber );
 
 #ifdef _WIN32
-    SOCKET UdpSocket;
+    SOCKET           UdpSocket;
 #else
-    int UdpSocket;
+    int              UdpSocket;
 #endif
 
-    QMutex Mutex;
+    QMutex           Mutex;
 
     CVector<uint8_t> vecbyRecBuf;
     CHostAddress     RecHostAddr;
     QHostAddress     SenderAddress;
     quint16          SenderPort;
 
-    CChannel* pChannel; // for client
-    CServer*  pServer;  // for server
+    CChannel*        pChannel; // for client
+    CServer*         pServer;  // for server
 
-    bool bIsClient;
+    bool             bIsClient;
 
-    bool bJitterBufferOK;
+    bool             bJitterBufferOK;
 
-  public:
+public:
     void OnDataReceived();
 
-  signals:
+signals:
     void NewConnection(); // for the client
 
     void NewConnection ( int          iChID,
@@ -123,6 +122,7 @@ class CSocket : public QObject
                                     CHostAddress     HostAdr );
 };
 
+
 /* Socket which runs in a separate high priority thread --------------------- */
 // The receive socket should be put in a high priority thread to ensure the GUI
 // does not effect the stability of the audio stream (e.g. if the GUI is on
@@ -132,20 +132,19 @@ class CHighPrioSocket : public QObject
 {
     Q_OBJECT
 
-  public:
-    CHighPrioSocket ( CChannel* pNewChannel, const quint16 iPortNumber ) :
-        Socket ( pNewChannel, iPortNumber )
-    {
-        Init();
-    }
+public:
+    CHighPrioSocket ( CChannel*     pNewChannel,
+                      const quint16 iPortNumber )
+        : Socket ( pNewChannel, iPortNumber ) { Init(); }
 
-    CHighPrioSocket ( CServer* pNewServer, const quint16 iPortNumber ) :
-        Socket ( pNewServer, iPortNumber )
-    {
-        Init();
-    }
+    CHighPrioSocket ( CServer*      pNewServer,
+                      const quint16 iPortNumber )
+        : Socket ( pNewServer, iPortNumber ) { Init(); }
 
-    virtual ~CHighPrioSocket() { NetworkWorkerThread.Stop(); }
+    virtual ~CHighPrioSocket()
+    {
+        NetworkWorkerThread.Stop();
+    }
 
     void Start()
     {
@@ -165,18 +164,12 @@ class CHighPrioSocket : public QObject
         return Socket.GetAndResetbJitterBufferOKFlag();
     }
 
-  protected:
+protected:
     class CSocketThread : public QThread
     {
-      public:
-        CSocketThread ( CSocket* pNewSocket = nullptr,
-                        QObject* parent     = nullptr ) :
-            QThread ( parent ),
-            pSocket ( pNewSocket ),
-            bRun ( true )
-        {
-            setObjectName ( "CSocketThread" );
-        }
+    public:
+        CSocketThread ( CSocket* pNewSocket = nullptr, QObject* parent = nullptr ) :
+          QThread ( parent ), pSocket ( pNewSocket ), bRun ( true ) { setObjectName ( "CSocketThread" ); }
 
         void Stop()
         {
@@ -192,9 +185,8 @@ class CHighPrioSocket : public QObject
 
         void SetSocket ( CSocket* pNewSocket ) { pSocket = pNewSocket; }
 
-      protected:
-        void run()
-        {
+    protected:
+        void run() {
             // make sure the socket pointer is initialized (should be always the
             // case)
             if ( pSocket != nullptr )
@@ -224,15 +216,13 @@ class CHighPrioSocket : public QObject
         NetworkWorkerThread.SetSocket ( &Socket );
 
         // connect the "InvalidPacketReceived" signal
-        QObject::connect ( &Socket,
-                           &CSocket::InvalidPacketReceived,
-                           this,
-                           &CHighPrioSocket::InvalidPacketReceived );
+        QObject::connect ( &Socket, &CSocket::InvalidPacketReceived,
+            this, &CHighPrioSocket::InvalidPacketReceived );
     }
 
     CSocketThread NetworkWorkerThread;
     CSocket       Socket;
 
-  signals:
+signals:
     void InvalidPacketReceived ( CHostAddress RecHostAddr );
 };

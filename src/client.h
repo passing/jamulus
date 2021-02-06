@@ -24,57 +24,57 @@
 
 #pragma once
 
-#include <QDateTime>
 #include <QHostAddress>
 #include <QHostInfo>
-#include <QMutex>
 #include <QString>
+#include <QDateTime>
+#include <QMutex>
 #ifdef USE_OPUS_SHARED_LIB
-#include "opus/opus_custom.h"
+# include "opus/opus_custom.h"
 #else
-#include "opus_custom.h"
+# include "opus_custom.h"
 #endif
-#include "buffer.h"
-#include "channel.h"
 #include "global.h"
-#include "signalhandler.h"
 #include "socket.h"
+#include "channel.h"
 #include "util.h"
+#include "buffer.h"
+#include "signalhandler.h"
 #ifdef LLCON_VST_PLUGIN
-#include "vstsound.h"
+# include "vstsound.h"
 #else
-#if defined( _WIN32 ) && !defined( JACK_REPLACES_ASIO )
-#include "../windows/sound.h"
-#else
-#if ( defined( Q_OS_MACX ) ) && !defined( JACK_REPLACES_COREAUDIO )
-#include "../mac/sound.h"
-#else
-#if defined( Q_OS_IOS )
-#include "../ios/sound.h"
-#else
-#ifdef ANDROID
-#include "../android/sound.h"
-#else
-#include "../linux/sound.h"
-#ifndef JACK_REPLACES_ASIO // these headers are not available in Windows OS
-#include <netdb.h>
-#include <sched.h>
-#endif
-#include <socket.h>
-#endif
-#endif
-#endif
-#endif
+# if defined ( _WIN32 ) && !defined ( JACK_REPLACES_ASIO )
+#  include "../windows/sound.h"
+# else
+#  if ( defined ( Q_OS_MACX ) ) && !defined ( JACK_REPLACES_COREAUDIO )
+#   include "../mac/sound.h"
+#  else
+#   if defined ( Q_OS_IOS )
+#     include "../ios/sound.h"
+#    else
+#    ifdef ANDROID
+#     include "../android/sound.h"
+#    else
+#     include "../linux/sound.h"
+#     ifndef JACK_REPLACES_ASIO // these headers are not available in Windows OS
+#      include <sched.h>
+#      include <netdb.h>
+#     endif
+#     include <socket.h>
+#    endif
+#   endif
+#  endif
+# endif
 #endif
 
 /* Definitions ****************************************************************/
 // audio in fader range
-#define AUD_FADER_IN_MIN 0
-#define AUD_FADER_IN_MAX 100
-#define AUD_FADER_IN_MIDDLE ( AUD_FADER_IN_MAX / 2 )
+#define AUD_FADER_IN_MIN                                    0
+#define AUD_FADER_IN_MAX                                    100
+#define AUD_FADER_IN_MIDDLE                                 ( AUD_FADER_IN_MAX / 2 )
 
 // audio reverberation range
-#define AUD_REVERB_MAX 100
+#define AUD_REVERB_MAX                                      100
 
 // OPUS number of coded bytes per audio packet
 // TODO we have to use new numbers for OPUS to avoid that old CELT packets
@@ -87,26 +87,27 @@
 // Fs: sampling rate (SYSTEM_SAMPLE_RATE_HZ)
 // L:  number of samples per packet (SYSTEM_FRAME_SIZE_SAMPLES)
 // N:  number of bytes per packet (values below)
-#define OPUS_NUM_BYTES_MONO_LOW_QUALITY 12
-#define OPUS_NUM_BYTES_MONO_NORMAL_QUALITY 22
-#define OPUS_NUM_BYTES_MONO_HIGH_QUALITY 36
-#define OPUS_NUM_BYTES_MONO_LOW_QUALITY_DBLE_FRAMESIZE 25
-#define OPUS_NUM_BYTES_MONO_NORMAL_QUALITY_DBLE_FRAMESIZE 45
-#define OPUS_NUM_BYTES_MONO_HIGH_QUALITY_DBLE_FRAMESIZE 82
+#define OPUS_NUM_BYTES_MONO_LOW_QUALITY                     12
+#define OPUS_NUM_BYTES_MONO_NORMAL_QUALITY                  22
+#define OPUS_NUM_BYTES_MONO_HIGH_QUALITY                    36
+#define OPUS_NUM_BYTES_MONO_LOW_QUALITY_DBLE_FRAMESIZE      25
+#define OPUS_NUM_BYTES_MONO_NORMAL_QUALITY_DBLE_FRAMESIZE   45
+#define OPUS_NUM_BYTES_MONO_HIGH_QUALITY_DBLE_FRAMESIZE     82
 
-#define OPUS_NUM_BYTES_STEREO_LOW_QUALITY 24
-#define OPUS_NUM_BYTES_STEREO_NORMAL_QUALITY 35
-#define OPUS_NUM_BYTES_STEREO_HIGH_QUALITY 73
-#define OPUS_NUM_BYTES_STEREO_LOW_QUALITY_DBLE_FRAMESIZE 47
+#define OPUS_NUM_BYTES_STEREO_LOW_QUALITY                   24
+#define OPUS_NUM_BYTES_STEREO_NORMAL_QUALITY                35
+#define OPUS_NUM_BYTES_STEREO_HIGH_QUALITY                  73
+#define OPUS_NUM_BYTES_STEREO_LOW_QUALITY_DBLE_FRAMESIZE    47
 #define OPUS_NUM_BYTES_STEREO_NORMAL_QUALITY_DBLE_FRAMESIZE 71
-#define OPUS_NUM_BYTES_STEREO_HIGH_QUALITY_DBLE_FRAMESIZE 165
+#define OPUS_NUM_BYTES_STEREO_HIGH_QUALITY_DBLE_FRAMESIZE   165
+
 
 /* Classes ********************************************************************/
 class CClient : public QObject
 {
     Q_OBJECT
 
-  public:
+public:
     CClient ( const quint16  iPortNumber,
               const QString& strConnOnStartupAddress,
               const QString& strMIDISetup,
@@ -116,33 +117,27 @@ class CClient : public QObject
 
     virtual ~CClient();
 
-    void Start();
-    void Stop();
-    bool IsRunning() { return Sound.IsRunning(); }
-    bool IsCallbackEntered() const { return Sound.IsCallbackEntered(); }
-    bool SetServerAddr ( QString strNAddr );
+    void   Start();
+    void   Stop();
+    bool   IsRunning() { return Sound.IsRunning(); }
+    bool   IsCallbackEntered() const { return Sound.IsCallbackEntered(); }
+    bool   SetServerAddr ( QString strNAddr );
 
-    double GetLevelForMeterdBLeft()
-    {
-        return SignalLevelMeter.GetLevelForMeterdBLeftOrMono();
-    }
-    double GetLevelForMeterdBRight()
-    {
-        return SignalLevelMeter.GetLevelForMeterdBRight();
-    }
+    double GetLevelForMeterdBLeft()  { return SignalLevelMeter.GetLevelForMeterdBLeftOrMono(); }
+    double GetLevelForMeterdBRight() { return SignalLevelMeter.GetLevelForMeterdBRight(); }
 
-    bool GetAndResetbJitterBufferOKFlag();
+    bool   GetAndResetbJitterBufferOKFlag();
 
-    bool IsConnected() { return Channel.IsConnected(); }
+    bool   IsConnected() { return Channel.IsConnected(); }
 
     EGUIDesign GetGUIDesign() const { return eGUIDesign; }
     void       SetGUIDesign ( const EGUIDesign eNGD ) { eGUIDesign = eNGD; }
 
     EAudioQuality GetAudioQuality() const { return eAudioQuality; }
-    void          SetAudioQuality ( const EAudioQuality eNAudioQuality );
+    void SetAudioQuality ( const EAudioQuality eNAudioQuality );
 
     EAudChanConf GetAudioChannels() const { return eAudioChannelConf; }
-    void         SetAudioChannels ( const EAudChanConf eNAudChanConf );
+    void SetAudioChannels ( const EAudChanConf eNAudChanConf );
 
     int  GetAudioInFader() const { return iAudioInFader; }
     void SetAudioInFader ( const int iNV ) { iAudioInFader = iNV; }
@@ -167,7 +162,7 @@ class CClient : public QObject
     }
     int GetSockBufNumFrames() { return Channel.GetSockBufNumFrames(); }
 
-    void SetServerSockBufNumFrames ( const int iNumBlocks )
+    void SetServerSockBufNumFrames ( const int  iNumBlocks  )
     {
         iServerSockBufNumFrames = iNumBlocks;
 
@@ -182,7 +177,7 @@ class CClient : public QObject
     int GetUploadRateKbps() { return Channel.GetUploadRateKbps(); }
 
     // sound card device selection
-    QStringList GetSndCrdDevNames() { return Sound.GetDevNames(); }
+    QStringList GetSndCrdDevNames()  { return Sound.GetDevNames(); }
 
     QString SetSndCrdDev ( const QString strNewDev );
     QString GetSndCrdDev() { return Sound.GetDev(); }
@@ -190,24 +185,18 @@ class CClient : public QObject
 
     // sound card channel selection
     int     GetSndCrdNumInputChannels() { return Sound.GetNumInputChannels(); }
-    QString GetSndCrdInputChannelName ( const int iDiD )
-    {
-        return Sound.GetInputChannelName ( iDiD );
-    }
-    void SetSndCrdLeftInputChannel ( const int iNewChan );
-    void SetSndCrdRightInputChannel ( const int iNewChan );
-    int  GetSndCrdLeftInputChannel() { return Sound.GetLeftInputChannel(); }
-    int  GetSndCrdRightInputChannel() { return Sound.GetRightInputChannel(); }
+    QString GetSndCrdInputChannelName ( const int iDiD ) { return Sound.GetInputChannelName ( iDiD ); }
+    void    SetSndCrdLeftInputChannel  ( const int iNewChan );
+    void    SetSndCrdRightInputChannel ( const int iNewChan );
+    int     GetSndCrdLeftInputChannel()  { return Sound.GetLeftInputChannel(); }
+    int     GetSndCrdRightInputChannel() { return Sound.GetRightInputChannel(); }
 
-    int GetSndCrdNumOutputChannels() { return Sound.GetNumOutputChannels(); }
-    QString GetSndCrdOutputChannelName ( const int iDiD )
-    {
-        return Sound.GetOutputChannelName ( iDiD );
-    }
-    void SetSndCrdLeftOutputChannel ( const int iNewChan );
-    void SetSndCrdRightOutputChannel ( const int iNewChan );
-    int  GetSndCrdLeftOutputChannel() { return Sound.GetLeftOutputChannel(); }
-    int  GetSndCrdRightOutputChannel() { return Sound.GetRightOutputChannel(); }
+    int     GetSndCrdNumOutputChannels() { return Sound.GetNumOutputChannels(); }
+    QString GetSndCrdOutputChannelName ( const int iDiD ) { return Sound.GetOutputChannelName ( iDiD ); }
+    void    SetSndCrdLeftOutputChannel  ( const int iNewChan );
+    void    SetSndCrdRightOutputChannel ( const int iNewChan );
+    int     GetSndCrdLeftOutputChannel()  { return Sound.GetLeftOutputChannel(); }
+    int     GetSndCrdRightOutputChannel() { return Sound.GetRightOutputChannel(); }
 
     void SetSndCrdPrefFrameSizeFactor ( const int iNewFactor );
     int  GetSndCrdPrefFrameSizeFactor() { return iSndCrdPrefFrameSizeFactor; }
@@ -244,32 +233,23 @@ class CClient : public QObject
     }
 
     bool GetFraSiFactPrefSupported() { return bFraSiFactPrefSupported; }
-    bool GetFraSiFactDefSupported() { return bFraSiFactDefSupported; }
+    bool GetFraSiFactDefSupported()  { return bFraSiFactDefSupported; }
     bool GetFraSiFactSafeSupported() { return bFraSiFactSafeSupported; }
 
     void SetMuteOutStream ( const bool bDoMute ) { bMuteOutStream = bDoMute; }
 
-    void SetRemoteChanGain ( const int   iId,
-                             const float fGain,
-                             const bool  bIsMyOwnFader );
+    void SetRemoteChanGain ( const int iId, const float fGain, const bool bIsMyOwnFader );
 
     void SetRemoteChanPan ( const int iId, const float fPan )
-    {
-        Channel.SetRemoteChanPan ( iId, fPan );
-    }
+        { Channel.SetRemoteChanPan ( iId, fPan ); }
 
     void SetRemoteInfo() { Channel.SetRemoteInfo ( ChannelInfo ); }
 
     void CreateChatTextMes ( const QString& strChatText )
-    {
-        Channel.CreateChatTextMes ( strChatText );
-    }
+        { Channel.CreateChatTextMes ( strChatText ); }
 
     void CreateCLPingMes()
-    {
-        ConnLessProtocol.CreateCLPingMes ( Channel.GetAddress(),
-                                           PreparePingMessage() );
-    }
+        { ConnLessProtocol.CreateCLPingMes ( Channel.GetAddress(), PreparePingMessage() ); }
 
     void CreateCLServerListPingMes ( const CHostAddress& InetAddr )
     {
@@ -279,29 +259,18 @@ class CClient : public QObject
     }
 
     void CreateCLServerListReqVerAndOSMes ( const CHostAddress& InetAddr )
-    {
-        ConnLessProtocol.CreateCLReqVersionAndOSMes ( InetAddr );
-    }
+        { ConnLessProtocol.CreateCLReqVersionAndOSMes ( InetAddr ); }
 
-    void
-    CreateCLServerListReqConnClientsListMes ( const CHostAddress& InetAddr )
-    {
-        ConnLessProtocol.CreateCLReqConnClientsListMes ( InetAddr );
-    }
+    void CreateCLServerListReqConnClientsListMes ( const CHostAddress& InetAddr )
+        { ConnLessProtocol.CreateCLReqConnClientsListMes ( InetAddr ); }
 
     void CreateCLReqServerListMes ( const CHostAddress& InetAddr )
-    {
-        ConnLessProtocol.CreateCLReqServerListMes ( InetAddr );
-    }
+        { ConnLessProtocol.CreateCLReqServerListMes ( InetAddr ); }
 
     int EstimatedOverallDelay ( const int iPingTimeMs );
 
-    void GetBufErrorRates ( CVector<double>& vecErrRates,
-                            double&          dLimit,
-                            double&          dMaxUpLimit )
-    {
-        Channel.GetBufErrorRates ( vecErrRates, dLimit, dMaxUpLimit );
-    }
+    void GetBufErrorRates ( CVector<double>& vecErrRates, double& dLimit, double& dMaxUpLimit )
+        { Channel.GetBufErrorRates ( vecErrRates, dLimit, dMaxUpLimit ); }
 
     // settings
     CChannelCoreInfo ChannelInfo;
@@ -312,91 +281,91 @@ class CClient : public QObject
     CSound* GetSound() { return &Sound; }
 #endif
 
-  protected:
+protected:
     // callback function must be static, otherwise it does not work
     static void AudioCallback ( CVector<short>& psData, void* arg );
 
-    void Init();
-    void ProcessSndCrdAudioData ( CVector<short>& vecsStereoSndCrd );
-    void ProcessAudioDataIntern ( CVector<short>& vecsStereoSndCrd );
+    void        Init();
+    void        ProcessSndCrdAudioData ( CVector<short>& vecsStereoSndCrd );
+    void        ProcessAudioDataIntern ( CVector<short>& vecsStereoSndCrd );
 
-    int  PreparePingMessage();
-    int  EvaluatePingMessage ( const int iMs );
-    void CreateServerJitterBufferMessage();
+    int         PreparePingMessage();
+    int         EvaluatePingMessage ( const int iMs );
+    void        CreateServerJitterBufferMessage();
 
     // only one channel is needed for client application
-    CChannel  Channel;
-    CProtocol ConnLessProtocol;
+    CChannel                Channel;
+    CProtocol               ConnLessProtocol;
 
     // audio encoder/decoder
-    OpusCustomMode*        Opus64Mode;
-    OpusCustomEncoder*     Opus64EncoderMono;
-    OpusCustomDecoder*     Opus64DecoderMono;
-    OpusCustomEncoder*     Opus64EncoderStereo;
-    OpusCustomDecoder*     Opus64DecoderStereo;
-    OpusCustomMode*        OpusMode;
-    OpusCustomEncoder*     OpusEncoderMono;
-    OpusCustomDecoder*     OpusDecoderMono;
-    OpusCustomEncoder*     OpusEncoderStereo;
-    OpusCustomDecoder*     OpusDecoderStereo;
-    OpusCustomEncoder*     CurOpusEncoder;
-    OpusCustomDecoder*     CurOpusDecoder;
-    EAudComprType          eAudioCompressionType;
-    int                    iCeltNumCodedBytes;
-    int                    iOPUSFrameSizeSamples;
-    EAudioQuality          eAudioQuality;
-    EAudChanConf           eAudioChannelConf;
-    int                    iNumAudioChannels;
-    bool                   bIsInitializationPhase;
-    bool                   bMuteOutStream;
-    float                  fMuteOutStreamGain;
-    CVector<unsigned char> vecCeltData;
+    OpusCustomMode*         Opus64Mode;
+    OpusCustomEncoder*      Opus64EncoderMono;
+    OpusCustomDecoder*      Opus64DecoderMono;
+    OpusCustomEncoder*      Opus64EncoderStereo;
+    OpusCustomDecoder*      Opus64DecoderStereo;
+    OpusCustomMode*         OpusMode;
+    OpusCustomEncoder*      OpusEncoderMono;
+    OpusCustomDecoder*      OpusDecoderMono;
+    OpusCustomEncoder*      OpusEncoderStereo;
+    OpusCustomDecoder*      OpusDecoderStereo;
+    OpusCustomEncoder*      CurOpusEncoder;
+    OpusCustomDecoder*      CurOpusDecoder;
+    EAudComprType           eAudioCompressionType;
+    int                     iCeltNumCodedBytes;
+    int                     iOPUSFrameSizeSamples;
+    EAudioQuality           eAudioQuality;
+    EAudChanConf            eAudioChannelConf;
+    int                     iNumAudioChannels;
+    bool                    bIsInitializationPhase;
+    bool                    bMuteOutStream;
+    float                   fMuteOutStreamGain;
+    CVector<unsigned char>  vecCeltData;
 
     CHighPrioSocket         Socket;
     CSound                  Sound;
     CStereoSignalLevelMeter SignalLevelMeter;
 
-    CVector<uint8_t> vecbyNetwData;
+    CVector<uint8_t>        vecbyNetwData;
 
-    int          iAudioInFader;
-    bool         bReverbOnLeftChan;
-    int          iReverbLevel;
-    CAudioReverb AudioReverb;
+    int                     iAudioInFader;
+    bool                    bReverbOnLeftChan;
+    int                     iReverbLevel;
+    CAudioReverb            AudioReverb;
 
-    int iSndCrdPrefFrameSizeFactor;
-    int iSndCrdFrameSizeFactor;
+    int                     iSndCrdPrefFrameSizeFactor;
+    int                     iSndCrdFrameSizeFactor;
 
-    bool             bSndCrdConversionBufferRequired;
-    int              iSndCardMonoBlockSizeSamConvBuff;
-    CBuffer<int16_t> SndCrdConversionBufferIn;
-    CBuffer<int16_t> SndCrdConversionBufferOut;
-    CVector<int16_t> vecDataConvBuf;
-    CVector<int16_t> vecsStereoSndCrdMuteStream;
-    CVector<int16_t> vecZeros;
+    bool                    bSndCrdConversionBufferRequired;
+    int                     iSndCardMonoBlockSizeSamConvBuff;
+    CBuffer<int16_t>        SndCrdConversionBufferIn;
+    CBuffer<int16_t>        SndCrdConversionBufferOut;
+    CVector<int16_t>        vecDataConvBuf;
+    CVector<int16_t>        vecsStereoSndCrdMuteStream;
+    CVector<int16_t>        vecZeros;
 
-    bool bFraSiFactPrefSupported;
-    bool bFraSiFactDefSupported;
-    bool bFraSiFactSafeSupported;
+    bool                    bFraSiFactPrefSupported;
+    bool                    bFraSiFactDefSupported;
+    bool                    bFraSiFactSafeSupported;
 
-    int iMonoBlockSizeSam;
-    int iStereoBlockSizeSam;
+    int                     iMonoBlockSizeSam;
+    int                     iStereoBlockSizeSam;
 
-    EGUIDesign eGUIDesign;
-    bool       bEnableOPUS64;
+    EGUIDesign              eGUIDesign;
+    bool                    bEnableOPUS64;
 
-    bool   bJitterBufferOK;
-    bool   bNuteMeInPersonalMix;
-    QMutex MutexDriverReinit;
+    bool                    bJitterBufferOK;
+    bool                    bNuteMeInPersonalMix;
+    QMutex                  MutexDriverReinit;
 
     // server settings
-    int iServerSockBufNumFrames;
+    int                     iServerSockBufNumFrames;
 
     // for ping measurement
-    QElapsedTimer PreciseTime;
+    QElapsedTimer           PreciseTime;
 
-    CSignalHandler* pSignalHandler;
+    CSignalHandler*         pSignalHandler;
 
-  protected slots:
+protected slots:
     void OnHandledSignal ( int sigNum );
     void OnSendProtMessage ( CVector<uint8_t> vecMessage );
     void OnInvalidPacketReceived ( CHostAddress RecHostAddr );
@@ -409,14 +378,9 @@ class CClient : public QObject
     void OnJittBufSizeChanged ( int iNewJitBufSize );
     void OnReqChanInfo() { Channel.SetRemoteInfo ( ChannelInfo ); }
     void OnNewConnection();
-    void OnCLDisconnection ( CHostAddress InetAddr )
-    {
-        if ( InetAddr == Channel.GetAddress() )
-        {
-            emit Disconnected();
-        }
-    }
-    void OnCLPingReceived ( CHostAddress InetAddr, int iMs );
+    void OnCLDisconnection ( CHostAddress InetAddr ) { if ( InetAddr == Channel.GetAddress() ) { emit Disconnected(); } }
+    void OnCLPingReceived ( CHostAddress InetAddr,
+                            int          iMs );
 
     void OnSendCLProtMessage ( CHostAddress     InetAddr,
                                CVector<uint8_t> vecMessage );
@@ -429,14 +393,13 @@ class CClient : public QObject
     void OnControllerInFaderLevel ( int iChannelIdx, int iValue );
     void OnClientIDReceived ( int iChanID );
 
-  signals:
+signals:
     void ConClientListMesReceived ( CVector<CChannelInfo> vecChanInfo );
     void ChatTextReceived ( QString strChatText );
     void ClientIDReceived ( int iChanID );
     void MuteStateHasChangedReceived ( int iChanID, bool bIsMuted );
     void LicenceRequired ( ELicenceType eLicenceType );
-    void VersionAndOSReceived ( COSUtil::EOpSystemType eOSType,
-                                QString                strVersion );
+    void VersionAndOSReceived ( COSUtil::EOpSystemType eOSType, QString strVersion );
     void PingTimeReceived ( int iPingTime );
     void RecorderStateReceived ( ERecorderState eRecorderState );
 

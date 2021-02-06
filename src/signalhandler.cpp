@@ -48,8 +48,7 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -62,17 +61,13 @@ ARE
 
 #include "signalhandler.h"
 
-class CSignalHandlerSingleton : public CSignalHandler
-{
-  public:
+class CSignalHandlerSingleton : public CSignalHandler {
+public:
     inline CSignalHandlerSingleton() : CSignalHandler() {}
 };
 Q_GLOBAL_STATIC ( CSignalHandlerSingleton, singleton )
 
-CSignalHandler::CSignalHandler() :
-    pSignalBase ( CSignalBase::withSignalHandler ( this ) )
-{
-}
+CSignalHandler::CSignalHandler() : pSignalBase ( CSignalBase::withSignalHandler ( this ) ) {}
 
 CSignalHandler::~CSignalHandler() = default;
 
@@ -80,14 +75,11 @@ CSignalHandler* CSignalHandler::getSingletonP() { return singleton; }
 
 bool CSignalHandler::emitSignal ( int sigNum )
 {
-    return QMetaObject::invokeMethod ( singleton,
-                                       "HandledSignal",
-                                       Qt::QueuedConnection,
-                                       Q_ARG ( int, sigNum ) );
+    return QMetaObject::invokeMethod( singleton, "HandledSignal", Qt::QueuedConnection, Q_ARG( int, sigNum ) );
 }
 
 #ifndef _WIN32
-void CSignalHandler::OnSocketNotify ( int socket )
+void CSignalHandler::OnSocketNotify( int socket )
 {
     int sigNum;
     if ( ::read ( socket, &sigNum, sizeof ( int ) ) == sizeof ( int ) )
@@ -123,13 +115,18 @@ CSignalWin::CSignalWin ( CSignalHandler* nPSignalHandler ) :
     SetConsoleCtrlHandler ( signalHandler, true );
 }
 
-CSignalWin::~CSignalWin() { SetConsoleCtrlHandler ( signalHandler, false ); }
+CSignalWin::~CSignalWin() {
+    SetConsoleCtrlHandler ( signalHandler, false );
+}
 
-QReadWriteLock* CSignalWin::getLock() const { return &lock; }
+QReadWriteLock* CSignalWin::getLock() const
+{
+    return &lock;
+}
 
 BOOL WINAPI CSignalWin::signalHandler ( _In_ DWORD )
 {
-    auto        self = getSelf<CSignalWin>();
+    auto self = getSelf<CSignalWin>();
     QReadLocker lock ( self->getLock() );
     return self->pSignalHandler->emitSignal ( -1 );
 }
@@ -142,13 +139,9 @@ CSignalUnix::CSignalUnix ( CSignalHandler* nPSignalHandler ) :
 {
     if ( ::socketpair ( AF_UNIX, SOCK_STREAM, 0, socketPair ) == 0 )
     {
-        socketNotifier =
-            new QSocketNotifier ( socketPair[1], QSocketNotifier::Read );
+        socketNotifier = new QSocketNotifier ( socketPair[ 1 ], QSocketNotifier::Read );
 
-        QObject::connect ( socketNotifier,
-                           &QSocketNotifier::activated,
-                           nPSignalHandler,
-                           &CSignalHandler::OnSocketNotify );
+        QObject::connect ( socketNotifier, &QSocketNotifier::activated, nPSignalHandler, &CSignalHandler::OnSocketNotify );
 
         socketNotifier->setEnabled ( true );
 
@@ -159,8 +152,7 @@ CSignalUnix::CSignalUnix ( CSignalHandler* nPSignalHandler ) :
     }
 }
 
-CSignalUnix::~CSignalUnix()
-{
+CSignalUnix::~CSignalUnix() {
     setSignalHandled ( SIGUSR1, false );
     setSignalHandled ( SIGUSR2, false );
     setSignalHandled ( SIGINT, false );
@@ -190,7 +182,7 @@ bool CSignalUnix::setSignalHandled ( int sigNum, bool state )
 
 void CSignalUnix::signalHandler ( int sigNum )
 {
-    const auto res = ::write ( socketPair[0], &sigNum, sizeof ( int ) );
+    const auto res = ::write ( socketPair[ 0 ], &sigNum, sizeof ( int ) );
     Q_UNUSED ( res );
 }
 #endif

@@ -8,41 +8,43 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
 
 #pragma once
 
-#include "global.h"
-#include "util.h"
 #include <QFrame>
-#include <QLayout>
 #include <QPixmap>
+#include <QTimer>
+#include <QLayout>
 #include <QProgressBar>
 #include <QStackedLayout>
-#include <QTimer>
+#include "util.h"
+#include "global.h"
+
 
 /* Definitions ****************************************************************/
-#define NUM_LEDS_INCL_CLIP_LED ( NUM_STEPS_LED_BAR + 1 )
-#define CLIP_IND_TIME_OUT_MS 20000
+#define NUM_LEDS_INCL_CLIP_LED           ( NUM_STEPS_LED_BAR + 1 )
+#define CLIP_IND_TIME_OUT_MS             20000
+
 
 /* Classes ********************************************************************/
 class CLevelMeter : public QWidget
 {
     Q_OBJECT
 
-  public:
+public:
     enum ELevelMeterType
     {
         MT_LED,
@@ -56,10 +58,10 @@ class CLevelMeter : public QWidget
     void SetValue ( const double dValue );
     void SetLevelMeterType ( const ELevelMeterType eNType );
 
-  protected:
+protected:
     class cLED
     {
-      public:
+    public:
         enum ELightColor
         {
             RL_DISABLED,
@@ -75,11 +77,11 @@ class CLevelMeter : public QWidget
         ELightColor GetColor() { return eCurLightColor; };
         QLabel*     GetLabelPointer() { return pLEDLabel; }
 
-      protected:
-        QPixmap BitmCubeRoundBlack;
-        QPixmap BitmCubeRoundGreen;
-        QPixmap BitmCubeRoundYellow;
-        QPixmap BitmCubeRoundRed;
+    protected:
+        QPixmap     BitmCubeRoundBlack;
+        QPixmap     BitmCubeRoundGreen;
+        QPixmap     BitmCubeRoundYellow;
+        QPixmap     BitmCubeRoundRed;
 
         ELightColor eCurLightColor;
         QLabel*     pLEDLabel;
@@ -95,8 +97,8 @@ class CLevelMeter : public QWidget
     CVector<cLED*>  vecpLEDs;
     QProgressBar*   pBarMeter;
 
-    QTimer TimerClip;
+    QTimer          TimerClip;
 
-  public slots:
+public slots:
     void ClipReset();
 };
