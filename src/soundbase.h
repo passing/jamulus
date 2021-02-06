@@ -109,7 +109,7 @@ class CSoundBase : public QThread
     virtual QString LoadAndInitializeDriver ( QString, bool ) { return ""; }
     virtual void    UnloadCurrentDriver() {}
     QVector<QString>
-            LoadAndInitializeFirstValidDriver ( const bool bOpenDriverSetup = false );
+    LoadAndInitializeFirstValidDriver ( const bool bOpenDriverSetup = false );
     void    ParseCommandLineArgument ( const QString& strMIDISetup );
     QString GetDeviceName ( const int iDiD ) { return strDriverNames[iDiD]; }
 

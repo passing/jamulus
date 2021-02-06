@@ -290,7 +290,7 @@ class CChannel : public QObject
     void OnChangeChanPan ( int iChanID, float fNewPan );
     void OnChangeChanInfo ( CChannelCoreInfo ChanInfo );
     void
-         OnNetTranspPropsReceived ( CNetworkTransportProps NetworkTransportProps );
+    OnNetTranspPropsReceived ( CNetworkTransportProps NetworkTransportProps );
     void OnReqNetTranspProps();
     void OnReqSplitMessSupport();
     void OnSplitMessSupported() { Protocol.SetSplitMessageSupported ( true ); }

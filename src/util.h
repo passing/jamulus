@@ -917,10 +917,10 @@ class CLocale
 {
   public:
     static QString
-                                  GetCountryFlagIconsResourceReference ( const QLocale::Country eCountry );
+    GetCountryFlagIconsResourceReference ( const QLocale::Country eCountry );
     static QMap<QString, QString> GetAvailableTranslations();
     static QPair<QString, QString>
-                FindSysLangTransFileName ( const QMap<QString, QString>& TranslMap );
+    FindSysLangTransFileName ( const QMap<QString, QString>& TranslMap );
     static void LoadTranslation ( const QString     strLanguage,
                                   QCoreApplication* pApp );
 };

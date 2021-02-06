@@ -384,7 +384,7 @@ class CProtocol : public QObject
     void ReqChanInfo();
     void ChatTextReceived ( QString strChatText );
     void
-         NetTranspPropsReceived ( CNetworkTransportProps NetworkTransportProps );
+    NetTranspPropsReceived ( CNetworkTransportProps NetworkTransportProps );
     void ReqNetTranspProps();
     void ReqSplitMessSupport();
     void SplitMessSupported();
