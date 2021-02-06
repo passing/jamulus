@@ -34,9 +34,9 @@ CSound::CSound ( void ( *fpNewProcessCallback ) ( CVector<short>& psData,
     CSoundBase ( "CoreAudio", fpNewProcessCallback, arg, strMIDISetup ),
     midiInPortRef ( static_cast<MIDIPortRef> ( NULL ) )
 {
-    // Apple Mailing Lists: Subject: GUI Apps should set
-    // kAudioHardwarePropertyRunLoop in the HAL, From: Jeff Moore, Date: Fri, 6
-    // Dec 2002 Most GUI applciations have several threads on which they receive
+    // Apple Mailing Lists: Subject: GUI Apps should set kAudioHardwarePropertyRunLoop
+    // in the HAL, From: Jeff Moore, Date: Fri, 6 Dec 2002
+    // Most GUI applciations have several threads on which they receive
     // notifications already, so the having the HAL's thread around is wasteful.
     // Here is what you should do: On the thread you want the HAL to use for
     // notifications (for most apps, this will be the main thread), add the
@@ -308,11 +308,9 @@ int CSound::CountChannels ( AudioDeviceID devID, bool isInput )
     {
         for ( UInt32 i = 0; i < buflist->mNumberBuffers; ++i )
         {
-            // The correct value mNumberChannels for an AudioBuffer can be
-            // derived from the mChannelsPerFrame and the interleaved flag. For
-            // non interleaved formats, mNumberChannels is always 1. For
-            // interleaved formats, mNumberChannels is equal to
-            // mChannelsPerFrame.
+            // The correct value mNumberChannels for an AudioBuffer can be derived from the mChannelsPerFrame
+            // and the interleaved flag. For non interleaved formats, mNumberChannels is always 1.
+            // For interleaved formats, mNumberChannels is equal to mChannelsPerFrame.
             result += buflist->mBuffers[i].mNumberChannels;
 
             if ( isInput )
@@ -557,8 +555,7 @@ QString CSound::CheckDeviceCapabilities ( const int iDriverIdx )
         }
     }
 
-    // get the stream ID of the input device (at least one stream must always
-    // exist)
+    // get the stream ID of the input device (at least one stream must always exist)
     iPropertySize               = 0;
     stPropertyAddress.mSelector = kAudioDevicePropertyStreams;
     stPropertyAddress.mScope    = kAudioObjectPropertyScopeInput;
@@ -580,8 +577,7 @@ QString CSound::CheckDeviceCapabilities ( const int iDriverIdx )
 
     const AudioStreamID inputStreamID = vInputStreamIDList[0];
 
-    // get the stream ID of the output device (at least one stream must always
-    // exist)
+    // get the stream ID of the output device (at least one stream must always exist)
     iPropertySize               = 0;
     stPropertyAddress.mSelector = kAudioDevicePropertyStreams;
     stPropertyAddress.mScope    = kAudioObjectPropertyScopeOutput;
@@ -603,10 +599,11 @@ QString CSound::CheckDeviceCapabilities ( const int iDriverIdx )
 
     const AudioStreamID outputStreamID = vOutputStreamIDList[0];
 
-    // According to the AudioHardware documentation: "If the format is a linear
-    // PCM format, the data will always be presented as 32 bit, native endian
-    // floating point. All conversions to and from the true physical format of
-    // the hardware is handled by the devices driver.". check the input
+    // According to the AudioHardware documentation: "If the format is a linear PCM
+    // format, the data will always be presented as 32 bit, native endian floating
+    // point. All conversions to and from the true physical format of the hardware
+    // is handled by the devices driver.".
+    // check the input
     iPropertySize               = sizeof ( AudioStreamBasicDescription );
     stPropertyAddress.mSelector = kAudioStreamPropertyVirtualFormat;
     stPropertyAddress.mScope    = kAudioObjectPropertyScopeGlobal;
@@ -685,8 +682,7 @@ QString CSound::CheckDeviceCapabilities ( const int iDriverIdx )
         // add the "[n]:" at the beginning as is in the Audio-Midi-Setup
         if ( !bConvOK || ( iPropertySize == 0 ) )
         {
-            // use a default name in case there was an error or the name is
-            // empty
+            // use a default name in case there was an error or the name is empty
             sChannelNamesInput[iCurInCH] =
                 QString ( "%1: Channel %1" ).arg ( iCurInCH + 1 );
         }
@@ -722,8 +718,7 @@ QString CSound::CheckDeviceCapabilities ( const int iDriverIdx )
         // add the "[n]:" at the beginning as is in the Audio-Midi-Setup
         if ( !bConvOK || ( iPropertySize == 0 ) )
         {
-            // use a default name in case there was an error or the name is
-            // empty
+            // use a default name in case there was an error or the name is empty
             sChannelNamesOutput[iCurOutCH] =
                 QString ( "%1: Channel %1" ).arg ( iCurOutCH + 1 );
         }
@@ -774,12 +769,12 @@ void CSound::UpdateChSelection()
     int iSelCHRight, iSelAddCHRight;
 
     // initialize all buffer indexes with an invalid value
-    iSelInBufferLeft    = INVALID_INDEX;
-    iSelInBufferRight   = INVALID_INDEX;
-    iSelAddInBufferLeft = INVALID_INDEX;  // if no additional channel used, this
-                                          // will stay on the invalid value
-    iSelAddInBufferRight = INVALID_INDEX; // if no additional channel used, this
-                                          // will stay on the invalid value
+    iSelInBufferLeft  = INVALID_INDEX;
+    iSelInBufferRight = INVALID_INDEX;
+    iSelAddInBufferLeft =
+        INVALID_INDEX; // if no additional channel used, this will stay on the invalid value
+    iSelAddInBufferRight =
+        INVALID_INDEX; // if no additional channel used, this will stay on the invalid value
     iSelOutBufferLeft  = INVALID_INDEX;
     iSelOutBufferRight = INVALID_INDEX;
 
@@ -1055,8 +1050,8 @@ CSound::deviceNotification ( AudioDeviceID,
         }
         else
         {
-            // for any other change in audio devices, just initiate a restart
-            // which triggers an update of the sound device selection combo box
+            // for any other change in audio devices, just initiate a restart which
+            // triggers an update of the sound device selection combo box
             pSound->EmitReinitRequestSignal ( RS_ONLY_RESTART );
         }
     }

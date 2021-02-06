@@ -8,16 +8,16 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
@@ -271,8 +271,8 @@ void CServerListManager::OnTimerPingServerInList()
 
     const int iCurServerListSize = ServerList.size();
 
-    // send ping to list entries except of the very first one (which is the
-    // central server entry)
+    // send ping to list entries except of the very first one (which is the central
+    // server entry)
     for ( int iIdx = 1; iIdx < iCurServerListSize; iIdx++ )
     {
         // send empty message to keep NAT port open at slave server
@@ -342,8 +342,7 @@ void CServerListManager::CentralServerRegisterServer (
                 pConnLessProtocol->CreateCLRegisterServerResp (
                     InetAddr,
                     SRR_VERSION_TOO_OLD );
-                return; // leave function early, i.e., we do not register this
-                        // server
+                return; // leave function early, i.e., we do not register this server
             }
 #endif
         }
@@ -351,15 +350,13 @@ void CServerListManager::CentralServerRegisterServer (
         // check for whitelist (it is enabled if it is not empty per definition)
         if ( !vWhiteList.empty() )
         {
-            // if the server is not listed, refuse registration and send
-            // registration response
+            // if the server is not listed, refuse registration and send registration response
             if ( !vWhiteList.contains ( InetAddr.InetAddr ) )
             {
                 pConnLessProtocol->CreateCLRegisterServerResp (
                     InetAddr,
                     SRR_NOT_FULFILL_REQIREMENTS );
-                return; // leave function early, i.e., we do not register this
-                        // server
+                return; // leave function early, i.e., we do not register this server
             }
         }
 
@@ -495,9 +492,9 @@ void CServerListManager::CentralServerQueryServerList (
             }
         }
 
-        // send the server list to the client, since we do not know that the
-        // client has a UDP fragmentation issue, we send both lists, the reduced
-        // and the normal list after each other
+        // send the server list to the client, since we do not know that the client
+        // has a UDP fragmentation issue, we send both lists, the reduced and the
+        // normal list after each other
         pConnLessProtocol->CreateCLRedServerListMes ( InetAddr, vecServerInfo );
         pConnLessProtocol->CreateCLServerListMes ( InetAddr, vecServerInfo );
     }

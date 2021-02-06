@@ -28,8 +28,8 @@ class CActivityId;
 
 // Represents an OSX specific activity. See Managing Activities
 // https://developer.apple.com/documentation/foundation/nsprocessinfo?language=objc
-// This essentially lets us start and stop an Activity frame where we tell the
-// OS that we are Latency Critical and are not performing background tasks.
+// This essentially lets us start and stop an Activity frame where we tell the OS
+// that we are Latency Critical and are not performing background tasks.
 class CActivity
 {
   private:

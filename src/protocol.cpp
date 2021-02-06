@@ -110,8 +110,7 @@ MESSAGES (with connection)
     +-------------------+-----------------+
 
 
-- PROTMESSID_MUTE_STATE_CHANGED: Mute state of your signal at another client has
-changed
+- PROTMESSID_MUTE_STATE_CHANGED: Mute state of your signal at another client has changed
 
     +-------------------+-----------------+
     | 1 byte channel ID | 1 byte is muted |
@@ -193,8 +192,7 @@ changed
                           - 3: OPUS64
     - "flags":           flags indicating network properties:
                           - 0: none
-                          - 1: WITH_COUNTER (a packet counter is added to the
-audio packet)
+                          - 1: WITH_COUNTER (a packet counter is added to the audio packet)
     - "audiocod arg":    argument for the audio coder, if not used this value
                          shall be set to 0
 
@@ -224,8 +222,7 @@ audio packet)
 - PROTMESSID_VERSION_AND_OS: Version number and operating system
 
     +-------------------------+------------------+------------------------------+
-    | 1 byte operating system | 2 bytes number n | n bytes UTF-8 string version
-|
+    | 1 byte operating system | 2 bytes number n | n bytes UTF-8 string version |
     +-------------------------+------------------+------------------------------+
 
 
@@ -235,8 +232,7 @@ audio packet)
     note: does not have any data -> n = 0
 
 
-- PROTMESSID_RECORDER_STATE: notifies of changes in the server jam recorder
-state
+- PROTMESSID_RECORDER_STATE: notifies of changes in the server jam recorder state
 
     +--------------+
     | 1 byte state |
@@ -288,12 +284,9 @@ CONNECTION LESS MESSAGES
         ... ------------------+----------------------------------+ ...
         ...  2 bytes number n | n bytes UTF-8 string server name | ...
         ... ------------------+----------------------------------+ ...
-        ... ------------------+----------------------------------------------+
-...
-        ...  2 bytes number n | n bytes UTF-8 string server internal address |
-...
-        ... ------------------+----------------------------------------------+
-...
+        ... ------------------+----------------------------------------------+ ...
+        ...  2 bytes number n | n bytes UTF-8 string server internal address | ...
+        ... ------------------+----------------------------------------------+ ...
         ... ------------------+---------------------------+
         ...  2 bytes number n | n bytes UTF-8 string city |
         ... ------------------+---------------------------+
@@ -312,8 +305,8 @@ CONNECTION LESS MESSAGES
       necessary, that value will contain the server internal address.
 
 
-- PROTMESSID_CLM_REGISTER_SERVER_EX: Register a server, providing extended
-server information
+- PROTMESSID_CLM_REGISTER_SERVER_EX: Register a server, providing extended server
+                                     information
 
     +--------------------------------+-------------------------------+
     | PROTMESSID_CLM_REGISTER_SERVER | PROTMESSID_CLM_VERSION_AND_OS |
@@ -337,8 +330,7 @@ server information
       of the PROTMESSID_CLM_REGISTER_SERVER message is used
 
 
-- PROTMESSID_CLM_RED_SERVER_LIST: Reduced server list message (to have less UDP
-fragmentation)
+- PROTMESSID_CLM_RED_SERVER_LIST: Reduced server list message (to have less UDP fragmentation)
 
     for each registered server append following data:
 
@@ -370,8 +362,7 @@ fragmentation)
 - PROTMESSID_CLM_VERSION_AND_OS: Version number and operating system
 
     +-------------------------+------------------+------------------------------+
-    | 1 byte operating system | 2 bytes number n | n bytes UTF-8 string version
-|
+    | 1 byte operating system | 2 bytes number n | n bytes UTF-8 string version |
     +-------------------------+------------------+------------------------------+
 
 
@@ -568,8 +559,7 @@ void CProtocol::CreateAndSendMessage ( const int               iID,
                                        iStartIndexInData,
                                        iCurPartSize );
 
-            // increment the start index of the source data by the last part
-            // size
+            // increment the start index of the source data by the last part size
             iStartIndexInData += iCurPartSize;
 
             Mutex.lock();
@@ -650,9 +640,9 @@ void CProtocol::ParseMessageBody ( const CVector<uint8_t>& vecbyMesBodyData,
                                    const int               iRecID )
 {
     /*
-    // TEST channel implementation: randomly delete protocol messages (50 %
-    loss) if ( rand() < ( RAND_MAX / 2 ) ) return false;
-    */
+// TEST channel implementation: randomly delete protocol messages (50 % loss)
+if ( rand() < ( RAND_MAX / 2 ) ) return false;
+*/
 
     // In case we received a message and returned an answer but our answer
     // did not make it to the receiver, he will resend his message. We check
@@ -735,24 +725,20 @@ void CProtocol::ParseMessageBody ( const CVector<uint8_t>& vecbyMesBodyData,
                          ( iSplitMessageCnt >= iReceivedNumParts ) ||
                          ( iSplitMessageCnt >= MAX_NUM_MESS_SPLIT_PARTS ) )
                     {
-                        // in case of an error we reset the split message
-                        // counter
+                        // in case of an error we reset the split message counter
                         iSplitMessageCnt       = 0;
                         iSplitMessageDataIndex = 0;
                     }
                     else
                     {
-                        // update counter and message data index since we have
-                        // received a valid new part
+                        // update counter and message data index since we have received a valid new part
                         iSplitMessageCnt++;
                         iSplitMessageDataIndex += iCurPartSize;
 
-                        // check if the split part messages was completely
-                        // received
+                        // check if the split part messages was completely received
                         if ( iSplitMessageCnt == iReceivedNumParts )
                         {
-                            // the split message is completely received, copy
-                            // data for parsing
+                            // the split message is completely received, copy data for parsing
                             vecbyMesBodyDataSplitMess.Init (
                                 iSplitMessageDataIndex );
 
@@ -761,14 +747,12 @@ void CProtocol::ParseMessageBody ( const CVector<uint8_t>& vecbyMesBodyData,
                                             iSplitMessageDataIndex,
                                         vecbyMesBodyDataSplitMess.begin() );
 
-                            // the received ID is still
-                            // PROTMESSID_SPECIAL_SPLIT_MESSAGE, set it to the
-                            // ID of the original reconstructed split message
-                            // now
+                            // the received ID is still PROTMESSID_SPECIAL_SPLIT_MESSAGE, set it to
+                            // the ID of the original reconstructed split message now
                             iRecIDModified = iOriginalID;
 
-                            // the complete split message was reconstructed,
-                            // reset the counter for the next split message
+                            // the complete split message was reconstructed, reset the counter for
+                            // the next split message
                             iSplitMessageCnt       = 0;
                             iSplitMessageDataIndex = 0;
                             bEvaluateMessage       = true;
@@ -778,8 +762,7 @@ void CProtocol::ParseMessageBody ( const CVector<uint8_t>& vecbyMesBodyData,
             }
             else
             {
-                // a non-split message was received, reset split message counter
-                // and directly evaluate message
+                // a non-split message was received, reset split message counter and directly evaluate message
                 iSplitMessageCnt       = 0;
                 iSplitMessageDataIndex = 0;
                 bEvaluateMessage       = true;
@@ -787,8 +770,8 @@ void CProtocol::ParseMessageBody ( const CVector<uint8_t>& vecbyMesBodyData,
 
             if ( bEvaluateMessage )
             {
-                // use a reference to either the original data vector or the
-                // reconstructed split message to avoid unnecessary copying
+                // use a reference to either the original data vector or the reconstructed
+                // split message to avoid unnecessary copying
                 const CVector<uint8_t>& vecbyMesBodyDataRef =
                     ( iRecID == PROTMESSID_SPECIAL_SPLIT_MESSAGE )
                         ? vecbyMesBodyDataSplitMess
@@ -888,9 +871,9 @@ void CProtocol::ParseConnectionLessMessageBody (
     const CHostAddress&     InetAddr )
 {
     /*
-    // TEST channel implementation: randomly delete protocol messages (50 %
-    loss) if ( rand() < ( RAND_MAX / 2 ) ) return false;
-    */
+// TEST channel implementation: randomly delete protocol messages (50 % loss)
+if ( rand() < ( RAND_MAX / 2 ) ) return false;
+*/
 
     // check which type of message we received and do action
     switch ( iRecID )
@@ -2300,8 +2283,7 @@ void CProtocol::CreateCLServerListMes (
         vecData.Enlarge ( iCurListEntrLen );
 
         // IP address (4 bytes)
-        // note the Server List manager has put the internal details in HostAddr
-        // where required
+        // note the Server List manager has put the internal details in HostAddr where required
         PutValOnStream (
             vecData,
             iPos,
@@ -2310,8 +2292,7 @@ void CProtocol::CreateCLServerListMes (
             4 );
 
         // port number (2 bytes)
-        // note the Server List manager has put the internal details in HostAddr
-        // where required
+        // note the Server List manager has put the internal details in HostAddr where required
         PutValOnStream (
             vecData,
             iPos,
@@ -2465,8 +2446,7 @@ void CProtocol::CreateCLRedServerListMes (
         vecData.Enlarge ( iCurListEntrLen );
 
         // IP address (4 bytes)
-        // note the Server List manager has put the internal details in HostAddr
-        // where required
+        // note the Server List manager has put the internal details in HostAddr where required
         PutValOnStream (
             vecData,
             iPos,
@@ -2475,16 +2455,14 @@ void CProtocol::CreateCLRedServerListMes (
             4 );
 
         // port number (2 bytes)
-        // note the Server List manager has put the internal details in HostAddr
-        // where required
+        // note the Server List manager has put the internal details in HostAddr where required
         PutValOnStream (
             vecData,
             iPos,
             static_cast<uint32_t> ( vecServerInfo[i].HostAddr.iPort ),
             2 );
 
-        // name (note that the string length indicator is 1 in this special
-        // case)
+        // name (note that the string length indicator is 1 in this special case)
         PutStringUTF8OnStream ( vecData, iPos, strUTF8Name, 1 );
     }
 
@@ -2516,8 +2494,7 @@ bool CProtocol::EvaluateCLRedServerListMes ( const CHostAddress&     InetAddr,
         const quint16 iPort =
             static_cast<quint16> ( GetValFromStream ( vecData, iPos, 2 ) );
 
-        // server name (note that the string length indicator is 1 in this
-        // special case)
+        // server name (note that the string length indicator is 1 in this special case)
         QString strName;
         if ( GetStringFromStream ( vecData,
                                    iPos,
@@ -2533,13 +2510,11 @@ bool CProtocol::EvaluateCLRedServerListMes ( const CHostAddress&     InetAddr,
             CHostAddress ( QHostAddress ( iIpAddr ), iPort ),
             CHostAddress ( QHostAddress ( iIpAddr ), iPort ),
             strName,
-            QLocale::AnyCountry, // set to any country since the information is
-                                 // not transmitted
+            QLocale::
+                AnyCountry, // set to any country since the information is not transmitted
             "", // empty city name since the information is not transmitted
-            0,  // per definition: if max. num. client is zero, we ignore the
-                // value in the server list
-            false ) ); // assume not permanent since the information is not
-                       // transmitted
+            0, // per definition: if max. num. client is zero, we ignore the value in the server list
+            false ) ); // assume not permanent since the information is not transmitted
     }
 
     // check size: all data is read, the position must now be at the end
@@ -3131,8 +3106,8 @@ uint32_t CProtocol::GetValFromStream ( const CVector<uint8_t>& vecIn,
                                        const int               iNumOfBytes )
 {
     /*
-        note: iPos is automatically incremented in this function
-    */
+    note: iPos is automatically incremented in this function
+*/
     // 4 bytes maximum since we return uint32
     Q_ASSERT ( ( iNumOfBytes > 0 ) && ( iNumOfBytes <= 4 ) );
     Q_ASSERT ( vecIn.Size() >= iPos + iNumOfBytes );
@@ -3155,8 +3130,8 @@ bool CProtocol::GetStringFromStream ( const CVector<uint8_t>& vecIn,
                                       const int               iNumberOfBytsLen )
 {
     /*
-        note: iPos is automatically incremented in this function
-    */
+    note: iPos is automatically incremented in this function
+*/
     const int iInLen = vecIn.Size();
 
     // check if at least iNumberOfBytsLen bytes are available
@@ -3301,8 +3276,8 @@ void CProtocol::PutValOnStream ( CVector<uint8_t>& vecIn,
                                  const int         iNumOfBytes )
 {
     /*
-        note: iPos is automatically incremented in this function
-    */
+    note: iPos is automatically incremented in this function
+*/
     // 4 bytes maximum since we use uint32
     Q_ASSERT ( ( iNumOfBytes > 0 ) && ( iNumOfBytes <= 4 ) );
     Q_ASSERT ( vecIn.Size() >= iPos + iNumOfBytes );

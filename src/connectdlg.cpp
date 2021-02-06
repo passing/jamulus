@@ -8,16 +8,16 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
@@ -327,10 +327,10 @@ void CConnectDlg::SetServerList ( const CHostAddress&         InetAddr,
                                   const bool bIsReducedServerList )
 {
     // If the normal list was received, we do not accept any further list
-    // updates (to avoid the reduced list overwrites the normal list (#657)).
-    // Also, we only accept a server list from the server address we have sent
-    // the request for this to (note that we cannot use the port number since
-    // the receive port and send port might be different at the central server).
+    // updates (to avoid the reduced list overwrites the normal list (#657)). Also,
+    // we only accept a server list from the server address we have sent the
+    // request for this to (note that we cannot use the port number since the
+    // receive port and send port might be different at the central server).
     if ( bServerListReceived ||
          ( InetAddr.InetAddr != CentralServerAddress.InetAddr ) )
     {
@@ -353,8 +353,8 @@ void CConnectDlg::SetServerList ( const CHostAddress&         InetAddr,
     }
     else
     {
-        // set flag and disable timer for resend server list request if full
-        // list was received (i.e. not the reduced list)
+        // set flag and disable timer for resend server list request if full list
+        // was received (i.e. not the reduced list)
         bServerListReceived = true;
         TimerReRequestServList.stop();
     }
@@ -420,8 +420,7 @@ void CConnectDlg::SetServerList ( const CHostAddress&         InetAddr,
             }
         }
 
-        // in case of all servers shown, add the registration number at the
-        // beginning
+        // in case of all servers shown, add the registration number at the beginning
         if ( bShowCompleteRegList )
         {
             pNewListViewItem->setText ( 0,
@@ -559,8 +558,7 @@ void CConnectDlg::SetConnClientsList (
                     CInstPictures::GetResourceReference (
                         vecChanInfo[i].iInstrument );
 
-                // first check if instrument picture is used or not and if it is
-                // valid
+                // first check if instrument picture is used or not and if it is valid
                 if ( !( CInstPictures::IsNotUsedInstrument (
                             vecChanInfo[i].iInstrument ) ||
                         strCurResourceRef.isEmpty() ) )
@@ -661,8 +659,7 @@ void CConnectDlg::UpdateListFilter()
                 lvwServers->topLevelItem ( iIdx );
             bool bFilterFound = false;
 
-            // DEFINITION: if "#" is set at the beginning of the filter text, we
-            // show
+            // DEFINITION: if "#" is set at the beginning of the filter text, we show
             //             occupied servers (#397)
             if ( ( sFilterText.indexOf ( "#" ) == 0 ) &&
                  ( sFilterText.length() == 1 ) )
@@ -707,9 +704,8 @@ void CConnectDlg::UpdateListFilter()
             if ( !pCurListViewItem->text ( 1 ).isEmpty() ||
                  bShowCompleteRegList )
             {
-                // only update hide and expand status if the hide state has to
-                // be changed to preserve if user clicked on expand icon
-                // manually
+                // only update hide and expand status if the hide state has to be changed to
+                // preserve if user clicked on expand icon manually
                 if ( ( pCurListViewItem->isHidden() && bFilterFound ) ||
                      ( !pCurListViewItem->isHidden() && !bFilterFound ) )
                 {
@@ -721,8 +717,8 @@ void CConnectDlg::UpdateListFilter()
     }
     else
     {
-        // if the filter was active but is now disabled, we have to update all
-        // list view items for the "ping received" hide state
+        // if the filter was active but is now disabled, we have to update all list
+        // view items for the "ping received" hide state
         if ( bListFilterWasActive )
         {
             const int iServerListLen = lvwServers->topLevelItemCount();
@@ -969,9 +965,8 @@ void CConnectDlg::SetPingTimeAndNumClientsResult ( const CHostAddress& InetAddr,
         lvwServers->setRootIsDecorated ( false );
     }
 
-    // we may have changed the Hidden state for some items, if a filter was
-    // active, we now have to update it to void lines appear which do not
-    // satisfy the filter criteria
+    // we may have changed the Hidden state for some items, if a filter was active, we now
+    // have to update it to void lines appear which do not satisfy the filter criteria
     UpdateListFilter();
 }
 

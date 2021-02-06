@@ -206,8 +206,7 @@ QString CSound::CheckDeviceCapabilities()
             return tr ( "Required audio sample format not available." );
         }
 
-        // store the name of the channel and check if channel mixing is
-        // supported
+        // store the name of the channel and check if channel mixing is supported
         channelInputName[i] = channelInfosInput[i].name;
 
         if ( !CheckSampleTypeSupportedForCHMixing (
@@ -316,17 +315,14 @@ int CSound::GetActualBufferSize ( const int iDesiredBufferSizeMono )
                         &HWBufferInfo.lGranularity );
 
     /*
-    // TEST
-    #include <QMessageBox>
-    QMessageBox::information ( 0, "APP_NAME", QString("lMinSize: %1, lMaxSize:
-    %2, lPreferredSize: %3, lGranularity: %4").
-                               arg(HWBufferInfo.lMinSize).arg(HWBufferInfo.lMaxSize).arg(HWBufferInfo.lPreferredSize).arg(HWBufferInfo.lGranularity)
-    ); _exit(1);
-    */
+// TEST
+#include <QMessageBox>
+QMessageBox::information ( 0, "APP_NAME", QString("lMinSize: %1, lMaxSize: %2, lPreferredSize: %3, lGranularity: %4").
+                           arg(HWBufferInfo.lMinSize).arg(HWBufferInfo.lMaxSize).arg(HWBufferInfo.lPreferredSize).arg(HWBufferInfo.lGranularity) );
+_exit(1);
+*/
 
-    // TODO see
-    // https://github.com/EddieRingle/portaudio/blob/master/src/hostapi/asio/pa_asio.cpp#L1654
-    // (SelectHostBufferSizeForUnspecifiedUserFramesPerBuffer)
+    // TODO see https://github.com/EddieRingle/portaudio/blob/master/src/hostapi/asio/pa_asio.cpp#L1654 (SelectHostBufferSizeForUnspecifiedUserFramesPerBuffer)
 
     // calculate "nearest" buffer size and set internal parameter accordingly
     // first check minimum and maximum values
@@ -376,8 +372,8 @@ int CSound::GetActualBufferSize ( const int iDesiredBufferSizeMono )
                     {
                         if ( iTrialBufSize >= iDesiredBufferSizeMono )
                         {
-                            // test which buffer size fits better: the old one
-                            // or the current one
+                            // test which buffer size fits better: the old one or the
+                            // current one
                             if ( ( iTrialBufSize - iDesiredBufferSizeMono ) >
                                  ( iDesiredBufferSizeMono -
                                    iLastTrialBufSize ) )
@@ -632,8 +628,7 @@ bool CSound::CheckSampleTypeSupported ( const ASIOSampleType SamType )
 bool CSound::CheckSampleTypeSupportedForCHMixing (
     const ASIOSampleType SamType )
 {
-    // check for supported sample types for audio channel mixing (see
-    // bufferSwitch)
+    // check for supported sample types for audio channel mixing (see bufferSwitch)
     return ( ( SamType == ASIOSTInt16LSB ) || ( SamType == ASIOSTInt24LSB ) ||
              ( SamType == ASIOSTInt32LSB ) );
 }
@@ -766,8 +761,7 @@ void CSound::bufferSwitch ( long index, ASIOBool )
                 break;
             }
 
-            case ASIOSTFloat32LSB: // IEEE 754 32 bit float, as found on Intel
-                                   // x86 architecture
+            case ASIOSTFloat32LSB: // IEEE 754 32 bit float, as found on Intel x86 architecture
                                    // NOT YET TESTED
                 for ( iCurSample = 0; iCurSample < iASIOBufferSizeMono;
                       iCurSample++ )
@@ -781,9 +775,8 @@ void CSound::bufferSwitch ( long index, ASIOBool )
                 }
                 break;
 
-            case ASIOSTFloat64LSB: // IEEE 754 64 bit double float, as found on
-                                   // Intel x86 architecture
-                                   // NOT YET TESTED
+            case ASIOSTFloat64LSB: // IEEE 754 64 bit double float, as found on Intel x86 architecture
+                // NOT YET TESTED
                 for ( iCurSample = 0; iCurSample < iASIOBufferSizeMono;
                       iCurSample++ )
                 {
@@ -873,8 +866,8 @@ void CSound::bufferSwitch ( long index, ASIOBool )
                 for ( iCurSample = 0; iCurSample < iASIOBufferSizeMono;
                       iCurSample++ )
                 {
-                    // because the bits are flipped, we do not have to perform
-                    // the shift by 8 bits
+                    // because the bits are flipped, we do not have to perform the
+                    // shift by 8 bits
                     int iCurSam = 0;
                     memcpy (
                         &iCurSam,
@@ -902,8 +895,7 @@ void CSound::bufferSwitch ( long index, ASIOBool )
                 }
                 break;
 
-            case ASIOSTFloat32MSB: // IEEE 754 32 bit float, as found on Intel
-                                   // x86 architecture
+            case ASIOSTFloat32MSB: // IEEE 754 32 bit float, as found on Intel x86 architecture
                                    // NOT YET TESTED
                 for ( iCurSample = 0; iCurSample < iASIOBufferSizeMono;
                       iCurSample++ )
@@ -918,9 +910,8 @@ void CSound::bufferSwitch ( long index, ASIOBool )
                 }
                 break;
 
-            case ASIOSTFloat64MSB: // IEEE 754 64 bit double float, as found on
-                                   // Intel x86 architecture
-                                   // NOT YET TESTED
+            case ASIOSTFloat64MSB: // IEEE 754 64 bit double float, as found on Intel x86 architecture
+                // NOT YET TESTED
                 for ( iCurSample = 0; iCurSample < iASIOBufferSizeMono;
                       iCurSample++ )
                 {
@@ -1061,8 +1052,7 @@ void CSound::bufferSwitch ( long index, ASIOBool )
                 break;
             }
 
-            case ASIOSTFloat32LSB: // IEEE 754 32 bit float, as found on Intel
-                                   // x86 architecture
+            case ASIOSTFloat32LSB: // IEEE 754 32 bit float, as found on Intel x86 architecture
                                    // NOT YET TESTED
                 for ( iCurSample = 0; iCurSample < iASIOBufferSizeMono;
                       iCurSample++ )
@@ -1076,9 +1066,8 @@ void CSound::bufferSwitch ( long index, ASIOBool )
                 }
                 break;
 
-            case ASIOSTFloat64LSB: // IEEE 754 64 bit double float, as found on
-                                   // Intel x86 architecture
-                                   // NOT YET TESTED
+            case ASIOSTFloat64LSB: // IEEE 754 64 bit double float, as found on Intel x86 architecture
+                // NOT YET TESTED
                 for ( iCurSample = 0; iCurSample < iASIOBufferSizeMono;
                       iCurSample++ )
                 {
@@ -1169,8 +1158,8 @@ void CSound::bufferSwitch ( long index, ASIOBool )
                 for ( iCurSample = 0; iCurSample < iASIOBufferSizeMono;
                       iCurSample++ )
                 {
-                    // because the bits are flipped, we do not have to perform
-                    // the shift by 8 bits
+                    // because the bits are flipped, we do not have to perform the
+                    // shift by 8 bits
                     int32_t iCurSam = static_cast<int32_t> ( Flip16Bits (
                         vecsMultChanAudioSndCrd[2 * iCurSample + i] ) );
 
@@ -1197,8 +1186,7 @@ void CSound::bufferSwitch ( long index, ASIOBool )
                 }
                 break;
 
-            case ASIOSTFloat32MSB: // IEEE 754 32 bit float, as found on Intel
-                                   // x86 architecture
+            case ASIOSTFloat32MSB: // IEEE 754 32 bit float, as found on Intel x86 architecture
                                    // NOT YET TESTED
                 for ( iCurSample = 0; iCurSample < iASIOBufferSizeMono;
                       iCurSample++ )
@@ -1213,9 +1201,8 @@ void CSound::bufferSwitch ( long index, ASIOBool )
                 }
                 break;
 
-            case ASIOSTFloat64MSB: // IEEE 754 64 bit double float, as found on
-                                   // Intel x86 architecture
-                                   // NOT YET TESTED
+            case ASIOSTFloat64MSB: // IEEE 754 64 bit double float, as found on Intel x86 architecture
+                // NOT YET TESTED
                 for ( iCurSample = 0; iCurSample < iASIOBufferSizeMono;
                       iCurSample++ )
                 {

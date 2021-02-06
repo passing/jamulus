@@ -152,8 +152,7 @@ void CSound::OpenJack ( const bool  bNoAutoJackConnect,
                            ports[0],
                            jack_port_name ( input_port_left ) );
 
-            // before connecting the second stereo channel, check if the input
-            // is not mono
+            // before connecting the second stereo channel, check if the input is not mono
             if ( ports[1] )
             {
                 jack_connect ( pJackClient,
@@ -175,8 +174,7 @@ void CSound::OpenJack ( const bool  bNoAutoJackConnect,
                            jack_port_name ( output_port_left ),
                            ports[0] );
 
-            // before connecting the second stereo channel, check if the output
-            // is not mono
+            // before connecting the second stereo channel, check if the output is not mono
             if ( ports[1] )
             {
                 jack_connect ( pJackClient,
@@ -245,13 +243,12 @@ int CSound::Init ( const int /* iNewPrefMonoBufferSize */ )
 
     // try setting buffer size
     // TODO seems not to work! -> no audio after this operation!
-    // Doesn't this give an infinite loop? The set buffer size function will
-    // call our registered callback which calls "EmitReinitRequestSignal()". In
-    // that function this CSound::Init() function is called...
-    // jack_set_buffer_size ( pJackClient, iNewPrefMonoBufferSize );
+    // Doesn't this give an infinite loop? The set buffer size function will call our
+    // registered callback which calls "EmitReinitRequestSignal()". In that function
+    // this CSound::Init() function is called...
+    //jack_set_buffer_size ( pJackClient, iNewPrefMonoBufferSize );
 
-    // without a Jack server, Jamulus makes no sense to run, throw an error
-    // message
+    // without a Jack server, Jamulus makes no sense to run, throw an error message
     if ( bJackWasShutDown )
     {
         throw CGenErr ( tr (

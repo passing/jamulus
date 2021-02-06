@@ -62,5 +62,4 @@ class CSound : public CSoundBase
     int iVSTMonoBufferSize;
 };
 
-#endif // !defined (
-       // _VSTSOUND_H__9518A346345768_11D3_8C0D_EEBF182CF549__INCLUDED_ )
+#endif // !defined ( _VSTSOUND_H__9518A346345768_11D3_8C0D_EEBF182CF549__INCLUDED_ )

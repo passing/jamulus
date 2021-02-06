@@ -8,16 +8,16 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
@@ -30,6 +30,8 @@ CHighPrecisionTimer::CHighPrecisionTimer (
     const bool bNewUseDoubleSystemFrameSize ) :
     bUseDoubleSystemFrameSize ( bNewUseDoubleSystemFrameSize )
 {
+    int misaligned_var;
+
     // add some error checking, the high precision timer implementation only
     // supports 64 and 128 samples frame size at 48 kHz sampling rate
 #if ( SYSTEM_FRAME_SIZE_SAMPLES != 64 ) &&                                     \
@@ -50,10 +52,11 @@ CHighPrecisionTimer::CHighPrecisionTimer (
     // required interval is minimum.
     veciTimeOutIntervals.Init ( 3 );
 
-    // for 128 sample frame size at 48 kHz sampling rate with 2 ms timer
-    // resolution: actual intervals:  0.0  2.666  5.333  8.0 quantized to 2 ms:
-    // 0    2      6      8 (0) for 64 sample frame size at 48 kHz sampling rate
-    // with 1 ms timer resolution: actual intervals:  0.0  1.333  2.666  4.0
+    // for 128 sample frame size at 48 kHz sampling rate with 2 ms timer resolution:
+    // actual intervals:  0.0  2.666  5.333  8.0
+    // quantized to 2 ms: 0    2      6      8 (0)
+    // for 64 sample frame size at 48 kHz sampling rate with 1 ms timer resolution:
+    // actual intervals:  0.0  1.333  2.666  4.0
     // quantized to 2 ms: 0    1      3      4 (0)
     veciTimeOutIntervals[0] = 0;
     veciTimeOutIntervals[1] = 1;
@@ -192,10 +195,9 @@ void CHighPrecisionTimer::run()
     {
         // call processing routine by fireing signal
 
-        // TODO by emit a signal we leave the high priority thread -> maybe use
-        // some
-        //      other connection type to have something like a true callback,
-        //      e.g. "Qt::DirectConnection" -> Can this work?
+        // TODO by emit a signal we leave the high priority thread -> maybe use some
+        //      other connection type to have something like a true callback, e.g.
+        //      "Qt::DirectConnection" -> Can this work?
 
         emit timeout();
 
@@ -314,8 +316,7 @@ CServer::CServer ( const int          iNewMaxNumChan,
         opus_custom_encoder_ctl ( Opus64EncoderMono[i], OPUS_SET_VBR ( 0 ) );
         opus_custom_encoder_ctl ( Opus64EncoderStereo[i], OPUS_SET_VBR ( 0 ) );
 
-        // for 64 samples frame size we have to adjust the PLC behavior to avoid
-        // loud artifacts
+        // for 64 samples frame size we have to adjust the PLC behavior to avoid loud artifacts
         opus_custom_encoder_ctl ( Opus64EncoderMono[i],
                                   OPUS_SET_PACKET_LOSS_PERC ( 35 ) );
         opus_custom_encoder_ctl ( Opus64EncoderStereo[i],
@@ -406,8 +407,7 @@ CServer::CServer ( const int          iNewMaxNumChan,
             2 /* stereo */ *
             DOUBLE_SYSTEM_FRAME_SIZE_SAMPLES /* worst case buffer size */ );
 
-        // allocate worst case memory for intermediate processing buffers in
-        // float precision
+        // allocate worst case memory for intermediate processing buffers in float precision
         vecvecfIntermediateProcBuf[i].Init (
             2 /* stereo */ *
             DOUBLE_SYSTEM_FRAME_SIZE_SAMPLES /* worst case buffer size */ );
@@ -830,8 +830,7 @@ void CServer::OnAboutToQuit()
 
 void CServer::OnHandledSignal ( int sigNum )
 {
-    // show the signal number on the console (note that this may not work for
-    // Windows)
+    // show the signal number on the console (note that this may not work for Windows)
     qDebug() << qUtf8Printable (
         QString ( "OnHandledSignal: %1" ).arg ( sigNum ) );
 
@@ -897,15 +896,13 @@ void CServer::Stop()
 void CServer::OnTimer()
 {
     /*
-    static CTimingMeas JitterMeas ( 1000, "test2.dat" ); JitterMeas.Measure();
-    // TEST do a timer jitter measurement
-    */
+static CTimingMeas JitterMeas ( 1000, "test2.dat" ); JitterMeas.Measure(); // TEST do a timer jitter measurement
+*/
     // Get data from all connected clients -------------------------------------
     // some inits
     int iNumClients = 0; // init connected client counter
     bChannelIsNowDisconnected =
-        false; // note that the flag must be a member function since
-               // QtConcurrent::run can only take 5 params
+        false; // note that the flag must be a member function since QtConcurrent::run can only take 5 params
 
     // Make put and get calls thread safe. Do not forget to unlock mutex
     // afterwards!
@@ -943,10 +940,9 @@ void CServer::OnTimer()
 
             for ( int iBlockCnt = 0; iBlockCnt < iNumBlocks; iBlockCnt++ )
             {
-                // The work for OPUS decoding is distributed over all available
-                // processor cores. By using the future synchronizer we make
-                // sure that all threads are done when we leave the timer
-                // callback function.
+                // The work for OPUS decoding is distributed over all available processor cores.
+                // By using the future synchronizer we make sure that all
+                // threads are done when we leave the timer callback function.
                 const int iStartChanCnt = iBlockCnt * iMTBlockSize;
                 const int iStopChanCnt =
                     std::min ( ( iBlockCnt + 1 ) * iMTBlockSize - 1,
@@ -960,8 +956,7 @@ void CServer::OnTimer()
                                         iNumClients ) );
             }
 
-            // make sure all concurrent run threads have finished when we leave
-            // this function
+            // make sure all concurrent run threads have finished when we leave this function
             FutureSynchronizer.waitForFinished();
             FutureSynchronizer.clearFutures();
         }
@@ -1026,15 +1021,13 @@ void CServer::OnTimer()
         // processing with multithreading
         if ( bUseMultithreading )
         {
-            // introduced by kraney (#653): each thread must complete within the
-            // 1 or 2ms time budget for the timer
+            // introduced by kraney (#653): each thread must complete within the 1 or 2ms time budget for the timer
             // TODO determine at startup by running a small benchmark
             const int iMaximumMixOpsInTimeBudget =
-                500; // approximate limit as observed on GCP e2-standard
-                     // instance
-            const int iMTBlockSize = iMaximumMixOpsInTimeBudget /
-                                     iNumClients; // number of ops = block size
-                                                  // * total number of clients
+                500; // approximate limit as observed on GCP e2-standard instance
+            const int iMTBlockSize =
+                iMaximumMixOpsInTimeBudget /
+                iNumClients; // number of ops = block size * total number of clients
             const int iNumBlocks = ( iNumClients - 1 ) / iMTBlockSize + 1;
 
             for ( int iBlockCnt = 0; iBlockCnt < iNumBlocks; iBlockCnt++ )
@@ -1057,8 +1050,7 @@ void CServer::OnTimer()
                                         iNumClients ) );
             }
 
-            // make sure all concurrent run threads have finished when we leave
-            // this function
+            // make sure all concurrent run threads have finished when we leave this function
             FutureSynchronizer.waitForFinished();
             FutureSynchronizer.clearFutures();
         }
@@ -1075,8 +1067,7 @@ void CServer::DecodeReceiveDataBlocks ( const int iStartChanCnt,
                                         const int iStopChanCnt,
                                         const int iNumClients )
 {
-    // loop over all channels in the current block, needed for multithreading
-    // support
+    // loop over all channels in the current block, needed for multithreading support
     for ( int iChanCnt = iStartChanCnt; iChanCnt <= iStopChanCnt; iChanCnt++ )
     {
         DecodeReceiveData ( iChanCnt, iNumClients );
@@ -1087,8 +1078,7 @@ void CServer::MixEncodeTransmitDataBlocks ( const int iStartChanCnt,
                                             const int iStopChanCnt,
                                             const int iNumClients )
 {
-    // loop over all channels in the current block, needed for multithreading
-    // support
+    // loop over all channels in the current block, needed for multithreading support
     for ( int iChanCnt = iStartChanCnt; iChanCnt <= iStopChanCnt; iChanCnt++ )
     {
         MixEncodeTransmitData ( iChanCnt, iNumClients );
@@ -1126,8 +1116,7 @@ void CServer::DecodeReceiveData ( const int iChanCnt, const int iNumClients )
         vecNumFrameSizeConvBlocks[iChanCnt] = 1;
     }
 
-    // update conversion buffer size (nothing will happen if the size stays the
-    // same)
+    // update conversion buffer size (nothing will happen if the size stays the same)
     if ( vecUseDoubleSysFraSizeConvBuf[iChanCnt] )
     {
         DoubleFrameSizeConvBufIn[iCurChanID].SetBufferSize (
@@ -1182,9 +1171,8 @@ void CServer::DecodeReceiveData ( const int iChanCnt, const int iNumClients )
         vecvecfGains[iChanCnt][j] *=
             vecChannels[vecChanIDsCurConChan[j]].GetFadeInGain();
 
-        // use the fade in of the current channel for all other connected
-        // clients as well to avoid the client volumes are at 100% when joining
-        // a server (#628)
+        // use the fade in of the current channel for all other connected clients
+        // as well to avoid the client volumes are at 100% when joining a server (#628)
         if ( j != iChanCnt )
         {
             vecvecfGains[iChanCnt][j] *=
@@ -1196,12 +1184,11 @@ void CServer::DecodeReceiveData ( const int iChanCnt, const int iNumClients )
             vecChannels[iCurChanID].GetPan ( vecChanIDsCurConChan[j] );
     }
 
-    // If the server frame size is smaller than the received OPUS frame size, we
-    // need a conversion buffer which stores the large buffer. Note that we have
-    // a shortcut here. If the conversion buffer is not needed, the boolean flag
-    // is false and the Get() function is not called at all. Therefore if the
-    // buffer is not needed we do not spend any time in the function but go
-    // directly inside the if condition.
+    // If the server frame size is smaller than the received OPUS frame size, we need a conversion
+    // buffer which stores the large buffer.
+    // Note that we have a shortcut here. If the conversion buffer is not needed, the boolean flag
+    // is false and the Get() function is not called at all. Therefore if the buffer is not needed
+    // we do not spend any time in the function but go directly inside the if condition.
     if ( ( vecUseDoubleSysFraSizeConvBuf[iChanCnt] == 0 ) ||
          !DoubleFrameSizeConvBufIn[iCurChanID].Get (
              vecvecsData[iChanCnt],
@@ -1229,10 +1216,9 @@ void CServer::DecodeReceiveData ( const int iChanCnt, const int iNumClients )
                         iCurChanID ); // TODO do this outside the mutex lock?
                 }
 
-                // note that no mutex is needed for this shared resource since
-                // it is not a read-modify-write operation but an atomic write
-                // and also each thread can only set it to true and never to
-                // false
+                // note that no mutex is needed for this shared resource since it is not a
+                // read-modify-write operation but an atomic write and also each thread can
+                // only set it to true and never to false
                 bChannelIsNowDisconnected = true;
             }
 
@@ -1260,9 +1246,8 @@ void CServer::DecodeReceiveData ( const int iChanCnt, const int iNumClients )
             }
         }
 
-        // a new large frame is ready, if the conversion buffer is required, put
-        // it in the buffer and read out the small frame size immediately for
-        // further processing
+        // a new large frame is ready, if the conversion buffer is required, put it in the buffer
+        // and read out the small frame size immediately for further processing
         if ( vecUseDoubleSysFraSizeConvBuf[iChanCnt] != 0 )
         {
             DoubleFrameSizeConvBufIn[iCurChanID].PutAll (
@@ -1289,8 +1274,7 @@ void CServer::MixEncodeTransmitData ( const int iChanCnt,
     // get actual ID of current channel
     const int iCurChanID = vecChanIDsCurConChan[iChanCnt];
 
-    // init intermediate processing vector with zeros since we mix all channels
-    // on that vector
+    // init intermediate processing vector with zeros since we mix all channels on that vector
     vecfIntermProcBuf.Reset ( 0 );
 
     // distinguish between stereo and mono mode
@@ -1364,14 +1348,13 @@ void CServer::MixEncodeTransmitData ( const int iChanCnt,
         // Stereo target channel -----------------------------------------------
         for ( j = 0; j < iNumClients; j++ )
         {
-            // get a reference to the audio data and gain/pan of the current
-            // client
+            // get a reference to the audio data and gain/pan of the current client
             const CVector<int16_t>& vecsData = vecvecsData[j];
             const float             fGain    = vecvecfGains[iChanCnt][j];
             const float             fPan     = vecvecfPannings[iChanCnt][j];
 
-            // calculate combined gain/pan for each stereo channel where we
-            // define the panning that center equals full gain for both channels
+            // calculate combined gain/pan for each stereo channel where we define
+            // the panning that center equals full gain for both channels
             const float fGainL = MathUtils::GetLeftPan ( fPan, false ) * fGain;
             const float fGainR = MathUtils::GetRightPan ( fPan, false ) * fGain;
 
@@ -1380,8 +1363,7 @@ void CServer::MixEncodeTransmitData ( const int iChanCnt,
             {
                 if ( vecNumAudioChannels[j] == 1 )
                 {
-                    // mono: copy same mono data in both out stereo audio
-                    // channels
+                    // mono: copy same mono data in both out stereo audio channels
                     for ( i = 0, k = 0; i < iServerFrameSizeSamples;
                           i++, k += 2 )
                     {
@@ -1403,8 +1385,7 @@ void CServer::MixEncodeTransmitData ( const int iChanCnt,
             {
                 if ( vecNumAudioChannels[j] == 1 )
                 {
-                    // mono: copy same mono data in both out stereo audio
-                    // channels
+                    // mono: copy same mono data in both out stereo audio channels
                     for ( i = 0, k = 0; i < iServerFrameSizeSamples;
                           i++, k += 2 )
                     {
@@ -1468,12 +1449,11 @@ void CServer::MixEncodeTransmitData ( const int iChanCnt,
         }
     }
 
-    // If the server frame size is smaller than the received OPUS frame size, we
-    // need a conversion buffer which stores the large buffer. Note that we have
-    // a shortcut here. If the conversion buffer is not needed, the boolean flag
-    // is false and the Get() function is not called at all. Therefore if the
-    // buffer is not needed we do not spend any time in the function but go
-    // directly inside the if condition.
+    // If the server frame size is smaller than the received OPUS frame size, we need a conversion
+    // buffer which stores the large buffer.
+    // Note that we have a shortcut here. If the conversion buffer is not needed, the boolean flag
+    // is false and the Get() function is not called at all. Therefore if the buffer is not needed
+    // we do not spend any time in the function but go directly inside the if condition.
     if ( ( vecUseDoubleSysFraSizeConvBuf[iChanCnt] == 0 ) ||
          DoubleFrameSizeConvBufOut[iCurChanID].Put (
              vecsSendData,
@@ -1493,10 +1473,8 @@ void CServer::MixEncodeTransmitData ( const int iChanCnt,
             // OPUS encoding
             if ( pCurOpusEncoder != nullptr )
             {
-                // TODO find a better place than this: the setting does not
-                // change all the time so for speed
-                //      optimization it would be better to set it only if the
-                //      network frame size is changed
+                // TODO find a better place than this: the setting does not change all the time so for speed
+                //      optimization it would be better to set it only if the network frame size is changed
                 opus_custom_encoder_ctl (
                     pCurOpusEncoder,
                     OPUS_SET_BITRATE ( CalcBitRateBitsPerSecFromCodedBytes (
@@ -1536,8 +1514,7 @@ CVector<CChannelInfo> CServer::CreateChannelList()
             vecChanInfo.Add ( CChannelInfo (
                 i, // ID
                 QHostAddress ( QHostAddress::Null )
-                    .toIPv4Address(), // use invalid IP address (for privacy
-                                      // reason, #316)
+                    .toIPv4Address(), // use invalid IP address (for privacy reason, #316)
                 vecChannels[i].GetChanInfo() ) );
         }
     }
@@ -1914,8 +1891,7 @@ bool CServer::CreateLevelsForAllConChannels (
                                                    iServerFrameSizeSamples,
                                                    vecNumAudioChannels[j] > 1 );
 
-            // map value to integer for transmission via the protocol (4 bit
-            // available)
+            // map value to integer for transmission via the protocol (4 bit available)
             vecLevelsOut[j] =
                 static_cast<uint16_t> ( std::ceil ( dCurSigLevelForMeterdB ) );
         }
@@ -1926,8 +1902,7 @@ bool CServer::CreateLevelsForAllConChannels (
 
     if ( bUseDoubleSystemFrameSize )
     {
-        // additional increment needed for double frame size to get to the same
-        // time interval
+        // additional increment needed for double frame size to get to the same time interval
         iFrameCount++;
     }
 

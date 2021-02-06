@@ -35,8 +35,7 @@ class RingBuffer
   public:
     /**
      * @brief RingBuffer
-     * @param max maximum number of elements that can be contained in the ring
-     * buffer
+     * @param max maximum number of elements that can be contained in the ring buffer
      */
     RingBuffer ( std::size_t max = 0 ) :
         mData ( max ),
@@ -48,8 +47,7 @@ class RingBuffer
 
     /**
      * @brief Resets the ring_buffer
-     * @param max maximum number of elements that can be contained in the ring
-     * buffer.
+     * @param max maximum number of elements that can be contained in the ring buffer.
      */
     void reset ( std::size_t max = 0 )
     {

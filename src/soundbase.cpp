@@ -8,16 +8,16 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
@@ -114,8 +114,8 @@ QString CSoundBase::SetDev ( const QString strDevName )
             }
             else
             {
-                // loading and initializing the current driver failed, try to
-                // find at least one usable driver
+                // loading and initializing the current driver failed, try to find
+                // at least one usable driver
                 bTryLoadAnyDriver = true;
             }
         }
@@ -182,9 +182,9 @@ QString CSoundBase::SetDev ( const QString strDevName )
             sErrorMessage += "</ul>";
 
 #ifdef _WIN32
-            // to be able to access the ASIO driver setup for changing, e.g.,
-            // the sample rate, we offer the user under Windows that we open the
-            // driver setups of all registered ASIO drivers
+            // to be able to access the ASIO driver setup for changing, e.g., the sample rate, we
+            // offer the user under Windows that we open the driver setups of all registered
+            // ASIO drivers
             sErrorMessage =
                 sErrorMessage + "<br/>" +
                 tr ( "Do you want to open the ASIO driver setups?" );
@@ -286,14 +286,14 @@ void CSoundBase::ParseMIDIMessage ( const CVector<uint8_t>& vMIDIPaketBytes )
             const int iMIDIChannelZB = iStatusByte & 0x0F;
 
             /*
-            // debugging
-            printf ( "%02X: ", iMIDIChannelZB );
-            for ( int i = 0; i < vMIDIPaketBytes.Size(); i++ )
-            {
-                printf ( "%02X ", vMIDIPaketBytes[i] );
-            }
-            printf ( "\n" );
-            */
+// debugging
+printf ( "%02X: ", iMIDIChannelZB );
+for ( int i = 0; i < vMIDIPaketBytes.Size(); i++ )
+{
+    printf ( "%02X ", vMIDIPaketBytes[i] );
+}
+printf ( "\n" );
+*/
 
             // per definition if MIDI channel is 0, we listen to all channels
             // note that iCtrlMIDIChannel is one-based channel number
@@ -306,8 +306,8 @@ void CSoundBase::ParseMIDIMessage ( const CVector<uint8_t>& vMIDIPaketBytes )
                     // make sure packet is long enough
                     if ( vMIDIPaketBytes.Size() > 2 )
                     {
-                        // we are assuming that the controller number is the
-                        // same as the audio fader index and the range is 0-127
+                        // we are assuming that the controller number is the same
+                        // as the audio fader index and the range is 0-127
                         const int iFaderLevel = static_cast<int> (
                             static_cast<double> (
                                 qMin ( vMIDIPaketBytes[2], uint8_t ( 127 ) ) ) /

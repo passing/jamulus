@@ -8,16 +8,16 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
@@ -345,10 +345,10 @@ template<class TData>
 void CMovingAv<TData>::Add ( const TData tNewD )
 {
     /*
-        Optimized calculation of the moving average. We only add a new value and
-        subtract the old value from the result. We only need one addition and a
-        history buffer.
-    */
+    Optimized calculation of the moving average. We only add a new value and
+    subtract the old value from the result. We only need one addition and a
+    history buffer.
+*/
 
     // subtract oldest value
     dCurAvResult -= CVector<TData>::operator[] ( iCurIdx );
@@ -396,8 +396,7 @@ class CBaseDlg : public QDialog
 #ifdef ANDROID
             if ( pEvent->key() == Qt::Key_Back )
             {
-                close(); // otherwise, dialog does not show properly again in
-                         // android (nefarius2001, #832)
+                close(); // otherwise, dialog does not show properly again in android (nefarius2001, #832)
                 return;
             }
 #endif
@@ -535,9 +534,9 @@ enum EAudComprType
 enum ENetwFlags
 {
     // used for protocol -> enum values must be fixed!
-    NF_NONE         = 0,
-    NF_WITH_COUNTER = 1 // using a network counter to correctly order UDP
-                        // packets in jitter buffer
+    NF_NONE = 0,
+    NF_WITH_COUNTER =
+        1 // using a network counter to correctly order UDP packets in jitter buffer
 };
 
 // Audio quality enum ----------------------------------------------------------
@@ -742,11 +741,9 @@ enum ESkillLevel
 class CStereoSignalLevelMeter
 {
   public:
-    // TODO Calculate smoothing factor from sample rate and frame size (64 or
-    // 128 samples frame size).
-    //      But tests with 128 and 64 samples frame size have shown that the
-    //      meter fly back is ok for both numbers of samples frame size with a
-    //      factor of 0.99.
+    // TODO Calculate smoothing factor from sample rate and frame size (64 or 128 samples frame size).
+    //      But tests with 128 and 64 samples frame size have shown that the meter fly back
+    //      is ok for both numbers of samples frame size with a factor of 0.99.
     CStereoSignalLevelMeter ( const bool   bNIsStereoOut     = true,
                               const double dNSmoothingFactor = 0.99 ) :
         dSmoothingFactor ( dNSmoothingFactor ),

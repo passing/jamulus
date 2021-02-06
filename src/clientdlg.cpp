@@ -581,10 +581,9 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
                        this,
                        &CClientDlg::OnRecorderStateReceived );
 
-    // This connection is a special case. On receiving a licence required
-    // message via the protocol, a modal licence dialog is opened. Since this
-    // blocks the thread, we need a queued connection to make sure the core
-    // protocol mechanism is not blocked, too.
+    // This connection is a special case. On receiving a licence required message via the
+    // protocol, a modal licence dialog is opened. Since this blocks the thread, we need
+    // a queued connection to make sure the core protocol mechanism is not blocked, too.
     qRegisterMetaType<ELicenceType> ( "ELicenceType" );
     QObject::connect ( pClient,
                        &CClient::LicenceRequired,
@@ -682,11 +681,10 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
                        this,
                        &CClientDlg::OnReqServerListQuery );
 
-    // note that this connection must be a queued connection, otherwise the
-    // server list ping times are not accurate and the client list may not be
-    // retrieved for all servers listed (it seems the sendto() function needs to
-    // be called from different threads to fire the packet immediately and do
-    // not collect packets before transmitting)
+    // note that this connection must be a queued connection, otherwise the server list ping
+    // times are not accurate and the client list may not be retrieved for all servers listed
+    // (it seems the sendto() function needs to be called from different threads to fire the
+    // packet immediately and do not collect packets before transmitting)
     QObject::connect ( &ConnectDlg,
                        &CConnectDlg::CreateCLServerListPingMes,
                        this,
@@ -862,8 +860,7 @@ void CClientDlg::UpdateRevSelection()
         }
     }
 
-    // update visibility of the pan controls in the audio mixer board (pan is
-    // not supported for mono)
+    // update visibility of the pan controls in the audio mixer board (pan is not supported for mono)
     MainMixerBoard->SetDisplayPans ( pClient->GetAudioChannels() != CC_MONO );
 }
 
@@ -875,10 +872,9 @@ void CClientDlg::OnAudioPanValueChanged ( int value )
 
 void CClientDlg::OnConnectDlgAccepted()
 {
-    // We had an issue that the accepted signal was emit twice if a list item
-    // was double clicked in the connect dialog. To avoid this we introduced a
-    // flag which makes sure we process the accepted signal only once after the
-    // dialog was initially shown.
+    // We had an issue that the accepted signal was emit twice if a list item was double
+    // clicked in the connect dialog. To avoid this we introduced a flag which makes sure
+    // we process the accepted signal only once after the dialog was initially shown.
     if ( bConnectDlgWasShown )
     {
         // get the address from the connect dialog
@@ -913,9 +909,9 @@ void CClientDlg::OnConnectDlgAccepted()
             strMixerBoardLabel = strSelectedAddress;
 
             // special case: if the address is empty, we substitute the default
-            // central server address so that a user which just pressed the
-            // connect button without selecting an item in the table or manually
-            // entered an address gets a successful connection
+            // central server address so that a user which just pressed the connect
+            // button without selecting an item in the table or manually entered an
+            // address gets a successful connection
             if ( strSelectedAddress.isEmpty() )
             {
                 strSelectedAddress = DEFAULT_SERVER_ADDRESS;
@@ -923,8 +919,8 @@ void CClientDlg::OnConnectDlgAccepted()
             }
         }
 
-        // first check if we are already connected, if this is the case we have
-        // to disconnect the old server first
+        // first check if we are already connected, if this is the case we have to
+        // disconnect the old server first
         if ( pClient->IsRunning() )
         {
             Disconnect();
@@ -953,9 +949,8 @@ void CClientDlg::OnConnectDisconBut()
 
 void CClientDlg::OnClearAllStoredSoloMuteSettings()
 {
-    // if we are in an active connection, we first have to store all fader
-    // settings in the settings struct, clear the solo and mute states and then
-    // apply the settings again
+    // if we are in an active connection, we first have to store all fader settings in
+    // the settings struct, clear the solo and mute states and then apply the settings again
     MainMixerBoard->StoreAllFaderSettings();
     pSettings->vecStoredFaderIsSolo.Reset ( false );
     pSettings->vecStoredFaderIsMute.Reset ( false );
@@ -988,9 +983,8 @@ void CClientDlg::OnSaveChannelSetup()
 
     if ( !strFileName.isEmpty() )
     {
-        // first store all current fader settings (in case we are in an active
-        // connection right now) and then save the information in the settings
-        // struct in the file
+        // first store all current fader settings (in case we are in an active connection
+        // right now) and then save the information in the settings struct in the file
         MainMixerBoard->StoreAllFaderSettings();
         pSettings->SaveFaderSettings ( strFileName );
     }
@@ -1091,9 +1085,9 @@ void CClientDlg::OnNumClientsChanged ( int iNewNumClients )
 
 void CClientDlg::SetMyWindowTitle ( const int iNumClients )
 {
-    // set the window title (and therefore also the task bar icon text of the
-    // OS) according to the following specification (#559): <ServerName> - <N>
-    // users - Jamulus
+    // set the window title (and therefore also the task bar icon text of the OS)
+    // according to the following specification (#559):
+    // <ServerName> - <N> users - Jamulus
     QString    strWinTitle;
     const bool bClientNameIsUsed = !pClient->strClientName.isEmpty();
 
@@ -1108,8 +1102,8 @@ void CClientDlg::SetMyWindowTitle ( const int iNumClients )
     if ( iNumClients == 0 )
     {
         // only application name
-        if ( !bClientNameIsUsed ) // if --clientname is used, the APP_NAME is
-                                  // the first word in title
+        if (
+            !bClientNameIsUsed ) // if --clientname is used, the APP_NAME is the first word in title
         {
             strWinTitle += QString ( APP_NAME );
         }
@@ -1128,8 +1122,8 @@ void CClientDlg::SetMyWindowTitle ( const int iNumClients )
                 " - " + QString::number ( iNumClients ) + " " + tr ( "users" );
         }
 
-        if ( !bClientNameIsUsed ) // if --clientname is used, the APP_NAME is
-                                  // the first word in title
+        if (
+            !bClientNameIsUsed ) // if --clientname is used, the APP_NAME is the first word in title
         {
             strWinTitle += " - " + QString ( APP_NAME );
         }
@@ -1326,8 +1320,7 @@ void CClientDlg::OnTimerCheckAudioDeviceOk()
     // check if the audio device entered the audio callback after a pre-defined
     // timeout to check if a valid device is selected and if we do not have
     // fundamental settings errors (in which case the GUI would only show that
-    // it is trying to connect the server which does not help to solve the
-    // problem (#129))
+    // it is trying to connect the server which does not help to solve the problem (#129))
     if ( !pClient->IsCallbackEntered() )
     {
         QMessageBox::warning (
@@ -1343,8 +1336,7 @@ void CClientDlg::OnSoundDeviceChanged ( QString strError )
 {
     if ( !strError.isEmpty() )
     {
-        // the sound device setup has a problem, disconnect any active
-        // connection
+        // the sound device setup has a problem, disconnect any active connection
         if ( pClient->IsRunning() )
         {
             Disconnect();
@@ -1358,8 +1350,7 @@ void CClientDlg::OnSoundDeviceChanged ( QString strError )
                                 nullptr );
     }
 
-    // if the check audio device timer is running, it must be restarted on a
-    // device change
+    // if the check audio device timer is running, it must be restarted on a device change
     if ( TimerCheckAudioDeviceOk.isActive() )
     {
         TimerCheckAudioDeviceOk.start ( CHECK_AUDIO_DEV_OK_TIME_MS );
@@ -1497,56 +1488,53 @@ void CClientDlg::SetGUIDesign ( const EGUIDesign eNewDesign )
     switch ( eNewDesign )
     {
     case GD_ORIGINAL:
-        backgroundFrame
-            ->setStyleSheet ( "QFrame#backgroundFrame { border-image:  "
-                              "url(:/png/fader/res/mixerboardbackground.png) "
-                              "34px 30px 40px 40px;"
-                              "                         border-top:    34px "
-                              "transparent;"
-                              "                         border-bottom: 40px "
-                              "transparent;"
-                              "                         border-left:   30px "
-                              "transparent;"
-                              "                         border-right:  40px "
-                              "transparent;"
-                              "                         padding:       -5px;"
-                              "                         margin:        -5px, "
-                              "-5px, 0px, 0px; }"
-                              "QLabel {                 color:          "
-                              "rgb(220, 220, 220);"
-                              "                         font:           bold; }"
-                              "QRadioButton {           color:          "
-                              "rgb(220, 220, 220);"
-                              "                         font:           bold; }"
-                              "QScrollArea {            background:     "
-                              "transparent; }"
-                              ".QWidget {               background:     "
-                              "transparent; }" // note: matches instances of
-                                               // QWidget, but not of its
-                                               // subclasses
-                              "QGroupBox {              background:     "
-                              "transparent; }"
-                              "QGroupBox::title {       color:          "
-                              "rgb(220, 220, 220); }"
-                              "QCheckBox::indicator {   width:          38px;"
-                              "                         height:         21px; }"
-                              "QCheckBox::indicator:unchecked {"
-                              "                         image:          "
-                              "url(:/png/fader/res/ledbuttonnotpressed.png); }"
-                              "QCheckBox::indicator:checked {"
-                              "                         image:          "
-                              "url(:/png/fader/res/ledbuttonpressed.png); }"
-                              "QCheckBox {              color:          "
-                              "rgb(220, 220, 220);"
-                              "                         font:           bold; "
-                              "}" );
+        backgroundFrame->setStyleSheet (
+            "QFrame#backgroundFrame { border-image:  "
+            "url(:/png/fader/res/mixerboardbackground.png) "
+            "34px 30px 40px 40px;"
+            "                         border-top:    34px "
+            "transparent;"
+            "                         border-bottom: 40px "
+            "transparent;"
+            "                         border-left:   30px "
+            "transparent;"
+            "                         border-right:  40px "
+            "transparent;"
+            "                         padding:       -5px;"
+            "                         margin:        -5px, "
+            "-5px, 0px, 0px; }"
+            "QLabel {                 color:          "
+            "rgb(220, 220, 220);"
+            "                         font:           bold; }"
+            "QRadioButton {           color:          "
+            "rgb(220, 220, 220);"
+            "                         font:           bold; }"
+            "QScrollArea {            background:     "
+            "transparent; }"
+            ".QWidget {               background:     "
+            "transparent; }" // note: matches instances of QWidget, but not of its subclasses
+            "QGroupBox {              background:     "
+            "transparent; }"
+            "QGroupBox::title {       color:          "
+            "rgb(220, 220, 220); }"
+            "QCheckBox::indicator {   width:          38px;"
+            "                         height:         21px; }"
+            "QCheckBox::indicator:unchecked {"
+            "                         image:          "
+            "url(:/png/fader/res/ledbuttonnotpressed.png); }"
+            "QCheckBox::indicator:checked {"
+            "                         image:          "
+            "url(:/png/fader/res/ledbuttonpressed.png); }"
+            "QCheckBox {              color:          "
+            "rgb(220, 220, 220);"
+            "                         font:           bold; "
+            "}" );
 
 #ifdef _WIN32
-        // Workaround QT-Windows problem: This should not be necessary since in
-        // the background frame the style sheet for QRadioButton was already
-        // set. But it seems that it is only applied if the style was set to
-        // default and then back to GD_ORIGINAL. This seems to be a QT related
-        // issue...
+        // Workaround QT-Windows problem: This should not be necessary since in the
+        // background frame the style sheet for QRadioButton was already set. But it
+        // seems that it is only applied if the style was set to default and then back
+        // to GD_ORIGINAL. This seems to be a QT related issue...
         rbtReverbSelL->setStyleSheet ( "color: rgb(220, 220, 220);"
                                        "font:  bold;" );
         rbtReverbSelR->setStyleSheet ( "color: rgb(220, 220, 220);"

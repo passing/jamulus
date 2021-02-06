@@ -8,16 +8,16 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
@@ -123,15 +123,13 @@ void CChatDlg::AddChatText ( QString strChatText )
     QAccessible::updateAccessibility (
         new QAccessibleValueChangeEvent ( txvChatWindow, strChatText ) );
 
-    // analyze strChatText to check if hyperlink (limit ourselves to http(s)://)
-    // but do not replace the hyperlinks if any HTML code for a hyperlink was
-    // found (the user has done the HTML coding hisself and we should not mess
-    // with that)
+    // analyze strChatText to check if hyperlink (limit ourselves to http(s)://) but do not
+    // replace the hyperlinks if any HTML code for a hyperlink was found (the user has done the HTML
+    // coding hisself and we should not mess with that)
     if ( !strChatText.contains ( QRegExp ( "href\\s*=|src\\s*=" ) ) )
     {
-        // searches for all occurrences of http(s) and cuts until a space (\S
-        // matches any non-white-space character and the + means that matches
-        // the previous element one or more times.)
+        // searches for all occurrences of http(s) and cuts until a space (\S matches any non-white-space
+        // character and the + means that matches the previous element one or more times.)
         strChatText.replace ( QRegExp ( "(https?://\\S+)" ),
                               "<a href=\"\\1\">\\1</a>" );
     }

@@ -8,7 +8,7 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -76,8 +76,7 @@ void CSettings::WriteToFile ( const QString&      strCurFileName,
 void CSettings::SetFileName ( const QString& sNFiName,
                               const QString& sDefaultFileName )
 {
-    // return the file name with complete path, take care if given file name is
-    // empty
+    // return the file name with complete path, take care if given file name is empty
     strFileName = sNFiName;
 
     if ( strFileName.isEmpty() )
@@ -401,8 +400,8 @@ void CClientSettings::ReadSettingsFromXML ( const QDomDocument& IniXMLDocument,
     if ( !strError.isEmpty() )
     {
 #ifndef HEADLESS
-        // special case: when settings are loaded no GUI is yet created,
-        // therefore we have to create a warning message box here directly
+        // special case: when settings are loaded no GUI is yet created, therefore
+        // we have to create a warning message box here directly
         QMessageBox::warning ( nullptr, APP_NAME, strError );
 #endif
     }
@@ -541,8 +540,7 @@ void CClientSettings::ReadSettingsFromXML ( const QDomDocument& IniXMLDocument,
     }
 
     // TODO compatibility to old version (< 3.6.1)
-    // NOTE that the strCurAddr and "check for empty" can be removed if
-    // compatibility mode is removed
+    // NOTE that the strCurAddr and "check for empty" can be removed if compatibility mode is removed
     vstrCentralServerAddress[0] =
         GetIniSetting ( IniXMLDocument, "client", "centralservaddr" );
 
@@ -573,8 +571,7 @@ void CClientSettings::ReadSettingsFromXML ( const QDomDocument& IniXMLDocument,
     }
     else
     {
-        // if no address type is given, choose one from the operating system
-        // locale
+        // if no address type is given, choose one from the operating system locale
         eCentralServerAddressType = AT_DEFAULT;
     }
 
@@ -1010,8 +1007,7 @@ void CServerSettings::ReadSettingsFromXML (
     }
     else
     {
-        // if no address type is given, choose one from the operating system
-        // locale
+        // if no address type is given, choose one from the operating system locale
         pServer->SetCentralServerAddressType ( AT_DEFAULT );
     }
 

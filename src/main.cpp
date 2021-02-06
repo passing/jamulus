@@ -53,8 +53,7 @@ int main ( int argc, char** argv )
     // initialize all flags and string which might be changed by command line
     // arguments
 #if defined( SERVER_BUNDLE ) && ( defined( Q_OS_MACX ) )
-    // if we are on MacOS and we are building a server bundle, starts Jamulus in
-    // server mode
+    // if we are on MacOS and we are building a server bundle, starts Jamulus in server mode
     bool bIsClient = false;
 #else
     bool bIsClient = true;
@@ -513,9 +512,8 @@ int main ( int argc, char** argv )
         strCentralServer = DEFAULT_SERVER_ADDRESS;
     }
 
-    // adjust default port number for client: use different default port than
-    // the server since if the client is started before the server, the server
-    // would get a socket bind error
+    // adjust default port number for client: use different default port than the server since
+    // if the client is started before the server, the server would get a socket bind error
     if ( bIsClient && !bCustomPortNumberGiven )
     {
         iPortNumber += 10; // increment by 10
@@ -580,7 +578,7 @@ int main ( int argc, char** argv )
     Q_INIT_RESOURCE ( resources );
 
     // TEST -> activate the following line to activate the test bench,
-    // CTestbench Testbench ( "127.0.0.1", DEFAULT_PORT_NUMBER );
+    //CTestbench Testbench ( "127.0.0.1", DEFAULT_PORT_NUMBER );
 
     try
     {

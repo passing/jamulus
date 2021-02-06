@@ -38,8 +38,8 @@ using namespace recorder;
  * @param address IP and Port
  * @param recordBaseDir Session recording directory
  *
- * Creates a file for the raw PCM data and sets up a QDataStream to which to
- * write received frames. The data is stored Little Endian.
+ * Creates a file for the raw PCM data and sets up a QDataStream to which to write received frames.
+ * The data is stored Little Endian.
  */
 CJamClient::CJamClient ( const qint64       frame,
                          const int          _numChannels,
@@ -66,8 +66,8 @@ CJamClient::CJamClient ( const qint64       frame,
 
     wavFile = new QFile ( recordBaseDir.absoluteFilePath ( fileName ) );
     if ( !wavFile->open ( QFile::OpenMode (
-             QIODevice::OpenModeFlag::ReadWrite ) ) ) // need to allow rewriting
-                                                      // headers
+             QIODevice::OpenModeFlag::
+                 ReadWrite ) ) ) // need to allow rewriting headers
     {
         throw new std::runtime_error (
             ( "Could not write to WAV file " + wavFile->fileName() )
@@ -79,8 +79,7 @@ CJamClient::CJamClient ( const qint64       frame,
 }
 
 /**
- * @brief CJamClient::Frame Handle a frame of PCM data from a client connected
- * to the server
+ * @brief CJamClient::Frame Handle a frame of PCM data from a client connected to the server
  * @param _name The client's current name
  * @param pcm The PCM data
  */
@@ -120,8 +119,7 @@ void CJamClient::Disconnect()
  * @brief CJamSession::CJamSession Construct a new jam recording session
  * @param recordBaseDir The recording base directory
  *
- * Each session is stored into its own subdirectory of the recording base
- * directory.
+ * Each session is stored into its own subdirectory of the recording base directory.
  */
 CJamSession::CJamSession ( QDir recordBaseDir ) :
     sessionDir ( QDir ( recordBaseDir.absoluteFilePath (
@@ -161,8 +159,7 @@ CJamSession::CJamSession ( QDir recordBaseDir ) :
 }
 
 /**
- * @brief CJamSession::DisconnectClient Capture details of the departing
- * client's connection
+ * @brief CJamSession::DisconnectClient Capture details of the departing client's connection
  * @param iChID the channel id of the client that disconnected
  */
 void CJamSession::DisconnectClient ( int iChID )
@@ -189,10 +186,8 @@ void CJamSession::DisconnectClient ( int iChID )
  * @param numAudioChannels the client number of audio channels
  * @param data the frame data
  *
- * Manages changes that affect how the recording is stored - i.e. if the number
- * of audio channels changes, we need a new file. Files are grouped by IP and
- * port number, so if either of those change for a connection, we also start a
- * new file.
+ * Manages changes that affect how the recording is stored - i.e. if the number of audio channels changes, we need a new file.
+ * Files are grouped by IP and port number, so if either of those change for a connection, we also start a new file.
  *
  * Also manages the overall current frame counter for the session.
  */
@@ -205,8 +200,7 @@ void CJamSession::Frame ( const int              iChID,
 {
     if ( iChID == chIdDisconnected )
     {
-        // DisconnectClient has just been called for this channel - this frame
-        // is "too late"
+        // DisconnectClient has just been called for this channel - this frame is "too late"
         chIdDisconnected = -1;
         return;
     }
@@ -248,8 +242,7 @@ void CJamSession::Frame ( const int              iChID,
 
     vecptrJamClients[iChID]->Frame ( name, data, iServerFrameSizeSamples );
 
-    // If _any_ connected client frame steps past currentFrame, increase
-    // currentFrame
+    // If _any_ connected client frame steps past currentFrame, increase currentFrame
     if ( vecptrJamClients[iChID]->StartFrame() +
              vecptrJamClients[iChID]->FrameCount() >
          currentFrame )
@@ -259,8 +252,7 @@ void CJamSession::Frame ( const int              iChID,
 }
 
 /**
- * @brief CJamSession::End Clean up any "hanging" clients when the server thinks
- * they all left
+ * @brief CJamSession::End Clean up any "hanging" clients when the server thinks they all left
  */
 void CJamSession::End()
 {
@@ -275,8 +267,7 @@ void CJamSession::End()
 }
 
 /**
- * @brief CJamSession::Tracks Retrieve a map of (latest) client name to
- * connection items
+ * @brief CJamSession::Tracks Retrieve a map of (latest) client name to connection items
  * @return a map of (latest) client name to connection items
  */
 QMap<QString, QList<STrackItem>> CJamSession::Tracks()
@@ -302,8 +293,7 @@ QMap<QString, QList<STrackItem>> CJamSession::Tracks()
 }
 
 /**
- * @brief CJamSession::TracksFromSessionDir Replica of CJamSession::Tracks but
- * using the directory contents to construct the track item map
+ * @brief CJamSession::TracksFromSessionDir Replica of CJamSession::Tracks but using the directory contents to construct the track item map
  * @param sessionDirName the directory name to scan
  * @return a map of (latest) client name to connection items
  */
@@ -321,7 +311,7 @@ CJamSession::TracksFromSessionDir ( const QString& sessionDirName,
         QString name     = split[0];
         QString hostPort = split[1];
         QString frame    = split[2];
-        QString tail = split[3]; // numChannels may have _nnn
+        QString tail     = split[3]; //numChannels may have _nnn
         QString numChannels =
             tail.count ( "_" ) > 0 ? tail.split ( "_" )[0] : tail;
 
@@ -351,8 +341,7 @@ CJamSession::TracksFromSessionDir ( const QString& sessionDirName,
  * ********************************************************************************************************/
 
 /**
- * @brief CJamRecorder::Init Create recording directory, if necessary, and
- * connect signal handlers
+ * @brief CJamRecorder::Init Create recording directory, if necessary, and connect signal handlers
  * @param server Server object emitting signals
  * @return QString::null on success else the failure reason
  */
@@ -407,8 +396,7 @@ void CJamRecorder::Start()
 }
 
 /**
- * @brief CJamRecorder::OnEnd Finalise the recording and write the Reaper RPP
- * file
+ * @brief CJamRecorder::OnEnd Finalise the recording and write the Reaper RPP file
  */
 void CJamRecorder::OnEnd()
 {
@@ -529,8 +517,7 @@ void CJamRecorder::AudacityLofFromCurrentSession()
 }
 
 /**
- * @brief CJamRecorder::SessionDirToReaper Replica of CJamRecorder::OnEnd() but
- * using the directory contents to construct the CReaperProject object
+ * @brief CJamRecorder::SessionDirToReaper Replica of CJamRecorder::OnEnd() but using the directory contents to construct the CReaperProject object
  * @param strSessionDirName
  */
 void CJamRecorder::SessionDirToReaper ( QString& strSessionDirName,
@@ -602,8 +589,7 @@ void CJamRecorder::OnDisconnected ( int iChID )
 }
 
 /**
- * @brief CJamRecorder::OnFrame Handle a frame emitted for a client by the
- * server
+ * @brief CJamRecorder::OnFrame Handle a frame emitted for a client by the server
  * @param iChID the client channel id
  * @param name the client name
  * @param address the client IP and port number

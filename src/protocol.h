@@ -8,16 +8,16 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
@@ -56,8 +56,7 @@
 #define PROTMESSID_OPUS_SUPPORTED 26    // tells that OPUS codec is supported
 #define PROTMESSID_LICENCE_REQUIRED 27  // licence required
 #define PROTMESSID_REQ_CHANNEL_LEVEL_LIST                                      \
-    28 // OLD (not used anymore) // TODO needed for compatibility to old servers
-       // >= 3.4.6 and <= 3.5.12
+    28 // OLD (not used anymore) // TODO needed for compatibility to old servers >= 3.4.6 and <= 3.5.12
 #define PROTMESSID_VERSION_AND_OS 29 // version number and operating system
 #define PROTMESSID_CHANNEL_PAN 30    // set channel pan for mix
 #define PROTMESSID_MUTE_STATE_CHANGED                                          \
@@ -102,8 +101,7 @@
 
 // lengths of message as defined in protocol.cpp file
 #define MESS_HEADER_LENGTH_BYTE 7 // TAG (2), ID (2), cnt (1), length (2)
-#define MESS_LEN_WITHOUT_DATA_BYTE ( MESS_HEADER_LENGTH_BYTE + 2 /* CRC (2)    \
-                                                                  */ )
+#define MESS_LEN_WITHOUT_DATA_BYTE ( MESS_HEADER_LENGTH_BYTE + 2 /* CRC (2) */ )
 
 // time out for message re-send if no acknowledgement was received
 #define SEND_MESS_TIMEOUT_MS 400 // ms

@@ -45,8 +45,7 @@ CSound::CSound ( void ( *fpNewProcessCallback ) ( CVector<short>& psData,
 void CSound::setupCommonStreamParams ( oboe::AudioStreamBuilder* builder )
 {
     // We request EXCLUSIVE mode since this will give us the lowest possible
-    // latency. If EXCLUSIVE mode isn't available the builder will fall back to
-    // SHARED mode
+    // latency. If EXCLUSIVE mode isn't available the builder will fall back to SHARED mode
     builder->setFormat ( oboe::AudioFormat::Float )
         ->setSharingMode ( oboe::SharingMode::Exclusive )
         ->setChannelCount ( oboe::ChannelCount::Stereo )
@@ -183,8 +182,7 @@ void CSound::Start()
     // call base class
     CSoundBase::Start();
 
-    // finally start the streams so the callback begins, start with inputstream
-    // first.
+    // finally start the streams so the callback begins, start with inputstream first.
     mRecordingStream->requestStart();
     mPlayStream->requestStart();
 }
@@ -215,10 +213,9 @@ int CSound::Init ( const int iNewPrefMonoBufferSize )
     return iOboeBufferSizeMono;
 }
 
-// This is the main callback method for when an audio stream is ready to publish
-// data to an output stream or has received data on an input stream. As per
-// manual much be very careful not to do anything in this back that can cause
-// delays such as sleeping, file processing, allocate memory, etc.
+// This is the main callback method for when an audio stream is ready to publish data to an output stream
+// or has received data on an input stream. As per manual much be very careful not to do anything in this back that
+// can cause delays such as sleeping, file processing, allocate memory, etc.
 oboe::DataCallbackResult CSound::onAudioReady ( oboe::AudioStream* oboeStream,
                                                 void*              audioData,
                                                 int32_t            numFrames )
@@ -253,8 +250,7 @@ oboe::DataCallbackResult CSound::onAudioInput ( oboe::AudioStream* oboeStream,
 {
     mStats.in_callback_calls++;
 
-    // First things first, we need to discard the input queue a little for 500ms
-    // or so
+    // First things first, we need to discard the input queue a little for 500ms or so
     if ( mCountCallbacksToDrain > 0 )
     {
         // discard the input buffer

@@ -8,16 +8,16 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
@@ -65,10 +65,10 @@ void CSocket::Init ( const quint16 iPortNumber )
         else
         {
             // If the port is not available, try "NUM_SOCKET_PORTS_TO_TRY" times
-            // with incremented port numbers. Randomize the start port, in case
-            // a faulty router gets stuck and confused by a particular port
-            // (like the starting port). Might work around frustrating "cannot
-            // connect" problems (#568)
+            // with incremented port numbers. Randomize the start port, in case a
+            // faulty router gets stuck and confused by a particular port (like
+            // the starting port). Might work around frustrating "cannot connect"
+            // problems (#568)
             const quint16 startingPortNumber =
                 iPortNumber + rand() % NUM_SOCKET_PORTS_TO_TRY;
 
@@ -235,12 +235,12 @@ bool CSocket::GetAndResetbJitterBufferOKFlag()
 void CSocket::OnDataReceived()
 {
     /*
-        The strategy of this function is that only the "put audio" function is
-        called directly (i.e. the high thread priority is used) and all other
-       less important things like protocol parsing and acting on protocol
-       messages is done in the low priority thread. To get a thread transition,
-       we have to use the signal/slot mechanism (i.e. we use messages for that).
-    */
+    The strategy of this function is that only the "put audio" function is
+    called directly (i.e. the high thread priority is used) and all other less
+    important things like protocol parsing and acting on protocol messages is
+    done in the low priority thread. To get a thread transition, we have to
+    use the signal/slot mechanism (i.e. we use messages for that).
+*/
 
     // read block from network interface and query address of sender
     sockaddr_in SenderAddr;
@@ -282,8 +282,7 @@ void CSocket::OnDataReceived()
         if ( CProtocol::IsConnectionLessMessageID ( iRecID ) )
         {
 
-            // TODO a copy of the vector is used -> avoid malloc in real-time
-            // routine
+            // TODO a copy of the vector is used -> avoid malloc in real-time routine
 
             emit ProtcolCLMessageReceived ( iRecID,
                                             vecbyMesBodyData,
@@ -292,8 +291,7 @@ void CSocket::OnDataReceived()
         else
         {
 
-            // TODO a copy of the vector is used -> avoid malloc in real-time
-            // routine
+            // TODO a copy of the vector is used -> avoid malloc in real-time routine
 
             emit ProtcolMessageReceived ( iRecCounter,
                                           iRecID,

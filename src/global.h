@@ -7,10 +7,10 @@
 
 \section intro_sec Introduction
 
-The Jamulus software enables musicians to perform real-time jam sessions over
-the internet. There is one server running the Jamulus server software which
-collects the audio data from each Jamulus client, mixes the audio data and sends
-the mix back to each client.
+The Jamulus software enables musicians to perform real-time jam sessions over the
+internet. There is one server running the Jamulus server software which collects
+the audio data from each Jamulus client, mixes the audio data and sends the mix
+back to each client.
 
 
 Prefix definitions for the GUI:
@@ -33,7 +33,7 @@ LED bar:      lbr
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -108,8 +108,7 @@ LED bar:      lbr
 #define SOFTWARE_MANUAL_URL "https://jamulus.io/wiki/Software-Manual"
 
 // determining server internal address uses well-known host and port
-// (You can change the service used here to something like Cloudflare (1.1.1.1),
-// Google DNS (8.8.8.8), or something else reliable)
+// (You can change the service used here to something like Cloudflare (1.1.1.1), Google DNS (8.8.8.8), or something else reliable)
 #define WELL_KNOWN_HOST "1.1.1.1" // CloudFlare
 #define WELL_KNOWN_PORT 53        // DNS
 #define IP_LOOKUP_TIMEOUT 500     // ms
@@ -148,8 +147,7 @@ LED bar:      lbr
 #define AUD_MIX_FADER_MAX 100
 #define AUD_MIX_PAN_MAX 100
 
-// maximum number of fader groups (must be consistent to audiomixerboard
-// implementation)
+// maximum number of fader groups (must be consistent to audiomixerboard implementation)
 #define MAX_NUM_FADER_GROUPS 4
 
 // maximum number of recognized sound cards installed in the system
@@ -177,8 +175,7 @@ LED bar:      lbr
 #define RED_BOUND_LED_BAR 7
 #define YELLOW_BOUND_LED_BAR 5
 
-// maximum number of connected clients at the server (must not be larger than
-// 256)
+// maximum number of connected clients at the server (must not be larger than 256)
 #define MAX_NUM_CHANNELS 150 // max number channels for server
 
 // actual number of used channels in the server
@@ -187,16 +184,14 @@ LED bar:      lbr
 #define DEFAULT_USED_NUM_CHANNELS 10 // default used number channels for server
 
 // Maximum number of servers registered in the server list. If you want to
-// change this parameter, you most probably have to adjust
-// MAX_SIZE_BYTES_NETW_BUF.
+// change this parameter, you most probably have to adjust MAX_SIZE_BYTES_NETW_BUF.
 #define MAX_NUM_SERVERS_IN_SERVER_LIST                                         \
     150 // reduced to 150 because we now have genre-based server lists
 
 // defines the time interval at which the ping time is updated in the GUI
 #define PING_UPDATE_TIME_MS 500 // ms
 
-// defines the time interval at which the ping time is updated for the server
-// list
+// defines the time interval at which the ping time is updated for the server list
 #define PING_UPDATE_TIME_SERVER_LIST_MS 2500 // ms
 
 // defines the interval between Channel Level updates from the server
@@ -230,9 +225,9 @@ LED bar:      lbr
 #define REGISTER_SERVER_RETRY_LIMIT 5 // count
 
 // Maximum length of fader tag and text message strings (Since for chat messages
-// some HTML code is added, we also have to define a second length which
-// includes this additionl HTML code. Right now the length of the HTML code is
-// approx. 66 characters. Here, we add some headroom to this number)
+// some HTML code is added, we also have to define a second length which includes
+// this additionl HTML code. Right now the length of the HTML code is approx. 66
+// characters. Here, we add some headroom to this number)
 #define MAX_LEN_FADER_TAG 16
 #define MAX_LEN_CHAT_TEXT 1600
 #define MAX_LEN_CHAT_TEXT_PLUS_HTML 1800
@@ -261,8 +256,7 @@ LED bar:      lbr
 #define _MAXSHORT 32767
 #define _MINSHORT ( -32768 )
 #define INVALID_INDEX                                                          \
-    -1 // define invalid index as a negative value (a valid index must always be
-       // >= 0)
+    -1 // define invalid index as a negative value (a valid index must always be >= 0)
 
 #if HAVE_STDINT_H
 #include <stdint.h>

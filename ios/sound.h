@@ -102,7 +102,7 @@ class CSound : public CSoundBase
     static void
     callbackMIDI ( const MIDIPacketList* pktlist, void* refCon, void* );
 
-    // AVAudioSession      audioSession;
+    //AVAudioSession      audioSession;
 
     MIDIPortRef midiInPortRef;
 

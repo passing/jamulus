@@ -11,8 +11,8 @@ jobs:
     - uses: DoozyX/clang-format-lint-action@v0.11
       with:
         source: '.'
-        exclude: './libs ./ios/ios_app_delegate.h'
-        extensions: 'h,cpp,c'
+        exclude: './libs'
+        extensions: 'cpp,h'
         clangFormatVersion: 10
         inplace: True
     - uses: EndBug/add-and-commit@v4

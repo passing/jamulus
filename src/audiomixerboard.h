@@ -136,9 +136,7 @@ class CChannelFader : public QObject
         SendFaderLevelToServer (
             value,
             QGuiApplication::keyboardModifiers() ==
-                Qt::ShiftModifier ); /* isolate a channel from the group
-                                        temporarily with shift-click-drag (#695)
-                                      */
+                Qt::ShiftModifier ); /* isolate a channel from the group temporarily with shift-click-drag (#695) */
     }
 
     void OnPanValueChanged ( int value );
@@ -253,9 +251,8 @@ class CAudioMixerBoard : public QGroupBox,
       protected:
         virtual void resizeEvent ( QResizeEvent* event )
         {
-            // if after a resize of the main window a vertical scroll bar is
-            // required, make sure that the fader label is visible (scroll down
-            // completely)
+            // if after a resize of the main window a vertical scroll bar is required, make
+            // sure that the fader label is visible (scroll down completely)
             ensureVisible ( 0, 2000 ); // use a large value here
             QScrollArea::resizeEvent ( event );
         }
@@ -282,13 +279,12 @@ class CAudioMixerBoard : public QGroupBox,
     bool                    bIsPanSupported;
     bool                    bNoFaderVisible;
     int                     iMyChannelID;
-    int iRunningNewClientCnt; // integer type is sufficient, will never overrun
-                              // for its purpose
-    int            iNumMixerPanelRows;
-    QString        strServerName;
-    ERecorderState eRecorderState;
-    QMutex         Mutex;
-    EChSortType    eChSortType;
+    int                     iRunningNewClientCnt; // integer type is sufficient, will never overrun for its purpose
+    int                     iNumMixerPanelRows;
+    QString                 strServerName;
+    ERecorderState          eRecorderState;
+    QMutex                  Mutex;
+    EChSortType             eChSortType;
 
     virtual void UpdateGainValue ( const int    iChannelIdx,
                                    const float  fValue,

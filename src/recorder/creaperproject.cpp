@@ -52,11 +52,9 @@ using namespace recorder;
 // Reaper Project writer -------------------------------------------------------
 
 /**
- * @brief CReaperItem::CReaperItem Construct a Reaper RPP "<ITEM>" for a given
- * RIFF WAVE file
+ * @brief CReaperItem::CReaperItem Construct a Reaper RPP "<ITEM>" for a given RIFF WAVE file
  * @param name the item name
- * @param trackItem the details of where the item is in the track, along with
- * the RIFF WAVE filename
+ * @param trackItem the details of where the item is in the track, along with the RIFF WAVE filename
  * @param iid the sequential item id
  */
 CReaperItem::CReaperItem ( const QString&    name,
@@ -90,8 +88,7 @@ CReaperItem::CReaperItem ( const QString&    name,
 }
 
 /**
- * @brief CReaperTrack::CReaperTrack Construct a Reaper RPP "<TRACK>" for a
- * given list of track items
+ * @brief CReaperTrack::CReaperTrack Construct a Reaper RPP "<TRACK>" for a given list of track items
  * @param name the track name
  * @param iid the sequential track id
  * @param items the list of items in the track
@@ -125,8 +122,7 @@ CReaperTrack::CReaperTrack ( QString           name,
 }
 
 /**
- * @brief CReaperProject::CReaperProject Construct a Reaper RPP
- * "<REAPER_PROJECT>" for a given list of tracks
+ * @brief CReaperProject::CReaperProject Construct a Reaper RPP "<REAPER_PROJECT>" for a given list of tracks
  * @param tracks the list of tracks
  */
 CReaperProject::CReaperProject ( QMap<QString, QList<STrackItem>> tracks,

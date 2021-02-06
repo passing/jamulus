@@ -421,8 +421,7 @@ CClientSettingsDlg::CClientSettingsDlg ( CClient*         pNCliP,
     // language combo box (corrects the setting if language not found)
     cbxLanguage->Init ( pSettings->strLanguage );
 
-    // init custom central server address combo box (max
-    // MAX_NUM_SERVER_ADDR_ITEMS entries)
+    // init custom central server address combo box (max MAX_NUM_SERVER_ADDR_ITEMS entries)
     cbxCentralServerAddress->setMaxCount ( MAX_NUM_SERVER_ADDR_ITEMS );
     cbxCentralServerAddress->setInsertPolicy ( QComboBox::NoInsert );
 

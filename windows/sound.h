@@ -127,9 +127,8 @@ class CSound : public CSoundBase
 
     // ASIO stuff
     ASIODriverInfo driverInfo;
-    ASIOBufferInfo
-        bufferInfos[2 * MAX_NUM_IN_OUT_CHANNELS]; // for input and output
-                                                  // buffers -> "2 *"
+    ASIOBufferInfo bufferInfos
+        [2 * MAX_NUM_IN_OUT_CHANNELS]; // for input and output buffers -> "2 *"
     ASIOChannelInfo channelInfosInput[MAX_NUM_IN_OUT_CHANNELS];
     QString         channelInputName[MAX_NUM_IN_OUT_CHANNELS];
     ASIOChannelInfo channelInfosOutput[MAX_NUM_IN_OUT_CHANNELS];

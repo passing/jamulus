@@ -32,8 +32,7 @@
 // NOTE If you want to change this number, the code has to modified, too!
 #define NUM_STAT_SIMULATION_BUFFERS 10
 
-// hysteresis for buffer size decision to avoid fast changes if close to the
-// bound
+// hysteresis for buffer size decision to avoid fast changes if close to the bound
 #define FILTER_DECISION_HYSTERESIS 0.1
 
 // definition of the upper error bound of the jitter buffers
@@ -61,10 +60,9 @@
 #define IIR_WEIGTH_UP_FAST_DOUBLE_FRAME_SIZE 0.9995
 #define IIR_WEIGTH_DOWN_FAST_DOUBLE_FRAME_SIZE 0.999
 
-// convert numbers from 128 samples case using
-// http://www.tsdconseil.fr/tutos/tuto-iir1-en.pdf and
-// https://octave-online.net: gamma = exp(-Ts/tau), after some calculations we
-// get: x=0.999995;exp(64/128*log(x))
+// convert numbers from 128 samples case using http://www.tsdconseil.fr/tutos/tuto-iir1-en.pdf
+// and https://octave-online.net:
+// gamma = exp(-Ts/tau), after some calculations we get: x=0.999995;exp(64/128*log(x))
 #define IIR_WEIGTH_UP_NORMAL 0.9999975
 #define IIR_WEIGTH_DOWN_NORMAL 0.99994999875
 #define IIR_WEIGTH_UP_FAST 0.9997499687422
@@ -358,8 +356,7 @@ class CConvBuf
 
     void SetBufferSize ( const int iNBSize )
     {
-        // if buffer size has changed, apply new value and reset the buffer
-        // pointers
+        // if buffer size has changed, apply new value and reset the buffer pointers
         if ( ( iNBSize != iBufferSize ) && ( iNBSize <= iMemSize ) )
         {
             iBufferSize = iNBSize;
@@ -371,11 +368,11 @@ class CConvBuf
     {
         iGetPos = 0;
 
-        std::copy ( vecsData.begin(),
-                    vecsData.begin() +
-                        iBufferSize, // note that input vector might be larger
-                                     // then memory size
-                    vecMemory.begin() );
+        std::copy (
+            vecsData.begin(),
+            vecsData.begin() +
+                iBufferSize, // note that input vector might be larger then memory size
+            vecMemory.begin() );
     }
 
     bool Put ( const CVector<TData>& vecData,

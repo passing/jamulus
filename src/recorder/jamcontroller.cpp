@@ -84,8 +84,7 @@ void CJamController::SetRecordingDir ( QString newRecordingDir,
         // We have a thread and we want to start a new one.
         // We only want one running.
         // This could take time, unfortunately.
-        // Hopefully changing recording directory will NOT happen during a long
-        // jam...
+        // Hopefully changing recording directory will NOT happen during a long jam...
         emit EndRecorderThread();
         pthJamRecorder->wait();
         pthJamRecorder = nullptr;

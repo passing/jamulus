@@ -118,8 +118,7 @@ CClient::CClient ( const quint16  iPortNumber,
     opus_custom_encoder_ctl ( Opus64EncoderMono, OPUS_SET_VBR ( 0 ) );
     opus_custom_encoder_ctl ( Opus64EncoderStereo, OPUS_SET_VBR ( 0 ) );
 
-    // for 64 samples frame size we have to adjust the PLC behavior to avoid
-    // loud artifacts
+    // for 64 samples frame size we have to adjust the PLC behavior to avoid loud artifacts
     opus_custom_encoder_ctl ( Opus64EncoderMono,
                               OPUS_SET_PACKET_LOSS_PERC ( 35 ) );
     opus_custom_encoder_ctl ( Opus64EncoderStereo,
@@ -457,8 +456,7 @@ void CClient::SetRemoteChanGain ( const int   iId,
                                   const float fGain,
                                   const bool  bIsMyOwnFader )
 {
-    // if this gain is for my own channel, apply the value for the Mute Myself
-    // function
+    // if this gain is for my own channel, apply the value for the Mute Myself function
     if ( bIsMyOwnFader )
     {
         fMuteOutStreamGain = fGain;
@@ -715,8 +713,7 @@ void CClient::OnSndCrdReinitRequest ( int iSndCrdResetType )
     MutexDriverReinit.lock();
     {
         // in older QT versions, enums cannot easily be used in signals without
-        // registering them -> workaroud: we use the int type and cast to the
-        // enum
+        // registering them -> workaroud: we use the int type and cast to the enum
         const ESndCrdResetType eSndCrdResetType =
             static_cast<ESndCrdResetType> ( iSndCrdResetType );
 
@@ -912,8 +909,7 @@ void CClient::Init()
         iSndCrdFrameSizeFactor = 1;
     }
 
-    // select the OPUS frame size mode depending on current mono block size
-    // samples
+    // select the OPUS frame size mode depending on current mono block size samples
     if ( bSndCrdConversionBufferRequired )
     {
         if ( ( iSndCardMonoBlockSizeSamConvBuff <
@@ -937,8 +933,7 @@ void CClient::Init()
         }
         else
         {
-            // since we use double size frame size for OPUS, we have to adjust
-            // the frame size factor
+            // since we use double size frame size for OPUS, we have to adjust the frame size factor
             iSndCrdFrameSizeFactor /= 2;
             eAudioCompressionType = CT_OPUS;
         }
@@ -1100,10 +1095,10 @@ void CClient::AudioCallback ( CVector<int16_t>& psData, void* arg )
     pMyClientObj->ProcessSndCrdAudioData ( psData );
 
     /*
-    // TEST do a soundcard jitter measurement
-    static CTimingMeas JitterMeas ( 1000, "test2.dat" );
-    JitterMeas.Measure();
-    */
+// TEST do a soundcard jitter measurement
+static CTimingMeas JitterMeas ( 1000, "test2.dat" );
+JitterMeas.Measure();
+*/
 }
 
 void CClient::ProcessSndCrdAudioData ( CVector<int16_t>& vecsStereoSndCrd )
@@ -1165,15 +1160,13 @@ void CClient::ProcessAudioDataIntern ( CVector<int16_t>& vecsStereoSndCrd )
     if ( !( ( iAudioInFader == AUD_FADER_IN_MIDDLE ) &&
             ( eAudioChannelConf == CC_STEREO ) ) )
     {
-        // calculate pan gain in the range 0 to 1, where 0.5 is the middle
-        // position
+        // calculate pan gain in the range 0 to 1, where 0.5 is the middle position
         const float fPan =
             static_cast<float> ( iAudioInFader ) / AUD_FADER_IN_MAX;
 
         if ( eAudioChannelConf == CC_STEREO )
         {
-            // for stereo only apply pan attenuation on one channel (same as pan
-            // in the server)
+            // for stereo only apply pan attenuation on one channel (same as pan in the server)
             const float fGainL = MathUtils::GetLeftPan ( fPan, false );
             const float fGainR = MathUtils::GetRightPan ( fPan, false );
 
@@ -1189,8 +1182,8 @@ void CClient::ProcessAudioDataIntern ( CVector<int16_t>& vecsStereoSndCrd )
         }
         else
         {
-            // for mono implement a cross-fade between channels and mix them,
-            // for mono-in/stereo-out use no attenuation in pan center
+            // for mono implement a cross-fade between channels and mix them, for
+            // mono-in/stereo-out use no attenuation in pan center
             const float fGainL = MathUtils::GetLeftPan (
                 fPan,
                 eAudioChannelConf != CC_MONO_IN_STEREO_OUT );
@@ -1273,8 +1266,7 @@ void CClient::ProcessAudioDataIntern ( CVector<int16_t>& vecsStereoSndCrd )
         {
             pCurCodedData = &vecbyNetwData[0];
 
-            // on any valid received packet, we clear the initialization phase
-            // flag
+            // on any valid received packet, we clear the initialization phase flag
             bIsInitializationPhase = false;
         }
         else
@@ -1310,15 +1302,14 @@ void CClient::ProcessAudioDataIntern ( CVector<int16_t>& vecsStereoSndCrd )
         }
     }
 
-    // check if channel is connected and if we do not have the initialization
-    // phase
+    // check if channel is connected and if we do not have the initialization phase
     if ( Channel.IsConnected() && ( !bIsInitializationPhase ) )
     {
         if ( eAudioChannelConf == CC_MONO )
         {
-            // copy mono data in stereo sound card buffer (note that since the
-            // input and output is the same buffer, we have to start from the
-            // end not to overwrite input values)
+            // copy mono data in stereo sound card buffer (note that since the input
+            // and output is the same buffer, we have to start from the end not to
+            // overwrite input values)
             for ( i = iMonoBlockSizeSam - 1, j = iStereoBlockSizeSam - 2;
                   i >= 0;
                   i--, j -= 2 )
@@ -1369,8 +1360,8 @@ int CClient::EstimatedOverallDelay ( const int iPingTimeMs )
         // use an alternative approach for estimating the sound card delay:
         //
         // we assume that we have two period sizes for the input and one for the
-        // output, therefore we have "3 *" instead of "2 *" (for input and
-        // output) the actual sound card buffer size
+        // output, therefore we have "3 *" instead of "2 *" (for input and output)
+        // the actual sound card buffer size
         // "GetSndCrdConvBufAdditionalDelayMonoBlSize"
         fTotalSoundCardDelayMs += ( 3 * GetSndCrdActualMonoBlSize() ) *
                                   1000.0f / SYSTEM_SAMPLE_RATE_HZ;

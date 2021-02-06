@@ -56,12 +56,11 @@ void CNetBuf::Init ( const int  iNewBlockSize,
                 iPreviousDataCnt++;
             }
 
-            // now resize the buffer to the new size (buffer is empty after this
-            // operation)
+            // now resize the buffer to the new size (buffer is empty after this operation)
             Resize ( iNewNumBlocks, iNewBlockSize );
 
-            // copy the previous data back in the buffer (make sure we only copy
-            // as much data back as the new buffer size can hold)
+            // copy the previous data back in the buffer (make sure we only copy as much
+            // data back as the new buffer size can hold)
             int iDataCnt = 0;
 
             while ( ( iDataCnt < iPreviousDataCnt ) &&
@@ -131,8 +130,7 @@ void CNetBuf::Resize ( const int iNewNumBlocks, const int iNewBlockSize )
         }
     }
 
-    // init buffer pointers and buffer state (empty buffer) and store buffer
-    // properties
+    // init buffer pointers and buffer state (empty buffer) and store buffer properties
     iBlockGetPos     = 0;
     iBlockPutPos     = 0;
     eBufState        = BS_EMPTY;
@@ -142,8 +140,8 @@ void CNetBuf::Resize ( const int iNewNumBlocks, const int iNewBlockSize )
 
 bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData, int iInSize )
 {
-    // if the sequence number is used, we need a complete different way of
-    // applying the new network packet
+    // if the sequence number is used, we need a complete different way of applying
+    // the new network packet
     if ( bUseSequenceNumber )
     {
         // check that the input size is a multiple of the block size
@@ -152,9 +150,8 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData, int iInSize )
             return false;
         }
 
-        // to get the number of input blocks we assume that the number of bytes
-        // for the sequence number is much smaller than the number of coded
-        // audio bytes
+        // to get the number of input blocks we assume that the number of bytes for
+        // the sequence number is much smaller than the number of coded audio bytes
         const int iNumBlocks = /* floor */ ( iInSize / iBlockSize );
 
         // copy new data in internal buffer
@@ -179,34 +176,28 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData, int iInSize )
                 iSeqNumDiff -= 256;
             }
 
-            // The 1-byte sequence number wraps around at a count of 256. So, if
-            // a packet is delayed further than this we cannot detect it. But it
-            // does not matter since such a packet is more than 100 ms delayed
-            // so we have a bad network situation anyway. Therefore we assume
-            // that the sequence number difference between the received and
-            // local counter is correct. The idea of the following code is that
-            // we always move our "buffer window" so that the received packet
-            // fits into the buffer. By doing this we are robust against sample
-            // rate offsets between client/server or buffer glitches in the
-            // audio driver since we adjust the window. The downside is that we
-            // never throw away single packets which arrive too late so we throw
-            // away valid packets when we move the "buffer window" to the
-            // delayed packet and then back to the correct place when the next
-            // normal packet is received. But tests showed that the new buffer
-            // strategy does not perform worse than the old jitter buffer which
-            // did not use any sequence number at all.
+            // The 1-byte sequence number wraps around at a count of 256. So, if a packet is delayed
+            // further than this we cannot detect it. But it does not matter since such a packet is
+            // more than 100 ms delayed so we have a bad network situation anyway. Therefore we
+            // assume that the sequence number difference between the received and local counter is
+            // correct. The idea of the following code is that we always move our "buffer window" so
+            // that the received packet fits into the buffer. By doing this we are robust against
+            // sample rate offsets between client/server or buffer glitches in the audio driver since
+            // we adjust the window. The downside is that we never throw away single packets which arrive
+            // too late so we throw away valid packets when we move the "buffer window" to the delayed
+            // packet and then back to the correct place when the next normal packet is received. But
+            // tests showed that the new buffer strategy does not perform worse than the old jitter
+            // buffer which did not use any sequence number at all.
             if ( iSeqNumDiff < 0 )
             {
-                // the received packet comes too late so we shift the "buffer
-                // window" to the past until the received packet is the very
-                // first packet in the buffer
+                // the received packet comes too late so we shift the "buffer window" to the past
+                // until the received packet is the very first packet in the buffer
                 for ( int i = iSeqNumDiff; i < 0; i++ )
                 {
                     // insert an invalid block at the shifted position
                     veciBlockValid[iBlockGetPos] = 0; // invalidate
 
-                    // we decrease the local sequence number and get position
-                    // and take care of wrap
+                    // we decrease the local sequence number and get position and take care of wrap
                     iSequenceNumberAtGetPos--;
                     iBlockGetPos--;
 
@@ -216,22 +207,19 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData, int iInSize )
                     }
                 }
 
-                // insert the new packet at the beginning of the buffer since it
-                // was delayed
+                // insert the new packet at the beginning of the buffer since it was delayed
                 iBlockPutPos = iBlockGetPos;
             }
             else if ( iSeqNumDiff >= iNumBlocksMemory )
             {
-                // the received packet comes too early so we move the "buffer
-                // window" in the future until the received packet is the last
-                // packet in the buffer
+                // the received packet comes too early so we move the "buffer window" in the
+                // future until the received packet is the last packet in the buffer
                 for ( int i = 0; i < iSeqNumDiff - iNumBlocksMemory + 1; i++ )
                 {
                     // insert an invalid block at the shifted position
                     veciBlockValid[iBlockGetPos] = 0; // invalidate
 
-                    // we increase the local sequence number and get position
-                    // and take care of wrap
+                    // we increase the local sequence number and get position and take care of wrap
                     iSequenceNumberAtGetPos++;
                     iBlockGetPos++;
 
@@ -241,9 +229,8 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData, int iInSize )
                     }
                 }
 
-                // insert the new packet at the end of the buffer since it is
-                // too early (since we add an offset to the get position, we
-                // have to take care of wrapping)
+                // insert the new packet at the end of the buffer since it is too early (since
+                // we add an offset to the get position, we have to take care of wrapping)
                 iBlockPutPos = iBlockGetPos + iNumBlocksMemory - 1;
 
                 if ( iBlockPutPos >= iNumBlocksMemory )
@@ -253,9 +240,8 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData, int iInSize )
             }
             else
             {
-                // this is the regular case: the received packet fits into the
-                // buffer so we will write it at the correct position based on
-                // the sequence number
+                // this is the regular case: the received packet fits into the buffer so
+                // we will write it at the correct position based on the sequence number
                 iBlockPutPos = iBlockGetPos + iSeqNumDiff;
 
                 if ( iBlockPutPos >= iNumBlocksMemory )
@@ -282,8 +268,8 @@ bool CNetBuf::Put ( const CVector<uint8_t>& vecbyData, int iInSize )
     }
     else
     {
-        // check if there is not enough space available and that the input size
-        // is a multiple of the block size
+        // check if there is not enough space available and that the input size is a
+        // multiple of the block size
         if ( ( GetAvailSpace() < iInSize ) ||
              ( ( iInSize % iBlockSize ) != 0 ) )
         {
@@ -350,8 +336,7 @@ bool CNetBuf::Get ( CVector<uint8_t>& vecbyData, const int iOutSize )
         veciBlockValid[iBlockGetPos] = 0; // zero means invalid
     }
 
-    // for simultion buffer or invalid block only update pointer, no data
-    // copying
+    // for simultion buffer or invalid block only update pointer, no data copying
     if ( !bIsSimulation && bReturn )
     {
         // copy data from internal buffer in output buffer
@@ -692,20 +677,20 @@ void CNetBufWithStats::UpdateAutoSetting()
                              dWeightDown );
 
     /*
-    // TEST store important detection parameters in file for debugging
-    static FILE* pFile = fopen ( "test.dat", "w" );
-    static int icnt = 0;
-    if ( icnt == 50 )
-    {
-        fprintf ( pFile, "%d %e\n", iCurDecision, dCurIIRFilterResult );
-        fflush ( pFile );
-        icnt = 0;
-    }
-    else
-    {
-        icnt++;
-    }
-    */
+// TEST store important detection parameters in file for debugging
+static FILE* pFile = fopen ( "test.dat", "w" );
+static int icnt = 0;
+if ( icnt == 50 )
+{
+    fprintf ( pFile, "%d %e\n", iCurDecision, dCurIIRFilterResult );
+    fflush ( pFile );
+    icnt = 0;
+}
+else
+{
+    icnt++;
+}
+*/
 
     // apply a hysteresis
     iCurAutoBufferSizeSetting =

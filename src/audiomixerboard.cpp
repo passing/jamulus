@@ -2,22 +2,22 @@
  * Copyright (c) 2004-2020
  *
  * Author(s):
- *  Volker Fischer
+ *  Volker Fischer 
  *
  ******************************************************************************
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
@@ -278,8 +278,7 @@ void CChannelFader::SetGUIDesign ( const EGUIDesign eNewDesign )
         pLabelInstBox->setMinimumHeight (
             52 ); // maximum height of the instrument+flag pictures
         pFader->setMinimumHeight (
-            120 ); // if this value is too small, the fader might not be movable
-                   // with the mouse for fancy skin (#292)
+            120 ); // if this value is too small, the fader might not be movable with the mouse for fancy skin (#292)
         pPan->setFixedSize ( 50, 50 );
         pPanLabel->setText ( tr ( "PAN" ) );
         pcbMute->setText ( tr ( "MUTE" ) );
@@ -304,8 +303,8 @@ void CChannelFader::SetGUIDesign ( const EGUIDesign eNewDesign )
         pcbSolo->setText ( tr ( "S" ) );
         strGroupBaseText = tr ( "G" );
         plbrChannelLevel->SetLevelMeterType ( CLevelMeter::MT_SLIM_BAR );
-        iInstrPicMaxWidth = 18; // scale instrument picture to avoid enlarging
-                                // the width by the picture
+        iInstrPicMaxWidth =
+            18; // scale instrument picture to avoid enlarging the width by the picture
         break;
 
     default:
@@ -431,8 +430,7 @@ void CChannelFader::Reset()
     // general initializations
     SetRemoteFaderIsMute ( false );
 
-    // init gain and pan value -> maximum value as definition according to
-    // server
+    // init gain and pan value -> maximum value as definition according to server
     pFader->setValue ( AUD_MIX_FADER_MAX );
     dPreviousFaderLevel = AUD_MIX_FADER_MAX;
     pPan->setValue ( AUD_MIX_PAN_MAX / 2 );
@@ -473,10 +471,9 @@ void CChannelFader::SetFaderLevel ( const double dLevel,
     // first make a range check
     if ( dLevel >= 0 )
     {
-        // we set the new fader level in the GUI (slider control) and also tell
-        // the server about the change (block the signal of the fader since we
-        // want to call SendFaderLevelToServer with a special additional
-        // parameter)
+        // we set the new fader level in the GUI (slider control) and also tell the
+        // server about the change (block the signal of the fader since we want to
+        // call SendFaderLevelToServer with a special additional parameter)
         pFader->blockSignals ( true );
         pFader->setValue (
             min ( AUD_MIX_FADER_MAX, MathUtils::round ( dLevel ) ) );
@@ -488,10 +485,10 @@ void CChannelFader::SetFaderLevel ( const double dLevel,
 
         if ( dLevel > AUD_MIX_FADER_MAX )
         {
-            // If the level is above the maximum, we have to store it for the
-            // purpose of group fader movement. If you move a fader which has
-            // lower volume than this one and this clips at max, we want to
-            // retain the ratio between this fader and the others in the group.
+            // If the level is above the maximum, we have to store it for the purpose
+            // of group fader movement. If you move a fader which has lower volume than
+            // this one and this clips at max, we want to retain the ratio between this
+            // fader and the others in the group.
             dPreviousFaderLevel = dLevel;
         }
     }
@@ -766,8 +763,7 @@ void CChannelFader::SetChannelInfos ( const CChannelInfo& cChanInfo )
         if ( ( iInstrPicMaxWidth != INVALID_INDEX ) &&
              ( pixInstr.width() > iInstrPicMaxWidth ) )
         {
-            // scale instrument picture on request (scale to the width with
-            // correct aspect ratio)
+            // scale instrument picture on request (scale to the width with correct aspect ratio)
             plblInstrument->setPixmap (
                 pixInstr.scaledToWidth ( iInstrPicMaxWidth,
                                          Qt::SmoothTransformation ) );
@@ -892,8 +888,7 @@ void CChannelFader::SetChannelInfos ( const CChannelInfo& cChanInfo )
         break;
     }
 
-    // if no information is given, leave the tool tip empty, otherwise add
-    // header
+    // if no information is given, leave the tool tip empty, otherwise add header
     if ( !strToolTip.isEmpty() )
     {
         strToolTip.prepend ( "<h3>" + tr ( "Musician Profile" ) + "</h3>" );
@@ -926,8 +921,8 @@ CAudioMixerBoard::CAudioMixerBoard ( QWidget* parent ) :
 {
     // add group box and hboxlayout
     QHBoxLayout* pGroupBoxLayout = new QHBoxLayout ( this );
-    QWidget* pMixerWidget = new QWidget(); // will be added to the scroll area
-                                           // which is then the parent
+    QWidget*     pMixerWidget =
+        new QWidget(); // will be added to the scroll area which is then the parent
     pScrollArea = new CMixerBoardScrollArea ( this );
     pMainLayout = new QGridLayout ( pMixerWidget );
 
@@ -952,8 +947,7 @@ CAudioMixerBoard::CAudioMixerBoard ( QWidget* parent ) :
         vecpChanFader[i]->Hide();
     }
 
-    // insert horizontal spacer (at position MAX_NUM_CHANNELS+1 which is index
-    // MAX_NUM_CHANNELS)
+    // insert horizontal spacer (at position MAX_NUM_CHANNELS+1 which is index MAX_NUM_CHANNELS)
     pMainLayout->addItem ( new QSpacerItem ( 0, 0, QSizePolicy::Expanding ),
                            0,
                            MAX_NUM_CHANNELS );
@@ -963,8 +957,7 @@ CAudioMixerBoard::CAudioMixerBoard ( QWidget* parent ) :
         0,
         0,
         0,
-        1 ); // note: to avoid problems at the bottom, use a small margin for
-             // that
+        1 ); // note: to avoid problems at the bottom, use a small margin for that
 
     // add the group box to the scroll area
     pScrollArea->setMinimumWidth (
@@ -1037,12 +1030,11 @@ void CAudioMixerBoard::SetServerName ( const QString& strNewServerName )
     }
     else
     {
-        // Do not set the server name directly but first show a label which
-        // indicates that we are trying to connect the server. First if a
-        // connected client list was received, the connection was successful and
-        // the title is updated with the correct server name. Make sure to
-        // choose a "try to connect" title which is most striking (we use filled
-        // blocks and upper case letters).
+        // Do not set the server name directly but first show a label which indicates
+        // that we are trying to connect the server. First if a connected client
+        // list was received, the connection was successful and the title is updated
+        // with the correct server name. Make sure to choose a "try to connect" title
+        // which is most striking (we use filled blocks and upper case letters).
         setTitle ( u8"\u2588\u2588\u2588\u2588\u2588  " +
                    tr ( "T R Y I N G   T O   C O N N E C T" ) +
                    u8"  \u2588\u2588\u2588\u2588\u2588" );
@@ -1150,8 +1142,7 @@ void CAudioMixerBoard::ChangeFaderOrder ( const EChSortType eChSortType )
         }
         else if ( eChSortType == ST_BY_INSTRUMENT )
         {
-            // sort first "by instrument" and second "by name" by adding the
-            // name after the instrument
+            // sort first "by instrument" and second "by name" by adding the name after the instrument
             PairList << QPair<QString, int> (
                 CInstPictures::GetName (
                     vecpChanFader[i]->GetReceivedInstrument() ) +
@@ -1165,8 +1156,7 @@ void CAudioMixerBoard::ChangeFaderOrder ( const EChSortType eChSortType )
                 // put channels without a group at the end
                 PairList << QPair<QString, int> (
                     "z",
-                    i ); // group IDs are numbers, use letter to put it at the
-                         // end
+                    i ); // group IDs are numbers, use letter to put it at the end
             }
             else
             {
@@ -1177,9 +1167,8 @@ void CAudioMixerBoard::ChangeFaderOrder ( const EChSortType eChSortType )
         }
         else // ST_NO_SORT
         {
-            // per definition for no sort: faders are sorted in the order they
-            // appeared (note that we pad to a total of 11 characters with zeros
-            // to make sure the sorting is done correctly)
+            // per definition for no sort: faders are sorted in the order they appeared (note that we
+            // pad to a total of 11 characters with zeros to make sure the sorting is done correctly)
             PairList << QPair<QString, int> (
                 QString ( "%1" ).arg (
                     vecpChanFader[i]->GetRunningNewClientCnt(),
@@ -1204,9 +1193,8 @@ void CAudioMixerBoard::ChangeFaderOrder ( const EChSortType eChSortType )
     const int iNumFadersFirstRow =
         ( iNumVisibleFaders + 1 ) / iNumMixerPanelRows;
 
-    // add channels to the layout in the new order, note that it is not required
-    // to remove the widget from the layout first but it is moved to the new
-    // position automatically
+    // add channels to the layout in the new order, note that it is not required to remove
+    // the widget from the layout first but it is moved to the new position automatically
     int iVisibleFaderCnt = 0;
 
     for ( int i = 0; i < MAX_NUM_CHANNELS; i++ )
@@ -1215,9 +1203,8 @@ void CAudioMixerBoard::ChangeFaderOrder ( const EChSortType eChSortType )
 
         if ( vecpChanFader[iCurFaderID]->IsVisible() )
         {
-            // per definition: the fader order is colum-first/row-second (note
-            // that the value in iNumFadersFirstRow defines how many rows we
-            // will get)
+            // per definition: the fader order is colum-first/row-second (note that
+            // the value in iNumFadersFirstRow defines how many rows we will get)
             pMainLayout->addWidget (
                 vecpChanFader[iCurFaderID]->GetMainWidget(),
                 iVisibleFaderCnt / iNumFadersFirstRow,
@@ -1278,8 +1265,7 @@ void CAudioMixerBoard::ApplyNewConClientList (
                     // check if fader was already in use -> preserve gain value
                     if ( !vecpChanFader[i]->IsVisible() )
                     {
-                        // the fader was not in use, reset everything for new
-                        // client
+                        // the fader was not in use, reset everything for new client
                         vecpChanFader[i]->Reset();
 
                         // check if this is my own fader and set fader property
@@ -1288,11 +1274,9 @@ void CAudioMixerBoard::ApplyNewConClientList (
                             vecpChanFader[i]->SetIsMyOwnFader();
                         }
 
-                        // set and increment the running new client counter
-                        // needed for sorting (per definition: a fader for a new
-                        // client shall always be inserted at the
-                        // right-hand-side if no other sorting type is selected
-                        // (i.e. "no sorting" is active) (#673)
+                        // set and increment the running new client counter needed for sorting (per definition:
+                        // a fader for a new client shall always be inserted at the right-hand-side if no other
+                        // sorting type is selected (i.e. "no sorting" is active) (#673)
                         vecpChanFader[i]->SetRunningNewClientCnt (
                             iRunningNewClientCnt++ );
 
@@ -1301,12 +1285,11 @@ void CAudioMixerBoard::ApplyNewConClientList (
 
                         // Set the default initial fader level. Check first that
                         // this is not the initialization (i.e. previously there
-                        // were no faders visible) to avoid that our own level
-                        // is adjusted. If we have received our own channel ID,
-                        // then we can adjust the level even if no fader was
-                        // visible. The fader level of 100 % is the default in
-                        // the server, in that case we do not have to do
-                        // anything here.
+                        // were no faders visible) to avoid that our own level is
+                        // adjusted. If we have received our own channel ID, then
+                        // we can adjust the level even if no fader was visible.
+                        // The fader level of 100 % is the default in the
+                        // server, in that case we do not have to do anything here.
                         if ( ( !bNoFaderVisible ||
                                ( ( iMyChannelID != INVALID_INDEX ) &&
                                  ( iMyChannelID != i ) ) ) &&
@@ -1319,8 +1302,7 @@ void CAudioMixerBoard::ApplyNewConClientList (
                         }
                     }
 
-                    // restore gain (if new name is different from the current
-                    // one)
+                    // restore gain (if new name is different from the current one)
                     if ( vecpChanFader[i]->GetReceivedName().compare (
                              vecChanInfo[j].strName ) )
                     {
@@ -1348,8 +1330,7 @@ void CAudioMixerBoard::ApplyNewConClientList (
                             vecpChanFader[i]->SetFaderIsMute (
                                 bStoredFaderIsMute );
                             vecpChanFader[i]->SetGroupID (
-                                iGroupID ); // Must be the last to be set in the
-                                            // fader!
+                                iGroupID ); // Must be the last to be set in the fader!
                         }
                     }
 
@@ -1363,16 +1344,15 @@ void CAudioMixerBoard::ApplyNewConClientList (
             // if current fader is not used, hide it
             if ( !bFaderIsUsed )
             {
-                // before hiding the fader, store its level (if some conditions
-                // are fulfilled)
+                // before hiding the fader, store its level (if some conditions are fulfilled)
                 StoreFaderSettings ( vecpChanFader[i] );
 
                 vecpChanFader[i]->Hide();
             }
         }
 
-        // update the solo states since if any channel was on solo and a new
-        // client has just connected, the new channel must be muted
+        // update the solo states since if any channel was on solo and a new client
+        // has just connected, the new channel must be muted
         UpdateSoloStates();
 
         // update flag for "all faders are invisible"
@@ -1389,8 +1369,7 @@ void CAudioMixerBoard::ApplyNewConClientList (
 
 void CAudioMixerBoard::SetFaderLevel ( const int iChannelIdx, const int iValue )
 {
-    // only apply new fader level if channel index is valid and the fader is
-    // visible
+    // only apply new fader level if channel index is valid and the fader is visible
     if ( ( iChannelIdx >= 0 ) && ( iChannelIdx < MAX_NUM_CHANNELS ) )
     {
         if ( vecpChanFader[iChannelIdx]->IsVisible() )
@@ -1462,8 +1441,7 @@ void CAudioMixerBoard::LoadAllFaderSettings()
 void CAudioMixerBoard::SetRemoteFaderIsMute ( const int  iChannelIdx,
                                               const bool bIsMute )
 {
-    // only apply remote mute state if channel index is valid and the fader is
-    // visible
+    // only apply remote mute state if channel index is valid and the fader is visible
     if ( ( iChannelIdx >= 0 ) && ( iChannelIdx < MAX_NUM_CHANNELS ) )
     {
         if ( vecpChanFader[iChannelIdx]->IsVisible() )
@@ -1512,8 +1490,8 @@ void CAudioMixerBoard::UpdateGainValue ( const int    iChannelIdx,
     }
 
     // if this fader is selected, all other in the group must be updated as
-    // well (note that we do not have to update if this is already a group
-    // update to avoid an infinite loop)
+    // well (note that we do not have to update if this is already a group update
+    // to avoid an infinite loop)
     if ( ( vecpChanFader[iChannelIdx]->GetGroupID() != INVALID_INDEX ) &&
          !bIsGroupUpdate )
     {
@@ -1573,9 +1551,8 @@ void CAudioMixerBoard::StoreFaderSettings ( CChannelFader* pChanFader )
             if ( iTempListCnt < MAX_NUM_STORED_FADER_SETTINGS )
             {
                 // check for the old index of the current entry (this has to be
-                // skipped), note that per definition: the old index is an
-                // illegal index in case the entry was not present in the vector
-                // before
+                // skipped), note that per definition: the old index is an illegal
+                // index in case the entry was not present in the vector before
                 if ( iIdx != iOldIdx )
                 {
                     pSettings->vecStoredFaderLevels[iTempListCnt] =

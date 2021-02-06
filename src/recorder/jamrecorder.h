@@ -171,8 +171,7 @@ class CJamRecorder : public QObject
     }
 
     /**
-     * @brief Create recording directory, if necessary, and connect signal
-     * handlers
+     * @brief Create recording directory, if necessary, and connect signal handlers
      * @param server Server object emitting signals
      */
     QString Init();
@@ -180,8 +179,7 @@ class CJamRecorder : public QObject
     /**
      * @brief SessionDirToReaper Method that allows an RPP file to be recreated
      * @param strSessionDirName Where the session wave files are
-     * @param serverFrameSizeSamples What the server frame size was for the
-     * session
+     * @param serverFrameSizeSamples What the server frame size was for the session
      */
     static void SessionDirToReaper ( QString& strSessionDirName,
                                      int      serverFrameSizeSamples );

@@ -8,16 +8,16 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
@@ -30,8 +30,8 @@ CChannel::CChannel ( const bool bNIsServer ) :
     vecfPannings ( MAX_NUM_CHANNELS, 0.5f ),
     iCurSockBufNumFrames ( INVALID_INDEX ),
     bDoAutoSockBufSize ( true ),
-    bUseSequenceNumber ( false ), // this is important since in the client we
-                                  // reset on Channel.SetEnable ( false )
+    bUseSequenceNumber (
+        false ), // this is important since in the client we reset on Channel.SetEnable ( false )
     iSendSequenceNumber ( 0 ),
     iFadeInCnt ( 0 ),
     iFadeInCntMax ( FADE_IN_NUM_FRAMES_DBLE_FRAMESIZE ),
@@ -60,8 +60,7 @@ CChannel::CChannel ( const bool bNIsServer ) :
 
     // Connections -------------------------------------------------------------
 
-    // TODO if we later do not fire vectors in the emits, we can remove this
-    // again
+    // TODO if we later do not fire vectors in the emits, we can remove this again
     qRegisterMetaType<CVector<uint8_t>> ( "CVector<uint8_t>" );
     qRegisterMetaType<CHostAddress> ( "CHostAddress" );
 
@@ -188,9 +187,9 @@ void CChannel::SetEnable ( const bool bNEnStat )
     // disconnects from a server since we do not yet know if the next server we
     // connect to will support the sequence number. We use the SetEnable call in
     // the client for this task since at every start/stop it will call this
-    // function. NOTE that it is important to reset this parameter on
-    // SetEnable(false) since the SetEnable(true) is set AFTER the Init() in the
-    // client -> we simply set it regardless of the state which does not hurt.
+    // function. NOTE that it is important to reset this parameter on SetEnable(false)
+    // since the SetEnable(true) is set AFTER the Init() in the client -> we
+    // simply set it regardless of the state which does not hurt.
     bUseSequenceNumber = false;
 
     // if channel is not enabled, reset time out count and protocol
@@ -204,15 +203,13 @@ void CChannel::SetEnable ( const bool bNEnStat )
 void CChannel::OnVersionAndOSReceived ( COSUtil::EOpSystemType eOSType,
                                         QString                strVersion )
 {
-    // check if audio packet counter is supported by the server (minimum version
-    // is 3.6.0)
+    // check if audio packet counter is supported by the server (minimum version is 3.6.0)
 #if QT_VERSION >= QT_VERSION_CHECK( 5, 6, 0 )
     if ( QVersionNumber::compare ( QVersionNumber::fromString ( strVersion ),
                                    QVersionNumber ( 3, 6, 0 ) ) >= 0 )
     {
-        // activate sequence counter and update the audio stream properties
-        // (which does all the initialization and tells the server about the
-        // change)
+        // activate sequence counter and update the audio stream properties (which
+        // does all the initialization and tells the server about the change)
         bUseSequenceNumber = true;
 
         SetAudioStreamProperties ( eAudioCompressionType,
@@ -231,8 +228,8 @@ void CChannel::SetAudioStreamProperties ( const EAudComprType eNewAudComprType,
                                           const int iNewNumAudioChannels )
 {
     /*
-        this function is intended for the client (not the server)
-    */
+    this function is intended for the client (not the server)
+*/
     CNetworkTransportProps NetworkTransportProps;
 
     Mutex.lock();
@@ -457,8 +454,7 @@ void CChannel::OnJittBufSizeChange ( int iNewJitBufSize )
         }
         else
         {
-            // manual setting is received, turn OFF auto setting and apply new
-            // value
+            // manual setting is received, turn OFF auto setting and apply new value
             SetDoAutoSockBufSize ( false );
             SetSockBufNumFrames ( iNewJitBufSize, true );
         }
@@ -536,8 +532,8 @@ void CChannel::OnNetTranspPropsReceived (
                 iCeltNumCodedBytes = iNetwFrameSize;
             }
 
-            // update maximum number of frames for fade in counter (only needed
-            // for server) and audio frame size
+            // update maximum number of frames for fade in counter (only needed for server)
+            // and audio frame size
             if ( eAudioCompressionType == CT_OPUS )
             {
                 iFadeInCntMax =
@@ -550,14 +546,14 @@ void CChannel::OnNetTranspPropsReceived (
                 iAudioFrameSizeSamples = SYSTEM_FRAME_SIZE_SAMPLES;
             }
 
-            // the fade-in counter maximum value may have changed, make sure the
-            // fade-in counter is not larger than the allowed maximum value
+            // the fade-in counter maximum value may have changed, make sure the fade-in counter
+            // is not larger than the allowed maximum value
             iFadeInCnt = std::min ( iFadeInCnt, iFadeInCntMax );
 
             MutexSocketBuf.lock();
             {
-                // update socket buffer (the network block size is a multiple of
-                // the minimum network frame size)
+                // update socket buffer (the network block size is a multiple of the
+                // minimum network frame size)
                 SockBuf.SetUseDoubleSystemFrameSize (
                     eAudioCompressionType ==
                     CT_OPUS ); // NOTE must be set BEFORE the init()
@@ -581,16 +577,14 @@ void CChannel::OnNetTranspPropsReceived (
 
 void CChannel::OnReqNetTranspProps()
 {
-    // fill network transport properties struct from current settings and send
-    // it
+    // fill network transport properties struct from current settings and send it
     Protocol.CreateNetwTranspPropsMes (
         GetNetworkTransportPropsFromCurrentSettings() );
 }
 
 void CChannel::OnReqSplitMessSupport()
 {
-    // activate split messages in our protocol (client) and return answer
-    // message to the server
+    // activate split messages in our protocol (client) and return answer message to the server
     Protocol.SetSplitMessageSupported ( true );
     Protocol.CreateSplitMessSupportedMes();
 }

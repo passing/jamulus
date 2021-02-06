@@ -8,16 +8,16 @@
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later
+ * Foundation; either version 2 of the License, or (at your option) any later 
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
+ * this program; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  *
 \******************************************************************************/
@@ -34,10 +34,8 @@ void CStereoSignalLevelMeter::Update ( const CVector<short>& vecsAudio,
     // Get maximum of current block
     //
     // Speed optimization:
-    // - we only make use of the negative values and ignore the positive ones
-    // (since
-    //   int16 has range {-32768, 32767}) -> we do not need to call the fabs()
-    //   function
+    // - we only make use of the negative values and ignore the positive ones (since
+    //   int16 has range {-32768, 32767}) -> we do not need to call the fabs() function
     // - we only evaluate every third sample
     //
     // With these speed optimizations we might loose some information in
@@ -247,9 +245,9 @@ void CAudioReverb::Init ( const EAudChanConf eNAudioChannelConf,
 bool CAudioReverb::isPrime ( const int number )
 {
     /*
-        Returns true if argument value is prime. Taken from "class Effect" in
-        "STK abstract effects parent class".
-    */
+    Returns true if argument value is prime. Taken from "class Effect" in
+    "STK abstract effects parent class".
+*/
     if ( number == 2 )
     {
         return true;
@@ -329,8 +327,8 @@ void CAudioReverb::Process ( CVector<int16_t>& vecsStereoInOut,
 
     for ( int i = 0; i < iStereoBlockSizeSam; i += 2 )
     {
-        // we sum up the stereo input channels (in case mono input is used, a
-        // zero shall be input for the right channel)
+        // we sum up the stereo input channels (in case mono input is used, a zero
+        // shall be input for the right channel)
         if ( eAudioChannelConf == CC_STEREO )
         {
             fMixedInput =
@@ -671,12 +669,12 @@ CAboutDlg::CAboutDlg ( QWidget* parent ) : CBaseDlg ( parent )
 CLicenceDlg::CLicenceDlg ( QWidget* parent ) : CBaseDlg ( parent )
 {
     /*
-        The licence dialog is structured as follows:
-        - text box with the licence text on the top
-        - check box: I &agree to the above licence terms
-        - Accept button (disabled if check box not checked)
-        - Decline button
-    */
+    The licence dialog is structured as follows:
+    - text box with the licence text on the top
+    - check box: I &agree to the above licence terms
+    - Accept button (disabled if check box not checked)
+    - Decline button
+*/
     setWindowIcon (
         QIcon ( QString::fromUtf8 ( ":/png/main/res/fronticon.png" ) ) );
 
@@ -724,14 +722,14 @@ CMusProfDlg::CMusProfDlg ( CClient* pNCliP, QWidget* parent ) :
     pClient ( pNCliP )
 {
     /*
-        The musician profile dialog is structured as follows:
-        - label with edit box for alias/name
-        - label with combo box for instrument
-        - label with combo box for country flag
-        - label with edit box for city
-        - label with combo box for skill level
-        - OK button
-    */
+    The musician profile dialog is structured as follows:
+    - label with edit box for alias/name
+    - label with combo box for instrument
+    - label with combo box for country flag
+    - label with edit box for city
+    - label with combo box for skill level
+    - OK button
+*/
     setWindowTitle ( tr ( "Musician Profile" ) );
     setWindowIcon (
         QIcon ( QString::fromUtf8 ( ":/png/main/res/fronticon.png" ) ) );
@@ -1141,8 +1139,7 @@ void CLanguageComboBox::Init ( QString& strSelLanguage )
 
 void CLanguageComboBox::OnLanguageActivated ( int iLanguageIdx )
 {
-    // only update if the language selection is different from the current
-    // selected language
+    // only update if the language selection is different from the current selected language
     if ( iIdxSelectedLanguage != iLanguageIdx )
     {
         QMessageBox::information (
@@ -1189,8 +1186,7 @@ bool NetworkUtil::ParseNetworkAddress ( QString       strAddress,
         // a colon is present in the address string, try to extract port number
         iNetPort = strPort.toInt();
 
-        // extract address port before separator (should be actual internet
-        // address)
+        // extract address port before separator (should be actual internet address)
         strAddress = strAddress.section ( strSep, 0, 0 );
 
         if ( bIsIP6 )
@@ -1300,8 +1296,8 @@ CInstPictures::GetTable ( const bool bReGenerateTable )
         // instrument picture data base initialization
         // NOTE: Do not change the order of any instrument in the future!
         // NOTE: The very first entry is the "not used" element per definition.
-        vecDataBase.Init ( 0 ); // first clear all existing data since we create
-                                // the list be adding entries
+        vecDataBase.Init (
+            0 ); // first clear all existing data since we create the list be adding entries
         vecDataBase.Add ( CInstPictProps (
             QCoreApplication::translate ( "CMusProfDlg", "None" ),
             ":/png/instr/res/instruments/none.png",
@@ -1564,12 +1560,11 @@ QString CLocale::GetCountryFlagIconsResourceReference (
     }
     else
     {
-        // NOTE: The following code was introduced to support old QT versions.
-        // The problem
-        //       is that the number of countries displayed is less than the one
-        //       displayed with the new code below (which is disabled).
-        //       Therefore, as soon as the compatibility to the very old
-        //       versions of QT is not required anymore, use the new code.
+        // NOTE: The following code was introduced to support old QT versions. The problem
+        //       is that the number of countries displayed is less than the one displayed
+        //       with the new code below (which is disabled). Therefore, as soon as the
+        //       compatibility to the very old versions of QT is not required anymore, use
+        //       the new code.
         // COMPATIBLE FOR OLD QT VERSIONS -> use a table:
         QString strISO3166 = "";
         switch ( static_cast<int> ( eCountry ) )
@@ -2131,43 +2126,39 @@ QString CLocale::GetCountryFlagIconsResourceReference (
 
         // AT LEAST QT 4.8 IS REQUIRED:
         /*
-                // There is no direct query of the country code in Qt, therefore
-        we use a
-                // workaround: Get the matching locales properties and split the
-        name of
-                // that since the second part is the country code
-                QList<QLocale> vCurLocaleList = QLocale::matchingLocales (
-        QLocale::AnyLanguage, QLocale::AnyScript, eCountry );
+        // There is no direct query of the country code in Qt, therefore we use a
+        // workaround: Get the matching locales properties and split the name of
+        // that since the second part is the country code
+        QList<QLocale> vCurLocaleList = QLocale::matchingLocales ( QLocale::AnyLanguage,
+                                                                   QLocale::AnyScript,
+                                                                   eCountry );
 
-                // check if the matching locales query was successful
-                if ( vCurLocaleList.size() > 0 )
+        // check if the matching locales query was successful
+        if ( vCurLocaleList.size() > 0 )
+        {
+            QStringList vstrLocParts = vCurLocaleList.at ( 0 ).name().split("_");
+
+            // the second split contains the name we need
+            if ( vstrLocParts.size() > 1 )
+            {
+                strReturn = ":/png/flags/res/flags/" + vstrLocParts.at ( 1 ).toLower() + ".png";
+
+                // check if file actually exists, if not then invalidate reference
+                if ( !QFile::exists ( strReturn ) )
                 {
-                    QStringList vstrLocParts = vCurLocaleList.at ( 0
-        ).name().split("_");
-
-                    // the second split contains the name we need
-                    if ( vstrLocParts.size() > 1 )
-                    {
-                        strReturn = ":/png/flags/res/flags/" + vstrLocParts.at (
-        1 ).toLower() + ".png";
-
-                        // check if file actually exists, if not then invalidate
-        reference if ( !QFile::exists ( strReturn ) )
-                        {
-                            strReturn = "";
-                        }
-        //else
-        //{
-        //// TEST generate table
-        //static FILE* pFile = fopen ( "test.dat", "w" );
-        //fprintf ( pFile, "            case %d: strISO3166 = \"%s\"; break;\n",
-        //          static_cast<int> ( eCountry ), vstrLocParts.at ( 1
-        ).toLower().toStdString().c_str() );
-        //fflush ( pFile );
-        //}
-                    }
+                    strReturn = "";
                 }
-        */
+//else
+//{
+//// TEST generate table
+//static FILE* pFile = fopen ( "test.dat", "w" );
+//fprintf ( pFile, "            case %d: strISO3166 = \"%s\"; break;\n",
+//          static_cast<int> ( eCountry ), vstrLocParts.at ( 1 ).toLower().toStdString().c_str() );
+//fflush ( pFile );
+//}
+            }
+        }
+*/
     }
 
     return strReturn;
@@ -2179,8 +2170,8 @@ QMap<QString, QString> CLocale::GetAvailableTranslations()
     QDirIterator           DirIter ( ":/translations" );
 
     // add english language (default which is in the actual source code)
-    TranslMap["en"] = ""; // empty file name means that the translation load
-                          // fails and we get the default english language
+    TranslMap["en"] =
+        ""; // empty file name means that the translation load fails and we get the default english language
 
     while ( DirIter.hasNext() )
     {
