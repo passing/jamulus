@@ -102,7 +102,7 @@ class CHighPrecisionTimer : public QThread
   protected:
     virtual void run();
 
-    bool bRun;
+    bool     bRun;
 
 #if defined( __APPLE__ ) || defined( __MACOSX )
     uint64_t Delay;

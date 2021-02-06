@@ -260,9 +260,9 @@ LED bar:      lbr
 
 #define _MAXSHORT 32767
 #define _MINSHORT ( -32768 )
-#define INVALID_INDEX                                                          \
-    -1 // define invalid index as a negative value (a valid index must always be
-       // >= 0)
+#define INVALID_INDEX                                                            \
+    -1 // define invalid index as a negative value (a valid index must always be \
+        // >= 0)
 
 #if HAVE_STDINT_H
 #include <stdint.h>

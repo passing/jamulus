@@ -55,9 +55,9 @@
 #define PROTMESSID_CHANNEL_INFOS 25     // set channel infos
 #define PROTMESSID_OPUS_SUPPORTED 26    // tells that OPUS codec is supported
 #define PROTMESSID_LICENCE_REQUIRED 27  // licence required
-#define PROTMESSID_REQ_CHANNEL_LEVEL_LIST                                      \
-    28 // OLD (not used anymore) // TODO needed for compatibility to old servers
-       // >= 3.4.6 and <= 3.5.12
+#define PROTMESSID_REQ_CHANNEL_LEVEL_LIST                                        \
+    28 // OLD (not used anymore) // TODO needed for compatibility to old servers \
+        // >= 3.4.6 and <= 3.5.12
 #define PROTMESSID_VERSION_AND_OS 29 // version number and operating system
 #define PROTMESSID_CHANNEL_PAN 30    // set channel pan for mix
 #define PROTMESSID_MUTE_STATE_CHANGED                                          \
@@ -384,7 +384,7 @@ class CProtocol : public QObject
     void ReqChanInfo();
     void ChatTextReceived ( QString strChatText );
     void
-    NetTranspPropsReceived ( CNetworkTransportProps NetworkTransportProps );
+         NetTranspPropsReceived ( CNetworkTransportProps NetworkTransportProps );
     void ReqNetTranspProps();
     void ReqSplitMessSupport();
     void SplitMessSupported();
