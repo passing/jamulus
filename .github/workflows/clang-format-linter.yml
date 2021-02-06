@@ -12,7 +12,7 @@ jobs:
       with:
         source: '.'
         exclude: './libs'
-        extensions: 'h,cpp,c'
+        extensions: 'cpp,h'
         clangFormatVersion: 10
         inplace: True
     - uses: EndBug/add-and-commit@v4
