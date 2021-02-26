@@ -18,3 +18,4 @@ jobs:
         exclude: './libs'
         extensions: 'cpp,h'
         clangFormatVersion: 10
+      continue-on-error: true
