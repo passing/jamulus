@@ -63,13 +63,15 @@ CChannelFader::CChannelFader ( QWidget* pNW ) :
 
     // define the popup menu for the group checkbox
     pGroupPopupMenu = new QMenu ( "", pcbGroup );
-    pGroupPopupMenu->addAction ( tr ( "&No grouping" ), this, SLOT ( OnGroupMenuGrpNone() ) );
-    pGroupPopupMenu->addAction ( tr ( "Assign to group" ) + " &1", this, SLOT ( OnGroupMenuGrp1() ) );
-    pGroupPopupMenu->addAction ( tr ( "Assign to group" ) + " &2", this, SLOT ( OnGroupMenuGrp2() ) );
-    pGroupPopupMenu->addAction ( tr ( "Assign to group" ) + " &3", this, SLOT ( OnGroupMenuGrp3() ) );
-    pGroupPopupMenu->addAction ( tr ( "Assign to group" ) + " &4", this, SLOT ( OnGroupMenuGrp4() ) );
-#if ( MAX_NUM_FADER_GROUPS != 4 )
-# error "MAX_NUM_FADER_GROUPS must be set to 4, see implementation in CChannelFader()"
+    pGroupPopupMenu->addAction ( tr ( "&No grouping" ),
+        this, [=] { OnGroupMenuGrp ( INVALID_INDEX ); } );
+    for ( int iGrp = 0 ; iGrp < MAX_NUM_FADER_GROUPS ; iGrp++ )
+    {
+        pGroupPopupMenu->addAction ( tr ( "Assign to group" ) + ( QString ( " &%1" ) .arg( iGrp + 1 ) ),
+            this, [=] { OnGroupMenuGrp ( iGrp ); } );
+    }
+#if ( MAX_NUM_FADER_GROUPS != 8 )
+# error "MAX_NUM_FADER_GROUPS must be set to 8, see implementation in CChannelFader()"
 #endif
 
     // setup channel level
@@ -84,9 +86,10 @@ CChannelFader::CChannelFader ( QWidget* pNW ) :
     pPan->setRange               ( 0, AUD_MIX_PAN_MAX );
     pPan->setValue               ( AUD_MIX_PAN_MAX / 2 );
     pPan->setNotchesVisible      ( true );
-    pInfoLabel->setMinimumHeight ( 15 ); // prevents jitter when muting/unmuting (#811)
-    pPanInfoGrid->addWidget      ( pPanLabel, 0, Qt::AlignLeft );
-    pPanInfoGrid->addWidget      ( pInfoLabel );
+    pInfoLabel->setMinimumHeight ( pPanLabel->height() ); // prevents jitter when muting/unmuting (#811)
+    pInfoLabel->setAlignment     ( Qt::AlignTop );
+    pPanInfoGrid->addWidget      ( pPanLabel, 0, Qt::AlignLeft | Qt::AlignTop );
+    pPanInfoGrid->addWidget      ( pInfoLabel, 0, Qt::AlignHCenter | Qt::AlignTop );
     pPanGrid->addLayout          ( pPanInfoGrid );
     pPanGrid->addWidget          ( pPan, 0, Qt::AlignHCenter );
 
@@ -216,7 +219,7 @@ void CChannelFader::SetGUIDesign ( const EGUIDesign eNewDesign )
             "          border-bottom: 10px transparent;"
             "          border-left:   20px transparent;"
             "          border-right:  -25px transparent; }"
-            "QSlider::groove { image:          url();"
+            "QSlider::groove { image:          url(:/png/fader/res/transparent1x1.png);"
             "                  padding-left:   -34px;"
             "                  padding-top:    -10px;"
             "                  padding-bottom: -15px; }"
@@ -285,43 +288,73 @@ bool CChannelFader::GetDisplayChannelLevel()
 
 void CChannelFader::SetDisplayPans ( const bool eNDP )
 {
-    pInfoLabel->setHidden ( !eNDP );
     pPanLabel->setHidden  ( !eNDP );
     pPan->setHidden       ( !eNDP );
 }
 
 void CChannelFader::SetupFaderTag ( const ESkillLevel eSkillLevel )
 {
-    // the group ID defines the border color
-    QString strBorderColor;
-
-    switch ( iGroupID )
+    // Should never happen here
+    if ( iGroupID >= MAX_NUM_FADER_GROUPS )
     {
-    case 0:
-        strBorderColor = "red";
-        break;
+        SetGroupID ( INVALID_INDEX );
+    }
 
-    case 1:
-        strBorderColor = "blue";
-        break;
+    // the group ID defines the border color and style
+    QString strBorderColor = "black";
+    QString strBorderStyle = "solid";
 
-    case 2:
-        strBorderColor = "green";
-        break;
+    if ( iGroupID != INVALID_INDEX )
+    {
+        switch ( iGroupID % 4 )
+        {
+        case 0:
+            strBorderColor = "#C43AC5";
+            break;
 
-    case 3:
-        strBorderColor = "yellow";
-        break;
+        case 1:
+            strBorderColor = "#2B93D4";
+            break;
 
-    default:
-        strBorderColor = "black";
-        break;
+        case 2:
+            strBorderColor = "#3BC53A";
+            break;
+
+        case 3:
+            strBorderColor = "#D46C2B";
+            break;
+
+        default:
+            break;
+        }
+
+        switch ( iGroupID / 4 )
+        {
+        case 0:
+            strBorderStyle = "solid";
+            break;
+
+        case 1:
+            strBorderStyle = "dashed";
+            break;
+
+        case 2:
+            strBorderStyle = "dotted";
+            break;
+
+        case 3:
+            strBorderStyle = "double";
+            break;
+
+        default:
+            break;
+        }
     }
 
     // setup group box for label/instrument picture: set a thick black border
     // with nice round edges
     QString strStile =
-        "QGroupBox { border:        2px solid " + strBorderColor + ";"
+        "QGroupBox { border:        2px " + strBorderStyle + " " + strBorderColor + ";"
         "            border-radius: 4px;"
         "            padding:       3px;";
 
@@ -834,7 +867,7 @@ CAudioMixerBoard::CAudioMixerBoard ( QWidget* parent ) :
     bNoFaderVisible      ( true ),
     iMyChannelID         ( INVALID_INDEX ),
     iRunningNewClientCnt ( 0 ),
-    iNumMixerPanelRows   ( 1 ),
+    iNumMixerPanelRows   ( 1 ), // pSettings->iNumMixerPanelRows is not yet available
     strServerName        ( "" ),
     eRecorderState       ( RS_UNDEFINED ),
     eChSortType          ( ST_NO_SORT )
@@ -856,6 +889,8 @@ CAudioMixerBoard::CAudioMixerBoard ( QWidget* parent ) :
 
     // create all mixer controls and make them invisible
     vecpChanFader.Init ( MAX_NUM_CHANNELS );
+
+    vecAvgLevels.Init ( MAX_NUM_CHANNELS, 0.0f );
 
     for ( int i = 0; i < MAX_NUM_CHANNELS; i++ )
     {
@@ -1070,9 +1105,10 @@ void CAudioMixerBoard::ChangeFaderOrder ( const EChSortType eChSortType )
     // sort the channels according to the first of the pair
     std::stable_sort ( PairList.begin(), PairList.end() );
 
-    // calculate the number of the faders in the first row by distribute
-    // the faders equally in the available number of rows
-    const int iNumFadersFirstRow = ( iNumVisibleFaders + 1 ) / iNumMixerPanelRows;
+    // we want to distribute iNumVisibleFaders across the first row, then the next, etc
+    // up to iNumMixerPanelRows.  So row wants to start at 0 until we get to some number,
+    // then increase, where "some number" means we get no more than iNumMixerPanelRows.
+    const int iNumFadersFirstRow = ( iNumVisibleFaders + iNumMixerPanelRows - 1 ) / iNumMixerPanelRows;
 
     // add channels to the layout in the new order, note that it is not required to remove
     // the widget from the layout first but it is moved to the new position automatically
@@ -1084,8 +1120,8 @@ void CAudioMixerBoard::ChangeFaderOrder ( const EChSortType eChSortType )
 
         if ( vecpChanFader[iCurFaderID]->IsVisible() )
         {
-            // per definition: the fader order is colum-first/row-second (note that
-            // the value in iNumFadersFirstRow defines how many rows we will get)
+            // channels are added row-first, up to iNumFadersFirstRow, then onto
+            // the next row.
             pMainLayout->addWidget ( vecpChanFader[iCurFaderID]->GetMainWidget(),
                     iVisibleFaderCnt / iNumFadersFirstRow,
                     iVisibleFaderCnt % iNumFadersFirstRow );
@@ -1102,11 +1138,6 @@ void CAudioMixerBoard::UpdateTitle()
     if ( eRecorderState == RS_RECORDING )
     {
         strTitlePrefix = "[" + tr ( "RECORDING ACTIVE" ) + "] ";
-        setStyleSheet ( AM_RECORDING_STYLE );
-    }
-    else
-    {
-        setStyleSheet ( "" );
     }
 
     setTitle ( strTitlePrefix + tr ( "Personal Mix at: " ) + strServerName );
@@ -1150,6 +1181,7 @@ void CAudioMixerBoard::ApplyNewConClientList ( CVector<CChannelInfo>& vecChanInf
                     {
                         // the fader was not in use, reset everything for new client
                         vecpChanFader[i]->Reset();
+                        vecAvgLevels[i] = 0.0f;
 
                         // check if this is my own fader and set fader property
                         if ( i == iMyChannelID )
@@ -1309,6 +1341,169 @@ void CAudioMixerBoard::SetAllFaderLevelsToNewClientLevel()
             // same fader level now
             vecpChanFader[i]->SetFaderLevel (
                 pSettings->iNewClientFaderLevel / 100.0 * AUD_MIX_FADER_MAX, true );
+        }
+    }
+}
+
+void CAudioMixerBoard::AutoAdjustAllFaderLevels()
+{
+    QMutexLocker locker ( &Mutex );
+
+    // initialize variables used for statistics
+    float vecMaxLevel[MAX_NUM_FADER_GROUPS + 1];
+    int   vecChannelsPerGroup[MAX_NUM_FADER_GROUPS + 1];
+    for ( int i = 0; i < MAX_NUM_FADER_GROUPS + 1; ++i )
+    {
+        vecMaxLevel[i] = LOW_BOUND_SIG_METER;
+        vecChannelsPerGroup[i] = 0;
+    }
+    CVector<CVector<float>> levels;
+    levels.resize ( MAX_NUM_FADER_GROUPS + 1 );
+
+    // compute min/max level per group and number of channels per group
+    for ( int i = 0; i < MAX_NUM_CHANNELS; ++i )
+    {
+        // only apply to visible faders (and not to my own channel fader)
+        if ( vecpChanFader[i]->IsVisible() && ( i != iMyChannelID ) )
+        {
+            // map averaged meter output level to decibels
+            // (invert CStereoSignalLevelMeter::CalcLogResultForMeter)
+            float leveldB = vecAvgLevels[i] *
+                ( UPPER_BOUND_SIG_METER - LOW_BOUND_SIG_METER ) /
+                NUM_STEPS_LED_BAR + LOW_BOUND_SIG_METER;
+
+            int group = vecpChanFader[i]->GetGroupID();
+            if ( group == INVALID_INDEX )
+            {
+                group = MAX_NUM_FADER_GROUPS;
+            }
+
+            if ( leveldB >= AUTO_FADER_NOISE_THRESHOLD_DB )
+            {
+                vecMaxLevel[group] = fmax ( vecMaxLevel[group], leveldB );
+                levels[group].Add ( leveldB );
+            }
+            ++vecChannelsPerGroup[group];
+        }
+    }
+
+    // sort levels for later median computation
+    for ( int i = 0; i < MAX_NUM_FADER_GROUPS + 1; ++i )
+    {
+        std::sort ( levels[i].begin(), levels[i].end() );
+    }
+
+    // compute the number of active groups (at least one channel)
+    int cntActiveGroups = 0;
+    for ( int i = 0; i < MAX_NUM_FADER_GROUPS; ++i )
+    {
+        cntActiveGroups += vecChannelsPerGroup[i] > 0;
+    }
+
+    // only my channel is active, nothing to do
+    if ( cntActiveGroups == 0 &&
+        vecChannelsPerGroup[MAX_NUM_FADER_GROUPS] == 0 )
+    {
+        return;
+    }
+
+    // compute target level for each group
+    // (prevent clipping when each group contributes at maximum level)
+    float targetLevelPerGroup = -20.0f * log10 (
+        std::max ( cntActiveGroups, 1 ) );
+
+    // compute target levels for the channels of each group individually
+    float vecTargetChannelLevel[MAX_NUM_FADER_GROUPS + 1];
+    float levelOffset = 0.0f;
+    float minFader = 0.0f;
+    for ( int i = 0; i < MAX_NUM_FADER_GROUPS + 1; ++i )
+    {
+        // compute the target level for each channel in the current group
+        // (prevent clipping when each channel in this group contributes at
+        // the maximum level)
+        vecTargetChannelLevel[i] = vecChannelsPerGroup[i] > 0 ?
+            targetLevelPerGroup - 20.0f * log10 ( vecChannelsPerGroup[i] ) :
+            0.0f;
+
+        // get median level
+        int cntChannels = levels[i].Size();
+        if ( cntChannels == 0 )
+        {
+            continue;
+        }
+        float refLevel = levels[i][cntChannels / 2];
+
+        // since we can only attenuate channels but not amplify, we have to
+        // check that the reference channel can be brought to the target
+        // level
+        if ( refLevel < vecTargetChannelLevel[i] )
+        {
+            // otherwise, we adjust the level offset in such a way that
+            // the level can be reached
+            levelOffset = fmin ( levelOffset,
+                refLevel - vecTargetChannelLevel[i] );
+
+            // compute the minimum necessary fader setting
+            minFader = fmin ( minFader, -vecMaxLevel[i] +
+                vecTargetChannelLevel[i] + levelOffset );
+        }
+    }
+
+    // take minimum fader value into account
+    // very weak channels would actually require strong channels to be
+    // attenuated to a large amount; however, the attenuation is limited by
+    // the faders
+    if ( minFader < -AUD_MIX_FADER_RANGE_DB )
+    {
+        levelOffset += -AUD_MIX_FADER_RANGE_DB - minFader;
+    }
+
+    // adjust all levels
+    for ( int i = 0; i < MAX_NUM_CHANNELS; ++i )
+    {
+        // only apply to visible faders (and not to my own channel fader)
+        if ( vecpChanFader[i]->IsVisible() && ( i != iMyChannelID ) )
+        {
+            // map averaged meter output level to decibels
+            // (invert CStereoSignalLevelMeter::CalcLogResultForMeter)
+            float leveldB = vecAvgLevels[i] *
+                ( UPPER_BOUND_SIG_METER - LOW_BOUND_SIG_METER ) /
+                NUM_STEPS_LED_BAR + LOW_BOUND_SIG_METER;
+
+            int group = vecpChanFader[i]->GetGroupID();
+            if ( group == INVALID_INDEX )
+            {
+                if ( cntActiveGroups > 0 )
+                {
+                    // do not adjust the channels without group in group mode
+                    continue;
+                }
+                else
+                {
+                    group = MAX_NUM_FADER_GROUPS;
+                }
+            }
+
+            // do not adjust channels with almost zero level to full level since
+            // the channel might simply be silent at the moment
+            if ( leveldB >= AUTO_FADER_NOISE_THRESHOLD_DB )
+            {
+                // compute new level
+                float newdBLevel = -leveldB + vecTargetChannelLevel[group] +
+                    levelOffset;
+
+                // map range from decibels to fader level
+                // (this inverts MathUtils::CalcFaderGain)
+                float newFaderLevel = ( newdBLevel / AUD_MIX_FADER_RANGE_DB +
+                    1.0f ) * AUD_MIX_FADER_MAX;
+
+                // limit fader
+                newFaderLevel = fmin ( fmax ( newFaderLevel, 0.0f),
+                    float ( AUD_MIX_FADER_MAX ) );
+
+                // set fader level
+                vecpChanFader[i]->SetFaderLevel ( newFaderLevel, true );
+            }
         }
     }
 }
@@ -1516,6 +1711,11 @@ void CAudioMixerBoard::SetChannelLevels ( const CVector<uint16_t>& vecChannelLev
     {
         if ( vecpChanFader[iChId]->IsVisible() && ( i < iNumChannelLevels ) )
         {
+            // compute exponential moving average
+            vecAvgLevels[iChId] =
+                (1.0f - AUTO_FADER_ADJUST_ALPHA) * vecAvgLevels[iChId] +
+                AUTO_FADER_ADJUST_ALPHA * vecChannelLevel[i];
+
             vecpChanFader[iChId]->SetChannelLevel ( vecChannelLevel[i++] );
 
             // show level only if we successfully received levels from the
@@ -1526,4 +1726,9 @@ void CAudioMixerBoard::SetChannelLevels ( const CVector<uint16_t>& vecChannelLev
             }
         }
     }
+}
+
+void CAudioMixerBoard::MuteMyChannel()
+{
+    SetFaderIsMute ( iMyChannelID, true );
 }

@@ -64,6 +64,7 @@
 #define BUFFER_LED_UPDATE_TIME_MS   300   // ms
 #define LED_BAR_UPDATE_TIME_MS      1000  // ms
 #define CHECK_AUDIO_DEV_OK_TIME_MS  5000  // ms
+#define DETECT_FEEDBACK_TIME_MS     3000  // ms
 
 // number of ping times > upper bound until error message is shown
 #define NUM_HIGH_PINGS_UNTIL_ERROR  5
@@ -88,8 +89,7 @@ protected:
     void               SetGUIDesign ( const EGUIDesign eNewDesign );
     void               SetMyWindowTitle ( const int iNumClients );
     void               ShowConnectionSetupDialog();
-    void               ShowMusicianProfileDialog();
-    void               ShowGeneralSettings();
+    void               ShowGeneralSettings( int iTab );
     void               ShowChatWindow ( const bool bForceRaise = true );
     void               ShowAnalyzerConsole();
     void               UpdateAudioFaderSlider();
@@ -106,6 +106,7 @@ protected:
     bool               bConnected;
     bool               bConnectDlgWasShown;
     bool               bMIDICtrlUsed;
+    bool               bDetectFeedback;
     ERecorderState     eLastRecorderState;
     EGUIDesign         eLastDesign;
     QTimer             TimerSigMet;
@@ -113,6 +114,7 @@ protected:
     QTimer             TimerStatus;
     QTimer             TimerPing;
     QTimer             TimerCheckAudioDeviceOk;
+    QTimer             TimerDetectFeedback;
 
     virtual void       closeEvent     ( QCloseEvent*     Event );
     virtual void       dragEnterEvent ( QDragEnterEvent* Event ) { ManageDragNDrop ( Event, true ); }
@@ -123,13 +125,13 @@ protected:
     CChatDlg           ChatDlg;
     CConnectDlg        ConnectDlg;
     CAnalyzerConsole   AnalyzerConsole;
-    CMusProfDlg        MusicianProfileDlg;
 
 public slots:
     void OnConnectDisconBut();
     void OnTimerSigMet();
     void OnTimerBuffersLED();
     void OnTimerCheckAudioDeviceOk();
+    void OnTimerDetectFeedback();
 
     void OnTimerStatus() { UpdateDisplay(); }
 
@@ -165,8 +167,9 @@ public slots:
     void OnLoadChannelSetup();
     void OnSaveChannelSetup();
     void OnOpenConnectionSetupDialog() { ShowConnectionSetupDialog(); }
-    void OnOpenMusicianProfileDialog() { ShowMusicianProfileDialog(); }
-    void OnOpenGeneralSettings() { ShowGeneralSettings(); }
+    void OnOpenUserProfileSettings();
+    void OnOpenAudioNetSettings();
+    void OnOpenAdvancedSettings();
     void OnOpenChatDialog() { ShowChatWindow(); }
     void OnOpenAnalyzerConsole() { ShowAnalyzerConsole(); }
     void OnNoSortChannels()           { MainMixerBoard->SetFaderSorting ( ST_NO_SORT ); }
@@ -174,15 +177,14 @@ public slots:
     void OnSortChannelsByInstrument() { MainMixerBoard->SetFaderSorting ( ST_BY_INSTRUMENT ); }
     void OnSortChannelsByGroupID()    { MainMixerBoard->SetFaderSorting ( ST_BY_GROUPID ); }
     void OnSortChannelsByCity()       { MainMixerBoard->SetFaderSorting ( ST_BY_CITY ); }
-    void OnUseTowRowsForMixerPanel ( bool Checked ) { MainMixerBoard->SetNumMixerPanelRows ( Checked ? 2 : 1 ); }
     void OnClearAllStoredSoloMuteSettings();
     void OnSetAllFadersToNewClientLevel() { MainMixerBoard->SetAllFaderLevelsToNewClientLevel(); }
+    void OnAutoAdjustAllFaderLevels() { MainMixerBoard->AutoAdjustAllFaderLevels(); }
+    void OnNumMixerPanelRowsChanged ( int value ) { MainMixerBoard->SetNumMixerPanelRows ( value ); }
 
     void OnSettingsStateChanged ( int value );
     void OnChatStateChanged ( int value );
     void OnLocalMuteStateChanged ( int value );
-
-    void OnAudioPanValueChanged ( int value );
 
     void OnAudioReverbValueChanged ( int value )
         { pClient->SetReverbLevel ( value ); }
@@ -192,6 +194,9 @@ public slots:
 
     void OnReverbSelRClicked()
         { pClient->SetReverbOnLeftChan ( false ); }
+
+    void OnFeedbackDetectionChanged ( int state )
+        { ClientSettingsDlg.SetEnableFeedbackDetection ( state == Qt::Checked ); }
 
     void OnConClientListMesReceived ( CVector<CChannelInfo> vecChanInfo );
     void OnChatTextReceived ( QString strChatText );
@@ -250,4 +255,8 @@ public slots:
     void OnNumClientsChanged ( int iNewNumClients );
 
     void accept() { close(); } // introduced by pljones
+
+signals:
+    void SendTabChange ( int iTabIdx );
+
 };

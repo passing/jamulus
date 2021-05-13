@@ -135,11 +135,7 @@ public slots:
     void OnMuteStateChanged ( int value );
     void OnGroupStateChanged ( int );
 
-    void OnGroupMenuGrpNone() { SetGroupID ( INVALID_INDEX ); }
-    void OnGroupMenuGrp1()    { SetGroupID ( 0 ); }
-    void OnGroupMenuGrp2()    { SetGroupID ( 1 ); }
-    void OnGroupMenuGrp3()    { SetGroupID ( 2 ); }
-    void OnGroupMenuGrp4()    { SetGroupID ( 3 ); }
+    void OnGroupMenuGrp ( int iGrp ) { SetGroupID ( iGrp ); }
 
 signals:
     void gainValueChanged ( float  value,
@@ -184,12 +180,6 @@ protected:
 template<>
 class CAudioMixerBoardSlots<0> {};
 
-#define AM_RECORDING_STYLE "QGroupBox::title { subcontrol-origin: margin; \
-                           subcontrol-position: left top; \
-                           left: 7px; \
-                           color: rgb(255,255,255); \
-                           background-color: rgb(255,0,0); }"
-
 class CAudioMixerBoard :
     public QGroupBox,
     public CAudioMixerBoardSlots<MAX_NUM_CHANNELS>
@@ -211,6 +201,7 @@ public:
     void            SetPanIsSupported();
     void            SetRemoteFaderIsMute ( const int iChannelIdx, const bool bIsMute );
     void            SetMyChannelID ( const int iChannelIdx ) { iMyChannelID = iChannelIdx; }
+    int             GetMyChannelID() const { return iMyChannelID; }
 
     void            SetFaderLevel ( const int iChannelIdx,
                                     const int iValue );
@@ -238,6 +229,9 @@ public:
     void            SetAllFaderLevelsToNewClientLevel();
     void            StoreAllFaderSettings();
     void            LoadAllFaderSettings();
+    void            AutoAdjustAllFaderLevels();
+
+    void            MuteMyChannel();
 
 protected:
     class CMixerBoardScrollArea : public QScrollArea
@@ -282,6 +276,7 @@ protected:
     ERecorderState          eRecorderState;
     QMutex                  Mutex;
     EChSortType             eChSortType;
+    CVector<float>          vecAvgLevels;
 
     virtual void UpdateGainValue ( const int    iChannelIdx,
                                    const float  fValue,

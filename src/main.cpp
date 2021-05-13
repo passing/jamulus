@@ -69,11 +69,13 @@ int main ( int argc, char** argv )
     bool         bMuteStream                 = false;
     bool         bMuteMeInPersonalMix        = false;
     bool         bDisableRecording           = false;
+    bool         bDelayPan                   = false;
     bool         bNoAutoJackConnect          = false;
     bool         bUseTranslation             = true;
     bool         bCustomPortNumberGiven      = false;
     int          iNumServerChannels          = DEFAULT_USED_NUM_CHANNELS;
     quint16      iPortNumber                 = DEFAULT_PORT_NUMBER;
+    quint16      iQosNumber                  = DEFAULT_QOS_NUMBER;
     ELicenceType eLicenceType                = LT_NO_LICENCE;
     QString      strMIDISetup                = "";
     QString      strConnOnStartupAddress     = "";
@@ -84,6 +86,7 @@ int main ( int argc, char** argv )
     QString      strCentralServer            = "";
     QString      strServerInfo               = "";
     QString      strServerPublicIP           = "";
+    QString      strServerBindIP             = "";
     QString      strServerListFilter         = "";
     QString      strWelcomeMessage           = "";
     QString      strClientName               = "";
@@ -321,6 +324,24 @@ int main ( int argc, char** argv )
         }
 
 
+        // Quality of Service --------------------------------------------------
+        if ( GetNumericArgument ( argc,
+                                  argv,
+                                  i,
+                                  "-Q",
+                                  "--qos",
+                                  0,
+                                  255,
+                                  rDbleArgument ) )
+        {
+            iQosNumber            = static_cast<quint16> ( rDbleArgument );
+            qInfo() << qUtf8Printable( QString( "- selected QoS value: %1" )
+                .arg( iQosNumber ) );
+            CommandLineOptions << "--qos";
+            continue;
+        }
+
+
         // HTML status file ----------------------------------------------------
         if ( GetStringArgument ( argc,
                                  argv,
@@ -376,29 +397,55 @@ int main ( int argc, char** argv )
                                "--norecord" ) )
         {
             bDisableRecording = true;
-            qInfo() << "- recording will not be enabled";
+            qInfo() << "- recording will not take place until enabled";
             CommandLineOptions << "--norecord";
             continue;
         }
 
+        // Enable delay panning on startup -------------------------------------
+        if ( GetFlagArgument ( argv,
+                               i,
+                               "-P",
+                               "--delaypan" ) )
+        {
+            bDelayPan = true;
+            qInfo() << "- starting with delay panning";
+            CommandLineOptions << "--delaypan";
+            continue;
+        }
 
-        // Central server ------------------------------------------------------
+        // Directory server ----------------------------------------------------
         if ( GetStringArgument ( argc,
                                  argv,
                                  i,
                                  "-e",
+                                 "--directoryserver",
+                                 strArgument ) )
+        {
+            strCentralServer = strArgument;
+            qInfo() << qUtf8Printable( QString( "- directory server: %1" )
+                .arg( strCentralServer ) );
+            CommandLineOptions << "--directoryserver";
+            continue;
+        }
+
+        // Central server ** D E P R E C A T E D ** ----------------------------
+        if ( GetStringArgument ( argc,
+                                 argv,
+                                 i,
+                                 "--centralserver", // no short form
                                  "--centralserver",
                                  strArgument ) )
         {
             strCentralServer = strArgument;
-            qInfo() << qUtf8Printable( QString( "- central server: %1" )
+            qInfo() << qUtf8Printable( QString( "- directory server: %1" )
                 .arg( strCentralServer ) );
-            CommandLineOptions << "--centralserver";
+            CommandLineOptions << "--directoryserver";
             continue;
         }
 
 
-        // Server Public IP --------------------------------------------------
+        // Server Public IP ----------------------------------------------------
         if ( GetStringArgument ( argc,
                                  argv,
                                  i,
@@ -410,6 +457,22 @@ int main ( int argc, char** argv )
             qInfo() << qUtf8Printable( QString( "- server public IP: %1" )
                 .arg( strServerPublicIP ) );
             CommandLineOptions << "--serverpublicip";
+            continue;
+        }
+
+
+        // Server Bind IP --------------------------------------------------
+        if ( GetStringArgument ( argc,
+                                 argv,
+                                 i,
+                                 "--serverbindip", // no short form
+                                 "--serverbindip",
+                                 strArgument ) )
+        {
+            strServerBindIP = strArgument;
+            qInfo() << qUtf8Printable( QString( "- server bind IP: %1" )
+                .arg( strServerBindIP ) );
+            CommandLineOptions << "--serverbindip";
             continue;
         }
 
@@ -565,6 +628,14 @@ int main ( int argc, char** argv )
     Q_UNUSED ( bMuteStream )           // avoid compiler warnings
 #endif
 
+#ifdef SERVER_ONLY
+    if ( bIsClient )
+    {
+        qCritical() << "Only --server mode is supported in this build with nosound.";
+        exit ( 1 );
+    }
+#endif
+
     // the inifile is not supported for the headless server mode
     if ( !bIsClient && !bUseGUI && !strIniFileName.isEmpty() )
     {
@@ -587,12 +658,21 @@ int main ( int argc, char** argv )
         }
         if ( strCentralServer.isEmpty() || bIsClient )
         {
-            qWarning() << "Server Public IP will only take effect when registering a server with a central server.";
+            qWarning() << "Server Public IP will only take effect when registering a server with a directory server.";
         }
     }
 
-    // per definition: if we are in "GUI" server mode and no central server
-    // address is given, we use the default central server address
+    if ( !strServerBindIP.isEmpty() )
+    {
+        QHostAddress InetAddr;
+        if ( !InetAddr.setAddress ( strServerBindIP ) )
+        {
+            qWarning() << "Server Bind IP is invalid. Only plain IP addresses are supported.";
+        }
+    }
+
+    // per definition: if we are in "GUI" server mode and no directory server
+    // address is given, we use the default directory server address
     if ( !bIsClient && bUseGUI && strCentralServer.isEmpty() )
     {
         strCentralServer = DEFAULT_SERVER_ADDRESS;
@@ -612,7 +692,6 @@ int main ( int argc, char** argv )
     QCoreApplication* pApp = new QCoreApplication ( argc, argv );
 #else
 # if defined ( Q_OS_IOS )
-    bIsClient = false;
     bUseGUI = true;
 
     // bUseMultithreading = true;
@@ -673,6 +752,7 @@ int main ( int argc, char** argv )
             // Client:
             // actual client object
             CClient Client ( iPortNumber,
+                             iQosNumber,
                              strConnOnStartupAddress,
                              strMIDISetup,
                              bNoAutoJackConnect,
@@ -722,7 +802,9 @@ int main ( int argc, char** argv )
             // actual server object
             CServer Server ( iNumServerChannels,
                              strLoggingFileName,
+                             strServerBindIP,
                              iPortNumber,
+                             iQosNumber,
                              strHTMLStatusFileName,
                              strCentralServer,
                              strServerInfo,
@@ -734,6 +816,7 @@ int main ( int argc, char** argv )
                              bUseDoubleSystemFrameSize,
                              bUseMultithreading,
                              bDisableRecording,
+                             bDelayPan,
                              eLicenceType );
 
 #ifndef HEADLESS
@@ -772,6 +855,9 @@ int main ( int argc, char** argv )
             {
                 // only start application without using the GUI
                 qInfo() << qUtf8Printable( GetVersionAndNameStr ( false ) );
+
+                // enable server list if a directory server is defined
+                Server.SetServerListEnabled ( !strCentralServer.isEmpty() );
 
                 // update serverlist
                 Server.UpdateServerList();
@@ -817,18 +903,20 @@ QString UsageArguments ( char **argv )
 {
     return
         "Usage: " + QString ( argv[0] ) + " [option] [optional argument]\n"
-        "\nRecognized options:\n"
+        "\nGeneral options:\n"
         "  -h, -?, --help        display this help text and exit\n"
         "  -i, --inifile         initialization file name (not\n"
         "                        supported for headless server mode)\n"
         "  -n, --nogui           disable GUI\n"
-        "  -p, --port            set your local port number\n"
+        "  -p, --port            set the local port number\n"
+        "  -Q, --qos             set the QoS value. Default is 128. Disable with 0\n"
+        "                        (see the Jamulus website to enable QoS on Windows)\n"
         "  -t, --notranslation   disable translation (use English language)\n"
         "  -v, --version         output version information and exit\n"
         "\nServer only:\n"
         "  -d, --discononquit    disconnect all clients on quit\n"
-        "  -e, --centralserver   address of the server list on which to register\n"
-        "                        (or 'localhost' to be a server list)\n"
+        "  -e, --directoryserver address of the directory server with which to register\n"
+        "                        (or 'localhost' to host a server list on this server)\n"
         "  -f, --listfilter      server list whitelist filter in the format:\n"
         "                        [IP address 1];[IP address 2];[IP address 3]; ...\n"
         "  -F, --fastupdate      use 64 samples frame size mode\n"
@@ -837,6 +925,7 @@ QString UsageArguments ( char **argv )
         "  -m, --htmlstatus      enable HTML status file, set file name\n"
         "  -o, --serverinfo      infos of this server in the format:\n"
         "                        [name];[city];[country as QLocale ID]\n"
+        "  -P, --delaypan        start with delay panning enabled\n"
         "  -R, --recording       sets directory to contain recorded jams\n"
         "      --norecord        disables recording (when enabled by default by -R)\n"
         "  -s, --server          start server\n"
@@ -846,8 +935,9 @@ QString UsageArguments ( char **argv )
         "  -w, --welcomemessage  welcome message on connect\n"
         "  -z, --startminimized  start minimizied\n"
         "      --serverpublicip  specify your public IP address when\n"
-        "                        running a slave and your own central server\n"
+        "                        running a slave and your own directory server\n"
         "                        behind the same NAT\n"
+        "      --serverbindip    specify the IP address the server will bind to\n"
         "\nClient only:\n"
         "  -M, --mutestream      starts the application in muted state\n"
         "      --mutemyown       mute me in my personal mix (headless only)\n"

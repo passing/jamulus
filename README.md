@@ -1,10 +1,10 @@
-[![Homepage picture](src/res/homepage/jamulusbannersmall.png)](https://jamulus.io)
+[![Homepage picture](https://github.com/jamulussoftware/jamuluswebsite/blob/release/assets/img/jamulusbannersmall.png)](https://jamulus.io)
 
 [![Auto-Build](https://github.com/jamulussoftware/jamulus/actions/workflows/autobuild.yml/badge.svg)](https://github.com/jamulussoftware/jamulus/actions/workflows/autobuild.yml)
 
 Jamulus - Internet Jam Session Software
 =======================================
-<a href="https://jamulus.io/"><img align="left" src="src/res/homepage/mediawikisidebarlogo.png"/></a>
+<a href="https://jamulus.io/"><img align="left" width="102" height="102" src="https://jamulus.io/assets/img/jamulus-icon-2020.svg"/></a>
 
 Jamulus enables musicians to perform in real-time together over the internet.
 A Jamulus server collects the incoming audio data from each Jamulus client, mixes that data and then sends that mix back to each client. Jamulus can support large numbers of clients with minimal latency and modest bandwidth requirements. 
@@ -14,11 +14,6 @@ and runs under __Windows__ ([ASIO](https://www.steinberg.net)),
 __MacOS__ ([Core Audio](https://developer.apple.com/documentation/coreaudio)) and
 __Linux__ ([Jack](https://jackaudio.org)).
 It is based on the [Qt framework](https://www.qt.io) and uses the [OPUS](http://www.opus-codec.org) audio codec.
-
-[![Sourceforge logo](https://sflogo.sourceforge.net/sflogo.php?group_id=158367&amp;type=5)](https://sourceforge.net/projects/llcon)
-
-The project is hosted at [Sourceforge.net](https://sourceforge.net/projects/llcon).
-
 
 
 Installation
@@ -32,7 +27,7 @@ Help
 
 Official documentation for Jamulus is on the [Jamulus homepage](https://jamulus.io)
 
-See also the [discussion forums](https://sourceforge.net/p/llcon/discussion). If you have issues, feel free to ask for help there.
+See also the [discussion forums](https://github.com/jamulussoftware/jamulus/discussions). If you have issues, feel free to ask for help there.
 
 Bugs and feature requests can be [reported here](https://github.com/jamulussoftware/jamulus/issues)
 
@@ -49,12 +44,11 @@ Contributing
 See the [contributing instructions](CONTRIBUTING.md)
 
 
-Acknowledgments
+Acknowledgements
 ---------------
 
-This code contains open source code from different sources. The developer(s) want
-to thank the developer of this code for making their efforts available under open
-source:
+Jamulus contains code from different sources (see also [COPYING](COPYING)). The developers wish
+to thank the maintainers of these projects for making their efforts available to us under their respective licences:
 
 - Qt cross-platform application framework: http://www.qt.io
 

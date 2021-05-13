@@ -124,9 +124,9 @@ MESSAGES (with connection)
     +-------------------+-----------------+--------------------+ ...
     | 1 byte channel ID | 2 bytes country | 4 bytes instrument | ...
     +-------------------+-----------------+--------------------+ ...
-        ... --------------------+--------------------+ ...
-        ...  1 byte skill level | 4 bytes IP address | ...
-        ... --------------------+--------------------+ ...
+        ... --------------------+--------------------------------------+ ...
+        ...  1 byte skill level | 4 bytes zero (used to be IP address) | ...
+        ... --------------------+--------------------------------------+ ...
         ... ------------------+---------------------------+
         ...  2 bytes number n | n bytes UTF-8 string name |
         ... ------------------+---------------------------+
@@ -306,7 +306,7 @@ CONNECTION LESS MESSAGES
       NOTE: In the PROTMESSID_CLM_SERVER_LIST list, this field will be empty
       as only the initial IP address should be used by the client.  Where
       necessary, that value will contain the server internal address.
-      When running a central server and a slave server behind the same NAT,
+      When running a directory server and a slave server behind the same NAT,
       this field is used the other way round: It will contain the public
       IP in this case which will be served to clients from the Internet.
 
@@ -422,11 +422,11 @@ CONNECTION LESS MESSAGES
     - "status":
       Values of ESvrRegResult:
       0 - success
-      1 - failed due to central server list being full
+      1 - failed due to directory server list being full
       2 - your server version is too old
       3 - registration requirements not fulfilled
 
-    Note: the central server may send this message in response to a
+    Note: the directory server may send this message in response to a
           PROTMESSID_CLM_REGISTER_SERVER request.
           Where not received, the registering server may only retry up to
           five times for one registration request at 500ms intervals.
@@ -1191,9 +1191,8 @@ void CProtocol::CreateConClientListMes ( const CVector<CChannelInfo>& vecChanInf
         PutValOnStream ( vecData, iPos,
             static_cast<uint32_t> ( vecChanInfo[i].eSkillLevel ), 1 );
 
-        // IP address (4 bytes)
-        PutValOnStream ( vecData, iPos,
-            static_cast<uint32_t> ( vecChanInfo[i].iIpAddr ), 4 );
+        // used to be IP address before #316 (4 bytes)
+        PutValOnStream ( vecData, iPos, 0, 4 );
 
         // name
         PutStringUTF8OnStream ( vecData, iPos, strUTF8Name );
@@ -1235,9 +1234,8 @@ bool CProtocol::EvaluateConClientListMes ( const CVector<uint8_t>& vecData )
         const ESkillLevel eSkillLevel =
             static_cast<ESkillLevel> ( GetValFromStream ( vecData, iPos, 1 ) );
 
-        // IP address (4 bytes)
-        const int iIpAddr =
-            static_cast<int> ( GetValFromStream ( vecData, iPos, 4 ) );
+        // used to be IP address, zero since #316 (4 bytes)
+        iPos += 4;
 
         // name
         QString strCurName;
@@ -1261,7 +1259,6 @@ bool CProtocol::EvaluateConClientListMes ( const CVector<uint8_t>& vecData )
 
         // add channel information to vector
         vecChanInfo.Add ( CChannelInfo ( iChanID,
-                                         iIpAddr,
                                          strCurName,
                                          eCountry,
                                          strCurCity,
@@ -2610,8 +2607,8 @@ void CProtocol::CreateCLConnClientsListMes ( const CHostAddress&          InetAd
         // skill level (1 byte)
         PutValOnStream ( vecData, iPos, static_cast<uint32_t> ( vecChanInfo[i].eSkillLevel ), 1 );
 
-        // IP address (4 bytes)
-        PutValOnStream ( vecData, iPos, static_cast<uint32_t> ( vecChanInfo[i].iIpAddr ), 4 );
+        // used to be IP address before #316 (4 bytes)
+        PutValOnStream ( vecData, iPos, 0, 4 );
 
         // name
         PutStringUTF8OnStream ( vecData, iPos, strUTF8Name );
@@ -2652,8 +2649,8 @@ bool CProtocol::EvaluateCLConnClientsListMes ( const CHostAddress&     InetAddr,
         // skill level (1 byte)
         const ESkillLevel eSkillLevel = static_cast<ESkillLevel> ( GetValFromStream ( vecData, iPos, 1 ) );
 
-        // IP address (4 bytes)
-        const int iIpAddr = static_cast<int> ( GetValFromStream ( vecData, iPos, 4 ) );
+        // used to be IP address, zero since #316 (4 bytes)
+        iPos += 4;
 
         // name
         QString strCurName;
@@ -2677,7 +2674,6 @@ bool CProtocol::EvaluateCLConnClientsListMes ( const CHostAddress&     InetAddr,
 
         // add channel information to vector
         vecChanInfo.Add ( CChannelInfo ( iChanID,
-                                         iIpAddr,
                                          strCurName,
                                          eCountry,
                                          strCurCity,

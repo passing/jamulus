@@ -61,7 +61,7 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
     // Make My Server Public flag
     chbRegisterServer->setWhatsThis ( "<b>" + tr ( "Make My Server Public" ) + ":</b> " +
         tr ( "If the Make My Server Public check box is checked, this server registers "
-        "itself at the central server so that all users of the application "
+        "itself at the directory server so that all users of the application "
         "can see the server in the connect dialog server list and "
         "connect to it. The registration of the server is renewed periodically "
         "to make sure that all servers in the connect dialog server list are "
@@ -70,20 +70,20 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
     // register server status label
     lblRegSvrStatus->setWhatsThis ( "<b>" + tr ( "Register Server Status" ) + ":</b> " +
         tr ( "If the Make My Server Public check box is checked, this will show "
-        "whether registration with the central server is successful. If the "
+        "whether registration with the directory server is successful. If the "
         "registration failed, please choose another server list." ) );
 
-    // custom central server address
-    QString strCentrServAddr = "<b>" + tr ( "Custom Central Server Address" ) + ":</b> " +
-        tr ( "The custom central server address is the IP address or URL of the central "
+    // custom directory server address
+    QString strCentrServAddr = "<b>" + tr ( "Custom Directory Server Address" ) + ":</b> " +
+        tr ( "The custom directory server address is the IP address or URL of the directory "
         "server at which the server list of the connection dialog is managed." );
 
     lblCentralServerAddress->setWhatsThis ( strCentrServAddr );
     edtCentralServerAddress->setWhatsThis ( strCentrServAddr );
-    edtCentralServerAddress->setAccessibleName ( tr ( "Central server address line edit" ) );
+    edtCentralServerAddress->setAccessibleName ( tr ( "Directory server address line edit" ) );
 
     cbxCentServAddrType->setWhatsThis ( "<b>" + tr ( "Server List Selection" ) + ":</b> " + tr (
-        "Selects the server list (i.e. central server address) in which your server will be added." ) );
+        "Selects the server list (i.e. directory server address) in which your server will be added." ) );
     cbxCentServAddrType->setAccessibleName ( tr ( "Server list selection combo box" ) );
 
     // server name
@@ -219,10 +219,11 @@ CServerDlg::CServerDlg ( CServer*         pNServP,
     }
 
     // set up list view for connected clients
-    lvwClients->setColumnWidth ( 0, 170 );
-    lvwClients->setColumnWidth ( 1, 200 );
+    lvwClients->setColumnWidth ( 0, 170 );  // 170 //  IP:port
+    lvwClients->setColumnWidth ( 1, 200 );  // 200 //  Name
+    lvwClients->setColumnWidth ( 2, 120 );  //  60 //  Buf-Frames
+    lvwClients->setColumnWidth ( 3, 50 );   //         Channels
     lvwClients->clear();
-
 
 // TEST workaround for resize problem of window after iconize in task bar
 lvwClients->setMinimumWidth ( 170 + 130 + 60 + 205 );
@@ -239,7 +240,7 @@ lvwClients->setMinimumHeight ( 140 );
         vecpListViewItems[i]->setHidden ( true );
     }
 
-    // central server address type combo box
+    // directory server address type combo box
     cbxCentServAddrType->clear();
     cbxCentServAddrType->addItem ( csCentServAddrTypeToString ( AT_DEFAULT ) );
     cbxCentServAddrType->addItem ( csCentServAddrTypeToString ( AT_ANY_GENRE2 ) );
@@ -251,7 +252,7 @@ lvwClients->setMinimumHeight ( 140 );
     cbxCentServAddrType->addItem ( csCentServAddrTypeToString ( AT_CUSTOM ) );
     cbxCentServAddrType->setCurrentIndex ( static_cast<int> ( pServer->GetCentralServerAddressType() ) );
 
-    // custom central server address
+    // custom directory server address
     edtCentralServerAddress->setText ( pServer->GetServerListCentralServerAddress() );
 
     // update server name line edit
@@ -314,6 +315,16 @@ lvwClients->setMinimumHeight ( 140 );
     // user has changed the registry by hand)
     ModifyAutoStartEntry ( bCurAutoStartMinState );
 #endif
+
+    // update delay panning check box
+    if ( pServer->IsDelayPanningEnabled() )
+    {
+        chbEnableDelayPanning->setCheckState(Qt::Checked);
+    }
+    else
+    {
+        chbEnableDelayPanning->setCheckState(Qt::Unchecked);
+    }
 
     // Recorder controls
     chbEnableRecorder->setChecked ( pServer->GetRecordingEnabled() );
@@ -382,6 +393,10 @@ lvwClients->setMinimumHeight ( 140 );
     QObject::connect ( chbEnableRecorder, &QCheckBox::stateChanged,
         this, &CServerDlg::OnEnableRecorderStateChanged );
 
+    // delay panning
+    QObject::connect ( chbEnableDelayPanning, &QCheckBox::stateChanged,
+        this, &CServerDlg::OnEnableDelayPanningStateChanged );
+
     // line edits
     QObject::connect ( edtCentralServerAddress, &QLineEdit::editingFinished,
         this, &CServerDlg::OnCentralServerAddressEditingFinished );
@@ -447,15 +462,23 @@ lvwClients->setMinimumHeight ( 140 );
     // start timer for GUI controls
     Timer.start ( GUI_CONTRL_UPDATE_TIME );
 
-    // query the central server version number needed for update check (note
+    // query the update server version number needed for update check (note
     // that the connection less message respond may not make it back but that
     // is not critical since the next time Jamulus is started we have another
     // chance and the update check is not time-critical at all)
-    CHostAddress CentServerHostAddress;
+    CHostAddress UpdateServerHostAddress;
 
-    if ( NetworkUtil().ParseNetworkAddress ( DEFAULT_SERVER_ADDRESS, CentServerHostAddress ) )
+    // Send the request to two servers for redundancy if either or both of them
+    // has a higher release version number, the reply will trigger the notification.
+
+    if ( NetworkUtil().ParseNetworkAddress ( UPDATECHECK1_ADDRESS, UpdateServerHostAddress ) )
     {
-        pServer->CreateCLServerListReqVerAndOSMes ( CentServerHostAddress );
+        pServer->CreateCLServerListReqVerAndOSMes ( UpdateServerHostAddress );
+    }
+
+    if ( NetworkUtil().ParseNetworkAddress ( UPDATECHECK2_ADDRESS, UpdateServerHostAddress ) )
+    {
+        pServer->CreateCLServerListReqVerAndOSMes ( UpdateServerHostAddress );
     }
 }
 
@@ -548,11 +571,6 @@ void CServerDlg::OnLocationCountryActivated ( int iCntryListItem )
 
 void CServerDlg::OnCentServAddrTypeActivated ( int iTypeIdx )
 {
-    // if server was registered, unregister first
-    if ( pServer->GetServerListEnabled() )
-    {
-        pServer->UnregisterSlaveServer();
-    }
 
     // apply new setting to the server and update it
     pServer->SetCentralServerAddressType ( static_cast<ECSAddType> ( iTypeIdx ) );
@@ -577,6 +595,12 @@ void CServerDlg::OnServerStopped()
 void CServerDlg::OnStopRecorder()
 {
     UpdateRecorderStatus ( QString::null );
+    if ( pServer->GetRecorderErrMsg() != QString::null )
+    {
+        QMessageBox::warning ( this, APP_NAME, tr ( "Recorder failed to start. "
+            "Please check available disk space and permissions and try again. "
+            "Error: " ) + pServer->GetRecorderErrMsg() );
+    }
 }
 
 void CServerDlg::OnRecordingDirClicked()
@@ -619,7 +643,14 @@ void CServerDlg::OnCLVersionAndOSReceived ( CHostAddress           ,
 {
     // update check
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-    if ( QVersionNumber::compare ( QVersionNumber::fromString ( strVersion ), QVersionNumber::fromString ( VERSION ) ) > 0 )
+    int mySuffixIndex;
+    QVersionNumber myVersion = QVersionNumber::fromString ( VERSION, &mySuffixIndex );
+
+    int serverSuffixIndex;
+    QVersionNumber serverVersion = QVersionNumber::fromString ( strVersion, &serverSuffixIndex );
+
+    // only compare if the server version has no suffix (such as dev or beta)
+    if ( strVersion.size() == serverSuffixIndex && QVersionNumber::compare ( serverVersion, myVersion ) > 0 )
     {
         lblUpdateCheck->show();
     }
@@ -658,6 +689,10 @@ void CServerDlg::OnTimer()
                 // jitter buffer size (polling for updates)
                 vecpListViewItems[i]->setText ( 2,
                     QString().setNum ( veciJitBufNumFrames[i] ) );
+
+                // show num of audio channels
+                int iNumAudioChs = pServer->GetClientNumAudioChannels ( i );
+                vecpListViewItems[i]->setText ( 3, QString().setNum ( iNumAudioChs ) );
 
                 vecpListViewItems[i]->setHidden ( false );
             }
@@ -809,7 +844,14 @@ void CServerDlg::UpdateRecorderStatus ( QString sessionDir )
         strRecorderStatus = SREC_NOT_INITIALISED;
     }
 
+    chbEnableRecorder->blockSignals ( true );
+    chbEnableRecorder->setChecked ( strRecorderStatus != SREC_NOT_ENABLED );
+    chbEnableRecorder->blockSignals ( false );
+
     edtRecordingDir->setText ( strRecordingDir );
+    edtRecordingDir->setEnabled ( !bIsRecording );
+    pbtRecordingDir->setEnabled ( !bIsRecording );
+    tbtClearRecordingDir->setEnabled ( !bIsRecording );
     edtCurrentSessionDir->setEnabled ( bIsRecording );
     lblRecorderStatus->setText ( strRecorderStatus );
     pbtNewRecording->setEnabled ( bIsRecording );

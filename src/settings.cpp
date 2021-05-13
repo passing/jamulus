@@ -270,6 +270,18 @@ void CClientSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument
         iNewClientFaderLevel = iValue;
     }
 
+    // input boost
+    if ( GetNumericIniSet ( IniXMLDocument, "client", "inputboost",
+         1, 10, iValue ) )
+    {
+        iInputBoost = iValue;
+    }
+
+    if ( GetFlagIniSet ( IniXMLDocument, "client", "enablefeedbackdetection", bValue ) )
+    {
+        bEnableFeedbackDetection = bValue;
+    }
+
     // connect dialog show all musicians
     if ( GetFlagIniSet ( IniXMLDocument, "client", "connectdlgshowallmusicians", bValue ) )
     {
@@ -289,7 +301,7 @@ void CClientSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument
 
     // number of mixer panel rows
     if ( GetNumericIniSet ( IniXMLDocument, "client", "numrowsmixpan",
-         1, 2, iValue ) )
+         1, 8, iValue ) )
     {
         iNumMixerPanelRows = iValue;
     }
@@ -458,7 +470,7 @@ void CClientSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument
 // NOTE that the strCurAddr and "check for empty" can be removed if compatibility mode is removed
 vstrCentralServerAddress[0] = GetIniSetting ( IniXMLDocument, "client", "centralservaddr" );
 
-    // central server addresses
+    // directory server addresses
     for ( iIdx = 0; iIdx < MAX_NUM_SERVER_ADDR_ITEMS; iIdx++ )
     {
         const QString strCurAddr = GetIniSetting ( IniXMLDocument, "client",
@@ -470,7 +482,7 @@ vstrCentralServerAddress[0] = GetIniSetting ( IniXMLDocument, "client", "central
         }
     }
 
-    // central server address type
+    // directory server address type
     if ( GetNumericIniSet ( IniXMLDocument, "client", "centservaddrtype",
          0, static_cast<int> ( AT_CUSTOM ), iValue ) )
     {
@@ -504,10 +516,6 @@ if ( GetFlagIniSet ( IniXMLDocument, "client", "defcentservaddr", bValue ) )
     vecWindowPosChat = FromBase64ToByteArray (
         GetIniSetting ( IniXMLDocument, "client", "winposchat_base64" ) );
 
-    // window position of the musician profile window
-    vecWindowPosProfile = FromBase64ToByteArray (
-        GetIniSetting ( IniXMLDocument, "client", "winposprofile_base64" ) );
-
     // window position of the connect window
     vecWindowPosConnect = FromBase64ToByteArray (
         GetIniSetting ( IniXMLDocument, "client", "winposcon_base64" ) );
@@ -524,16 +532,17 @@ if ( GetFlagIniSet ( IniXMLDocument, "client", "defcentservaddr", bValue ) )
         bWindowWasShownChat = bValue;
     }
 
-    // visibility state of the musician profile window
-    if ( GetFlagIniSet ( IniXMLDocument, "client", "winvisprofile", bValue ) )
-    {
-        bWindowWasShownProfile = bValue;
-    }
-
     // visibility state of the connect window
     if ( GetFlagIniSet ( IniXMLDocument, "client", "winviscon", bValue ) )
     {
         bWindowWasShownConnect = bValue;
+    }
+
+    // selected Settings Tab
+    if ( GetNumericIniSet ( IniXMLDocument, "client", "settingstab",
+         0, 2, iValue ) )
+    {
+        iSettingsTab = iValue;
     }
 
     // fader settings
@@ -610,6 +619,14 @@ void CClientSettings::WriteSettingsToXML ( QDomDocument& IniXMLDocument )
     // new client level
     SetNumericIniSet ( IniXMLDocument, "client", "newclientlevel",
         iNewClientFaderLevel );
+
+    // input boost
+    SetNumericIniSet ( IniXMLDocument, "client", "inputboost",
+        iInputBoost );
+
+    // feedback detection
+    SetFlagIniSet ( IniXMLDocument, "client", "enablefeedbackdetection",
+        bEnableFeedbackDetection );
 
     // connect dialog show all musicians
     SetFlagIniSet ( IniXMLDocument, "client", "connectdlgshowallmusicians",
@@ -711,7 +728,7 @@ void CClientSettings::WriteSettingsToXML ( QDomDocument& IniXMLDocument )
     SetNumericIniSet ( IniXMLDocument, "client", "audioquality",
         static_cast<int> ( pClient->GetAudioQuality() ) );
 
-    // central server addresses
+    // directory server addresses
     for ( iIdx = 0; iIdx < MAX_NUM_SERVER_ADDR_ITEMS; iIdx++ )
     {
         PutIniSetting ( IniXMLDocument, "client",
@@ -719,7 +736,7 @@ void CClientSettings::WriteSettingsToXML ( QDomDocument& IniXMLDocument )
                         vstrCentralServerAddress[iIdx] );
     }
 
-    // central server address type
+    // directory server address type
     SetNumericIniSet ( IniXMLDocument, "client", "centservaddrtype",
         static_cast<int> ( eCentralServerAddressType ) );
 
@@ -735,10 +752,6 @@ void CClientSettings::WriteSettingsToXML ( QDomDocument& IniXMLDocument )
     PutIniSetting ( IniXMLDocument, "client", "winposchat_base64",
         ToBase64 ( vecWindowPosChat ) );
 
-    // window position of the musician profile window
-    PutIniSetting ( IniXMLDocument, "client", "winposprofile_base64",
-        ToBase64 ( vecWindowPosProfile ) );
-
     // window position of the connect window
     PutIniSetting ( IniXMLDocument, "client", "winposcon_base64",
         ToBase64 ( vecWindowPosConnect ) );
@@ -751,13 +764,13 @@ void CClientSettings::WriteSettingsToXML ( QDomDocument& IniXMLDocument )
     SetFlagIniSet ( IniXMLDocument, "client", "winvischat",
         bWindowWasShownChat );
 
-    // visibility state of the musician profile window
-    SetFlagIniSet ( IniXMLDocument, "client", "winvisprofile",
-        bWindowWasShownProfile );
-
     // visibility state of the connect window
     SetFlagIniSet ( IniXMLDocument, "client", "winviscon",
         bWindowWasShownConnect );
+
+    // Settings Tab
+    SetNumericIniSet ( IniXMLDocument, "client", "settingstab",
+        iSettingsTab );
 
     // fader settings
     WriteFaderSettingsToXML ( IniXMLDocument );
@@ -809,8 +822,8 @@ void CServerSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument
     int  iValue;
     bool bValue;
 
-    // central server address type (note that it is important
-    // to set this setting prior to the "central server address")
+    // directory server address type (note that it is important
+    // to set this setting prior to the "directory server address")
     if ( GetNumericIniSet ( IniXMLDocument, "server", "centservaddrtype",
          0, static_cast<int> ( AT_CUSTOM ), iValue ) )
     {
@@ -818,7 +831,7 @@ void CServerSettings::ReadSettingsFromXML ( const QDomDocument&   IniXMLDocument
     }
     else
     {
-        // if no address type is given, choose one from the operating system locale
+        // if no address type is given, use the default directory server
         pServer->SetCentralServerAddressType ( AT_DEFAULT );
     }
 
@@ -832,10 +845,11 @@ if ( GetFlagIniSet ( IniXMLDocument, "server", "defcentservaddr", bValue ) )
     }
 }
 
-    if ( !CommandLineOptions.contains ( "--centralserver" ) )
+    if ( !CommandLineOptions.contains ( "--centralserver" ) &&
+         !CommandLineOptions.contains ( "--directoryserver" ) )
     {
-        // central server address (to be set after the "use default central
-        // server address)
+        // directory server address (to be set after the "use default directory
+        // server" address)
         pServer->SetServerListCentralServerAddress (
             GetIniSetting ( IniXMLDocument, "server", "centralservaddr" ) );
     }
@@ -904,11 +918,11 @@ if ( GetFlagIniSet ( IniXMLDocument, "server", "defcentservaddr", bValue ) )
 
 void CServerSettings::WriteSettingsToXML ( QDomDocument& IniXMLDocument )
 {
-    // central server address
+    // directory server address
     PutIniSetting ( IniXMLDocument, "server", "centralservaddr",
         pServer->GetServerListCentralServerAddress() );
 
-    // central server address type
+    // directory server address type
     SetNumericIniSet ( IniXMLDocument, "server", "centservaddrtype",
         static_cast<int> ( pServer->GetCentralServerAddressType() ) );
 

@@ -57,16 +57,16 @@ class CSocket : public QObject
 
 public:
     CSocket ( CChannel*     pNewChannel,
-              const quint16 iPortNumber )
+              const quint16 iPortNumber, const quint16 iQosNumber, const QString& strServerBindIP )
         : pChannel ( pNewChannel ),
           bIsClient ( true ),
-          bJitterBufferOK ( true ) { Init ( iPortNumber ); }
+          bJitterBufferOK ( true ) { Init ( iPortNumber, iQosNumber, strServerBindIP ); }
 
     CSocket ( CServer*      pNServP,
-              const quint16 iPortNumber )
+              const quint16 iPortNumber, const quint16 iQosNumber, const QString& strServerBindIP )
         : pServer ( pNServP ),
           bIsClient ( false ),
-          bJitterBufferOK ( true ) { Init ( iPortNumber ); }
+          bJitterBufferOK ( true ) { Init ( iPortNumber, iQosNumber, strServerBindIP ); }
 
     virtual ~CSocket();
 
@@ -77,7 +77,7 @@ public:
     void Close();
 
 protected:
-    void Init ( const quint16 iPortNumber );
+    void Init ( const quint16 iPortNumber, const quint16 iQosNumber, const QString& strServerBindIP );
 
 #ifdef _WIN32
     SOCKET           UdpSocket;
@@ -134,12 +134,16 @@ class CHighPrioSocket : public QObject
 
 public:
     CHighPrioSocket ( CChannel*     pNewChannel,
-                      const quint16 iPortNumber )
-        : Socket ( pNewChannel, iPortNumber ) { Init(); }
+                      const quint16 iPortNumber, const quint16 iQosNumber, const QString& strServerBindIP )
+        : Socket ( pNewChannel, iPortNumber, iQosNumber, strServerBindIP ) { Init(); }
+
+    CHighPrioSocket ( CChannel*     pNewChannel,
+                      const quint16 iPortNumber, const quint16 iQosNumber )
+        : Socket ( pNewChannel, iPortNumber, iQosNumber, "" ) { Init(); }
 
     CHighPrioSocket ( CServer*      pNewServer,
-                      const quint16 iPortNumber )
-        : Socket ( pNewServer, iPortNumber ) { Init(); }
+                      const quint16 iPortNumber, const quint16 iQosNumber, const QString& strServerBindIP )
+        : Socket ( pNewServer, iPortNumber, iQosNumber, strServerBindIP ) { Init(); }
 
     virtual ~CHighPrioSocket()
     {

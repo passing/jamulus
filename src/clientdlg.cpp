@@ -44,11 +44,9 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
     ClientSettingsDlg   ( pNCliP, pNSetP, parent ),
     ChatDlg             ( parent ),
     ConnectDlg          ( pNSetP, bNewShowComplRegConnList, parent ),
-    AnalyzerConsole     ( pNCliP, parent ),
-    MusicianProfileDlg  ( pNCliP, parent )
+    AnalyzerConsole     ( pNCliP, parent )
 {
     setupUi ( this );
-
 
     // Add help text to controls -----------------------------------------------
     // input level meter
@@ -94,23 +92,6 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
 
     butConnect->setAccessibleName (
         tr ( "Connect and disconnect toggle button" ) );
-
-    // local audio input fader
-    QString strAudFader = "<b>" + tr ( "Local Audio Input Fader" ) + ":</b> " +
-        tr ( "Controls the relative levels of the left and right local audio "
-        "channels. For a mono signal it acts as a pan between the two channels."
-        "For example, if a microphone is connected to "
-        "the right input channel and an instrument is connected to the left "
-        "input channel which is much louder than the microphone, move the "
-        "audio fader in a direction where the label above the fader shows " ) +
-        "<i>" + tr ( "L" ) + " -x</i>" + tr ( ", where" ) + " <i>x</i> " +
-        tr ( "is the current attenuation indicator." );
-
-    lblAudioPan->setWhatsThis      ( strAudFader );
-    lblAudioPanValue->setWhatsThis ( strAudFader );
-    sldAudioPan->setWhatsThis      ( strAudFader );
-
-    sldAudioPan->setAccessibleName ( tr ( "Local audio input fader (left/right)" ) );
 
     // reverberation level
     QString strAudReverb = "<b>" + tr ( "Reverb effect" ) + ":</b> " +
@@ -183,6 +164,7 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
 
     // set the settings pointer to the mixer board (must be done early)
     MainMixerBoard->SetSettingsPointer ( pSettings );
+    MainMixerBoard->SetNumMixerPanelRows ( pSettings->iNumMixerPanelRows );
 
     // reset mixer board
     MainMixerBoard->HideAll();
@@ -201,16 +183,14 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
     ledBuffers->Reset();
     ledDelay->Reset();
 
-    // init audio in fader
-    sldAudioPan->setRange ( AUD_FADER_IN_MIN, AUD_FADER_IN_MAX );
-    sldAudioPan->setTickInterval ( AUD_FADER_IN_MAX / 5 );
-    UpdateAudioFaderSlider();
-
     // init audio reverberation
     sldAudioReverb->setRange ( 0, AUD_REVERB_MAX );
     const int iCurAudReverb = pClient->GetReverbLevel();
     sldAudioReverb->setValue ( iCurAudReverb );
     sldAudioReverb->setTickInterval ( AUD_REVERB_MAX / 5 );
+
+    // init input boost
+    pClient->SetInputBoost ( pSettings->iInputBoost );
 
     // init reverb channel
     UpdateRevSelection();
@@ -232,6 +212,7 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
 
     // setup timers
     TimerCheckAudioDeviceOk.setSingleShot ( true ); // only check once after connection
+    TimerDetectFeedback.setSingleShot ( true );
 
 
     // Connect on startup ------------------------------------------------------
@@ -262,16 +243,19 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
     QMenu* pViewMenu = new QMenu ( tr ( "&View" ), this );
 
     pViewMenu->addAction ( tr ( "&Connection Setup..." ), this,
-        SLOT ( OnOpenConnectionSetupDialog() ) );
-
-    pViewMenu->addAction ( tr ( "My &Profile..." ), this,
-        SLOT ( OnOpenMusicianProfileDialog() ) );
+        SLOT ( OnOpenConnectionSetupDialog() ), QKeySequence ( Qt::CTRL + Qt::Key_C ) );
 
     pViewMenu->addAction ( tr ( "C&hat..." ), this,
-        SLOT ( OnOpenChatDialog() ) );
+        SLOT ( OnOpenChatDialog() ), QKeySequence ( Qt::CTRL + Qt::Key_H ) );
 
-    pViewMenu->addAction ( tr ( "&Settings..." ), this,
-        SLOT ( OnOpenGeneralSettings() ) );
+    pViewMenu->addAction ( tr ( "My &Profile..." ), this,
+        SLOT ( OnOpenUserProfileSettings() ), QKeySequence ( Qt::CTRL + Qt::Key_P ) );
+
+    pViewMenu->addAction ( tr ( "Audio/Network &Settings..." ), this,
+        SLOT ( OnOpenAudioNetSettings() ), QKeySequence ( Qt::CTRL + Qt::Key_S ) );
+
+    pViewMenu->addAction ( tr ( "A&dvanced Settings..." ), this,
+        SLOT ( OnOpenAdvancedSettings() ), QKeySequence ( Qt::CTRL + Qt::Key_D ) );
 
     // optionally show analyzer console entry
     if ( bShowAnalyzerConsole )
@@ -326,20 +310,14 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
 
     pEditMenu->addSeparator();
 
-    QAction* NumRowsAction = pEditMenu->addAction ( tr ( "Use &Two Rows Mixer Panel" ), this,
-        SLOT ( OnUseTowRowsForMixerPanel ( bool ) ) );
-
-    // initialize the "use two rows for mixer panel" menu entry (is checkable)
-    NumRowsAction->setCheckable ( true );
-    NumRowsAction->setChecked ( pSettings->iNumMixerPanelRows > 1 );
-    MainMixerBoard->SetNumMixerPanelRows ( pSettings->iNumMixerPanelRows );
-
-    pEditMenu->addAction ( tr ( "&Clear All Stored Solo and Mute Settings" ), this,
+    pEditMenu->addAction ( tr ( "Clear &All Stored Solo and Mute Settings" ), this,
         SLOT ( OnClearAllStoredSoloMuteSettings() ) );
 
     pEditMenu->addAction ( tr ( "Set All Faders to New Client &Level" ), this,
         SLOT ( OnSetAllFadersToNewClientLevel() ), QKeySequence ( Qt::CTRL + Qt::Key_L ) );
 
+    pEditMenu->addAction ( tr ( "Auto-Adjust all &Faders" ), this,
+        SLOT ( OnAutoAdjustAllFaderLevels() ), QKeySequence ( Qt::CTRL + Qt::Key_F ) );
 
     // Main menu bar -----------------------------------------------------------
     QMenuBar* pMenu = new QMenuBar ( this );
@@ -368,7 +346,7 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
 
     if ( pSettings->bWindowWasShownSettings )
     {
-        ShowGeneralSettings();
+        ShowGeneralSettings( pSettings->iSettingsTab );
     }
 
     // chat window
@@ -380,17 +358,6 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
     if ( pSettings->bWindowWasShownChat )
     {
         ShowChatWindow();
-    }
-
-    // musician profile window
-    if ( !pSettings->vecWindowPosProfile.isEmpty() && !pSettings->vecWindowPosProfile.isNull() )
-    {
-        MusicianProfileDlg.restoreGeometry ( pSettings->vecWindowPosProfile );
-    }
-
-    if ( pSettings->bWindowWasShownProfile )
-    {
-        ShowMusicianProfileDialog();
     }
 
     // connection setup window
@@ -431,9 +398,8 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
     QObject::connect ( &TimerCheckAudioDeviceOk, &QTimer::timeout,
         this, &CClientDlg::OnTimerCheckAudioDeviceOk );
 
-    // sliders
-    QObject::connect ( sldAudioPan, &QSlider::valueChanged,
-        this, &CClientDlg::OnAudioPanValueChanged );
+    QObject::connect ( &TimerDetectFeedback, &QTimer::timeout,
+        this, &CClientDlg::OnTimerDetectFeedback );
 
     QObject::connect ( sldAudioReverb, &QSlider::valueChanged,
         this, &CClientDlg::OnAudioReverbValueChanged );
@@ -519,6 +485,12 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
     QObject::connect ( &ClientSettingsDlg, &CClientSettingsDlg::CustomCentralServerAddrChanged,
         &ConnectDlg, &CConnectDlg::OnCustomCentralServerAddrChanged );
 
+    QObject::connect ( &ClientSettingsDlg, &CClientSettingsDlg::NumMixerPanelRowsChanged,
+        this, &CClientDlg::OnNumMixerPanelRowsChanged );
+
+    QObject::connect ( this, &CClientDlg::SendTabChange,
+        &ClientSettingsDlg, &CClientSettingsDlg::OnMakeTabChange );
+
     QObject::connect ( MainMixerBoard, &CAudioMixerBoard::ChangeChanGain,
         this, &CClientDlg::OnChangeChanGain );
 
@@ -567,15 +539,23 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
         chbLocalMute->setCheckState ( Qt::Checked );
     }
 
-    // query the central server version number needed for update check (note
+    // query the update server version number needed for update check (note
     // that the connection less message respond may not make it back but that
     // is not critical since the next time Jamulus is started we have another
     // chance and the update check is not time-critical at all)
-    CHostAddress CentServerHostAddress;
+    CHostAddress UpdateServerHostAddress;
 
-    if ( NetworkUtil().ParseNetworkAddress ( DEFAULT_SERVER_ADDRESS, CentServerHostAddress ) )
+    // Send the request to two servers for redundancy if either or both of them
+    // has a higher release version number, the reply will trigger the notification.
+
+    if ( NetworkUtil().ParseNetworkAddress ( UPDATECHECK1_ADDRESS, UpdateServerHostAddress ) )
     {
-        pClient->CreateCLServerListReqVerAndOSMes ( CentServerHostAddress );
+        pClient->CreateCLServerListReqVerAndOSMes ( UpdateServerHostAddress );
+    }
+
+    if ( NetworkUtil().ParseNetworkAddress ( UPDATECHECK2_ADDRESS, UpdateServerHostAddress ) )
+    {
+        pClient->CreateCLServerListReqVerAndOSMes ( UpdateServerHostAddress );
     }
 }
 
@@ -585,18 +565,15 @@ void CClientDlg::closeEvent ( QCloseEvent* Event )
     pSettings->vecWindowPosMain     = saveGeometry();
     pSettings->vecWindowPosSettings = ClientSettingsDlg.saveGeometry();
     pSettings->vecWindowPosChat     = ChatDlg.saveGeometry();
-    pSettings->vecWindowPosProfile  = MusicianProfileDlg.saveGeometry();
     pSettings->vecWindowPosConnect  = ConnectDlg.saveGeometry();
 
     pSettings->bWindowWasShownSettings = ClientSettingsDlg.isVisible();
     pSettings->bWindowWasShownChat     = ChatDlg.isVisible();
-    pSettings->bWindowWasShownProfile  = MusicianProfileDlg.isVisible();
     pSettings->bWindowWasShownConnect  = ConnectDlg.isVisible();
 
     // if settings/connect dialog or chat dialog is open, close it
     ClientSettingsDlg.close();
     ChatDlg.close();
-    MusicianProfileDlg.close();
     ConnectDlg.close();
     AnalyzerConsole.close();
 
@@ -646,35 +623,6 @@ void CClientDlg::ManageDragNDrop ( QDropEvent* Event,
     }
 }
 
-void CClientDlg::UpdateAudioFaderSlider()
-{
-    // update slider and label of audio fader
-    const int iCurAudInFader = pClient->GetAudioInFader();
-    sldAudioPan->setValue ( iCurAudInFader );
-
-    // show in label the center position and what channel is
-    // attenuated
-    if ( iCurAudInFader == AUD_FADER_IN_MIDDLE )
-    {
-        lblAudioPanValue->setText ( tr ( "Center" ) );
-    }
-    else
-    {
-        if ( iCurAudInFader > AUD_FADER_IN_MIDDLE )
-        {
-            // attenuation on right channel
-            lblAudioPanValue->setText ( tr ( "L" ) + " -" +
-                QString().setNum ( iCurAudInFader - AUD_FADER_IN_MIDDLE ) );
-        }
-        else
-        {
-            // attenuation on left channel
-            lblAudioPanValue->setText ( tr ( "R" ) + " -" +
-                QString().setNum ( AUD_FADER_IN_MIDDLE - iCurAudInFader ) );
-        }
-    }
-}
-
 void CClientDlg::UpdateRevSelection()
 {
     if ( pClient->GetAudioChannels() == CC_STEREO )
@@ -703,12 +651,6 @@ void CClientDlg::UpdateRevSelection()
 
     // update visibility of the pan controls in the audio mixer board (pan is not supported for mono)
     MainMixerBoard->SetDisplayPans ( pClient->GetAudioChannels() != CC_MONO );
-}
-
-void CClientDlg::OnAudioPanValueChanged ( int value )
-{
-    pClient->SetAudioInFader ( value );
-    UpdateAudioFaderSlider();
 }
 
 void CClientDlg::OnConnectDlgAccepted()
@@ -749,13 +691,13 @@ void CClientDlg::OnConnectDlgAccepted()
             strMixerBoardLabel = strSelectedAddress;
 
             // special case: if the address is empty, we substitute the default
-            // central server address so that a user which just pressed the connect
+            // directory server address so that a user which just pressed the connect
             // button without selecting an item in the table or manually entered an
             // address gets a successful connection
             if ( strSelectedAddress.isEmpty() )
             {
                 strSelectedAddress = DEFAULT_SERVER_ADDRESS;
-                strMixerBoardLabel = tr ( "Central Server" );
+                strMixerBoardLabel = tr ( "Directory Server" );
             }
         }
 
@@ -847,7 +789,14 @@ void CClientDlg::OnCLVersionAndOSReceived ( CHostAddress           ,
 {
     // update check
 #if ( QT_VERSION >= QT_VERSION_CHECK(5, 6, 0) ) && !defined ( DISABLE_VERSION_CHECK )
-    if ( QVersionNumber::compare ( QVersionNumber::fromString ( strVersion ), QVersionNumber::fromString ( VERSION ) ) > 0 )
+    int mySuffixIndex;
+    QVersionNumber myVersion = QVersionNumber::fromString ( VERSION, &mySuffixIndex );
+
+    int serverSuffixIndex;
+    QVersionNumber serverVersion = QVersionNumber::fromString ( strVersion, &serverSuffixIndex );
+
+    // only compare if the server version has no suffix (such as dev or beta)
+    if ( strVersion.size() == serverSuffixIndex && QVersionNumber::compare ( serverVersion, myVersion ) > 0 )
     {
         // show the label and hide it after one minute again
         lblUpdateCheck->show();
@@ -916,6 +865,21 @@ void CClientDlg::OnNumClientsChanged ( int iNewNumClients )
     SetMyWindowTitle ( iNewNumClients );
 }
 
+void CClientDlg::OnOpenAudioNetSettings()
+{
+    ShowGeneralSettings ( SETTING_TAB_AUDIONET );
+}
+
+void CClientDlg::OnOpenAdvancedSettings()
+{
+    ShowGeneralSettings ( SETTING_TAB_ADVANCED );
+}
+
+void CClientDlg::OnOpenUserProfileSettings()
+{
+    ShowGeneralSettings ( SETTING_TAB_USER );
+}
+
 void CClientDlg::SetMyWindowTitle ( const int iNumClients )
 {
     // set the window title (and therefore also the task bar icon text of the OS)
@@ -928,7 +892,7 @@ void CClientDlg::SetMyWindowTitle ( const int iNumClients )
     {
         // if --clientname is used, the APP_NAME must be the very first word in
         // the title, otherwise some user scripts do not work anymore, see #789
-        strWinTitle += QString ( APP_NAME ) + " " + pClient->strClientName + " ";
+        strWinTitle += QString ( APP_NAME ) + " - " + pClient->strClientName + " ";
     }
 
     if ( iNumClients == 0 )
@@ -984,26 +948,19 @@ void CClientDlg::ShowConnectionSetupDialog()
     // show connect dialog
     bConnectDlgWasShown = true;
     ConnectDlg.show();
+    ConnectDlg.setWindowTitle ( MakeClientNameTitle ( tr ( "Connect" ) , pClient->strClientName ) );
 
     // make sure dialog is upfront and has focus
     ConnectDlg.raise();
     ConnectDlg.activateWindow();
 }
 
-void CClientDlg::ShowMusicianProfileDialog()
-{
-    // show musician profile dialog
-    MusicianProfileDlg.show();
-
-    // make sure dialog is upfront and has focus
-    MusicianProfileDlg.raise();
-    MusicianProfileDlg.activateWindow();
-}
-
-void CClientDlg::ShowGeneralSettings()
+void CClientDlg::ShowGeneralSettings( int iTab )
 {
     // open general settings dialog
+    emit SendTabChange ( iTab );
     ClientSettingsDlg.show();
+    ClientSettingsDlg.setWindowTitle ( MakeClientNameTitle ( tr ( "Settings" ) , pClient->strClientName ) );
 
     // make sure dialog is upfront and has focus
     ClientSettingsDlg.raise();
@@ -1013,6 +970,7 @@ void CClientDlg::ShowGeneralSettings()
 void CClientDlg::ShowChatWindow ( const bool bForceRaise )
 {
     ChatDlg.show();
+    ChatDlg.setWindowTitle ( MakeClientNameTitle ( tr ( "Chat" ) , pClient->strClientName ) );
 
     if ( bForceRaise )
     {
@@ -1039,7 +997,7 @@ void CClientDlg::OnSettingsStateChanged ( int value )
 {
     if ( value == Qt::Checked )
     {
-        ShowGeneralSettings();
+        ShowGeneralSettings( SETTING_TAB_AUDIONET );
     }
     else
     {
@@ -1079,6 +1037,33 @@ void CClientDlg::OnTimerSigMet()
     // show current level
     lbrInputLevelL->SetValue ( pClient->GetLevelForMeterdBLeft() );
     lbrInputLevelR->SetValue ( pClient->GetLevelForMeterdBRight() );
+
+    if ( bDetectFeedback &&
+        ( pClient->GetLevelForMeterdBLeft() > NUM_STEPS_LED_BAR - 0.5  ||
+        pClient->GetLevelForMeterdBRight() > NUM_STEPS_LED_BAR - 0.5 ) )
+    {
+        // mute locally and mute channel
+        chbLocalMute->setCheckState ( Qt::Checked );
+        MainMixerBoard->MuteMyChannel();
+
+        // show message box about feedback issue
+        QCheckBox* chb = new QCheckBox ( tr ( "Enable feedback detection" ) );
+        chb->setCheckState ( pSettings->bEnableFeedbackDetection ?
+            Qt::Checked : Qt::Unchecked );
+        QMessageBox msgbox;
+        msgbox.setText ( tr ( "Audio feedback or loud signal detected.\n\n"
+            "We muted your channel and activated 'Mute Myself'. Please solve "
+            "the feedback issue first and unmute yourself afterwards." ) );
+        msgbox.setIcon ( QMessageBox::Icon::Warning );
+        msgbox.addButton ( QMessageBox::Ok );
+        msgbox.setDefaultButton ( QMessageBox::Ok );
+        msgbox.setCheckBox ( chb );
+
+        QObject::connect ( chb, &QCheckBox::stateChanged,
+            this, &CClientDlg::OnFeedbackDetectionChanged );
+
+        msgbox.exec();
+    }
 }
 
 void CClientDlg::OnTimerBuffersLED()
@@ -1157,6 +1142,11 @@ void CClientDlg::OnTimerCheckAudioDeviceOk()
     }
 }
 
+void CClientDlg::OnTimerDetectFeedback()
+{
+    bDetectFeedback = false;
+}
+
 void CClientDlg::OnSoundDeviceChanged ( QString strError )
 {
     if ( !strError.isEmpty() )
@@ -1175,6 +1165,12 @@ void CClientDlg::OnSoundDeviceChanged ( QString strError )
     if ( TimerCheckAudioDeviceOk.isActive() )
     {
         TimerCheckAudioDeviceOk.start ( CHECK_AUDIO_DEV_OK_TIME_MS );
+    }
+
+    if ( pSettings->bEnableFeedbackDetection && TimerDetectFeedback.isActive() )
+    {
+        TimerDetectFeedback.start ( DETECT_FEEDBACK_TIME_MS );
+        bDetectFeedback = true;
     }
 
     // update the settings dialog
@@ -1230,6 +1226,13 @@ void CClientDlg::Connect ( const QString& strSelectedAddress,
         TimerBuffersLED.start         ( BUFFER_LED_UPDATE_TIME_MS );
         TimerPing.start               ( PING_UPDATE_TIME_MS );
         TimerCheckAudioDeviceOk.start ( CHECK_AUDIO_DEV_OK_TIME_MS ); // is single shot timer
+
+        // audio feedback detection
+        if ( pSettings->bEnableFeedbackDetection )
+        {
+            TimerDetectFeedback.start ( DETECT_FEEDBACK_TIME_MS ); // single shot timer
+            bDetectFeedback = true;
+        }
     }
 }
 
@@ -1264,6 +1267,8 @@ void CClientDlg::Disconnect()
     TimerBuffersLED.stop();
     TimerPing.stop();
     TimerCheckAudioDeviceOk.stop();
+    TimerDetectFeedback.stop();
+    bDetectFeedback = false;
 
 
 // TODO is this still required???
@@ -1312,6 +1317,9 @@ void CClientDlg::UpdateDisplay()
 
 void CClientDlg::SetGUIDesign ( const EGUIDesign eNewDesign )
 {
+    // remove any styling from the mixer board - reapply after changing skin
+    MainMixerBoard->setStyleSheet ( "" );
+
     // apply GUI design to current window
     switch ( eNewDesign )
     {

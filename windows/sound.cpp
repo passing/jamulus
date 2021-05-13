@@ -60,7 +60,17 @@ QString CSound::LoadAndInitializeDriver ( QString strDriverName,
         return tr ( "The current selected audio device is no longer present in the system." );
     }
 
+    // Save number of channels from last driver
+    // Need to save these (but not the driver name) as CheckDeviceCapabilities() overwrites them
+    long lNumInChanPrev = lNumInChan;
+    long lNumOutChanPrev = lNumOutChan;
+
     loadAsioDriver ( cDriverNames[iDriverIdx] );
+
+    // According to the docs, driverInfo.asioVersion and driverInfo.sysRef
+    // should be set, but we haven't being doing that and it seems to work
+    // okay...
+    memset ( &driverInfo, 0, sizeof driverInfo );
 
     if ( ASIOInit ( &driverInfo ) != ASE_OK )
     {
@@ -70,20 +80,25 @@ QString CSound::LoadAndInitializeDriver ( QString strDriverName,
     }
 
     // check device capabilities if it fulfills our requirements
-    const QString strStat = CheckDeviceCapabilities();
+    const QString strStat = CheckDeviceCapabilities(); // also sets lNumInChan and lNumOutChan
 
     // check if device is capable
     if ( strStat.isEmpty() )
     {
-// TODO: In order to fix https://github.com/jamulussoftware/jamulus/issues/796 we reset the channel mapping on every property change. This is not ideal. 
-	    
-// the device has changed, per definition we reset the channel
-// mapping to the defaults (first two available channels)
-ResetChannelMapping();
+        // Reset channel mapping if the sound card name has changed or the number of channels has changed
+        if ( ( strCurDevName.compare ( strDriverNames[iDriverIdx] ) != 0 ) ||
+             ( lNumInChanPrev != lNumInChan ) ||
+             ( lNumOutChanPrev != lNumOutChan ) )
+        {
+            // In order to fix https://github.com/jamulussoftware/jamulus/issues/796
+            // this code runs after a change in the ASIO driver (not when changing the ASIO input selection.)
 
-// store ID of selected driver if initialization was successful
-strCurDevName = cDriverNames[iDriverIdx];
+            // mapping to the defaults (first two available channels)
+            ResetChannelMapping();
 
+            // store ID of selected driver if initialization was successful
+            strCurDevName = cDriverNames[iDriverIdx];
+        }
     }
     else
     {
@@ -104,8 +119,15 @@ strCurDevName = cDriverNames[iDriverIdx];
 void CSound::UnloadCurrentDriver()
 {
     // clean up ASIO stuff
-    ASIOStop();
-    ASIODisposeBuffers();
+    if ( bRun )
+    {
+        Stop();
+    }
+    if ( bufferInfos[0].buffers[0] )
+    {
+        ASIODisposeBuffers();
+        bufferInfos[0].buffers[0] = NULL;
+    }
     ASIOExit();
     asioDrivers->removeCurrentDriver();
 }
@@ -322,7 +344,7 @@ _exit(1);
         }
         else
         {
-            // ASIO SDK 2.2: "Notes: When minimum and maximum buffer size are 
+            // ASIO SDK 2.2: "Notes: When minimum and maximum buffer size are
             // equal, the preferred buffer size has to be the same value as
             // well; granularity should be 0 in this case."
             if ( HWBufferInfo.lMinSize == HWBufferInfo.lMaxSize )
@@ -520,6 +542,10 @@ CSound::CSound ( void           (*fpNewCallback) ( CVector<int16_t>& psData, voi
     // init pointer to our sound object
     pSound = this;
 
+    // We assume NULL'd pointers in this structure indicate that buffers are not
+    // allocated yet (see UnloadCurrentDriver).
+    memset ( bufferInfos, 0, sizeof bufferInfos );
+
     // get available ASIO driver names in system
     for ( i = 0; i < MAX_NUMBER_SOUND_CARDS; i++ )
     {
@@ -534,13 +560,10 @@ CSound::CSound ( void           (*fpNewCallback) ( CVector<int16_t>& psData, voi
     // in case we do not have a driver available, throw error
     if ( lNumDevs == 0 )
     {
-        throw CGenErr ( "<b>" + tr ( "No ASIO audio device (driver) found." ) + "</b><br><br>" +
-            tr ( "The " ) + APP_NAME + tr ( " software requires the low latency audio "
-            "interface ASIO to work properly. This is not a standard "
-            "Windows audio interface and therefore a special audio driver is "
-            "required. Either your sound card has a native ASIO driver (which "
-            "is recommended) or you might want to use alternative drivers like "
-            "the ASIO4All driver." ) );
+        throw CGenErr ( "<b>" + tr ( "No ASIO audio device driver found." ) + "</b><br><br>" +
+            QString ( tr ( "Please install an ASIO driver before running %1. "
+            "If you own a device with ASIO support, install its official ASIO driver. "
+            "If not, you'll need to download and install a universal driver like ASIO4ALL." ) ).arg ( APP_NAME ) );
     }
     asioDrivers->removeCurrentDriver();
 

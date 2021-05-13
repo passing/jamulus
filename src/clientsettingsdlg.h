@@ -75,10 +75,13 @@ public:
     void UpdateDisplay();
     void UpdateSoundDeviceChannelSelectionFrame();
 
+    void SetEnableFeedbackDetection ( bool enable );
+
 protected:
     void    UpdateJitterBufferFrame();
     void    UpdateSoundCardFrame();
     void    UpdateCustomCentralServerComboBox();
+    void    UpdateAudioFaderSlider();
     QString GenSndCrdBufferDelayString ( const int     iFrameSize,
                                          const QString strAddText = "" );
 
@@ -95,8 +98,10 @@ public slots:
     void OnNetBufServerValueChanged ( int value );
     void OnAutoJitBufStateChanged ( int value );
     void OnEnableOPUS64StateChanged ( int value );
+    void OnFeedbackDetectionChanged ( int value );
     void OnCentralServerAddressEditingFinished();
     void OnNewClientLevelEditingFinished() { pSettings->iNewClientFaderLevel = edtNewClientLevel->text().toInt(); }
+    void OnInputBoostChanged();
     void OnSndCrdBufferDelayButtonGroupClicked ( QAbstractButton* button );
     void OnSoundcardActivated ( int iSndDevIdx );
     void OnLInChanActivated ( int iChanIdx );
@@ -108,9 +113,18 @@ public slots:
     void OnGUIDesignActivated ( int iDesignIdx );
     void OnDriverSetupClicked();
     void OnLanguageChanged ( QString strLanguage ) { pSettings->strLanguage = strLanguage; }
+    void OnAliasTextChanged ( const QString& strNewName );
+    void OnInstrumentActivated ( int iCntryListItem );
+    void OnCountryActivated ( int iCntryListItem );
+    void OnCityTextChanged ( const QString& strNewName );
+    void OnSkillActivated ( int iCntryListItem );
+    void OnTabChanged();
+    void OnMakeTabChange ( int iTabIdx );
+    void OnAudioPanValueChanged ( int value );
 
 signals:
     void GUIDesignChanged();
     void AudioChannelsChanged();
     void CustomCentralServerAddrChanged();
+    void NumMixerPanelRowsChanged ( int value );
 };

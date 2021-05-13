@@ -60,7 +60,7 @@ CJamClient::CJamClient(const qint64 frame, const int _numChannels, const QString
     wavFile = new QFile(recordBaseDir.absoluteFilePath(fileName));
     if (!wavFile->open(QFile::OpenMode(QIODevice::OpenModeFlag::ReadWrite))) // need to allow rewriting headers
     {
-        throw new std::runtime_error( ("Could not write to WAV file "  + wavFile->fileName()).toStdString() );
+        throw CGenErr ( "Could not write to WAV file "  + wavFile->fileName() );
     }
     out = new CWaveStream(wavFile, numChannels);
 
@@ -102,6 +102,42 @@ void CJamClient::Disconnect()
     wavFile = nullptr;
 }
 
+/**
+ * @brief CJamClient::TranslateChars Replace non-ASCII chars with nearest equivalent, if any, and change all punctuation to _
+ */
+QString CJamClient::TranslateChars (const QString& input) const
+{
+    // Allow letters and numbers
+    static const char charmap[256] = {
+        '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_',
+        '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_',
+        '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '_', '_', '_', '_', '_', '_',
+        '_', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+        'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '_', '_', '_', '_', '_',
+        '_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+        'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '_', '_', '_', '_', '_',
+        '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', 'S', '_', 'O', '_', 'Z', '_',
+        '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', 's', '_', 'o', '_', 'z', 'Y',
+        '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_',
+        '_', '_', '2', '3', '_', 'u', '_', '_', '_', '1', '_', '_', '_', '_', '_', '_',
+        'A', 'A', 'A', 'A', 'A', 'A', 'A', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I',
+        'D', 'N', 'O', 'O', 'O', 'O', 'O', 'x', 'O', 'U', 'U', 'U', 'U', 'Y', 'P', 'S',
+        'a', 'a', 'a', 'a', 'a', 'a', 'a', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i',
+        'd', 'n', 'o', 'o', 'o', 'o', 'o', '_', 'o', 'u', 'u', 'u', 'u', 'y', 'p', 'y'
+    };
+
+    QByteArray r = input.toLatin1();
+
+    for (auto &c : r)
+    {
+        unsigned char uc = c;
+        c = charmap[uc];
+    }
+
+    return QString::fromLatin1(r);
+}
+
 /* ********************************************************************************************************
  * CJamSession
  * ********************************************************************************************************/
@@ -124,15 +160,15 @@ CJamSession::CJamSession(QDir recordBaseDir) :
 
     if (!fi.exists() && !QDir().mkpath(sessionDir.absolutePath()))
     {
-        throw std::runtime_error( (sessionDir.absolutePath() + " does not exist but could not be created").toStdString() );
+        throw CGenErr ( sessionDir.absolutePath() + " does not exist and could not be created" );
     }
     if (!fi.isDir())
     {
-        throw std::runtime_error( (sessionDir.absolutePath() + " exists but is not a directory").toStdString() );
+        throw CGenErr ( sessionDir.absolutePath() + " exists but is not a directory" );
     }
     if (!fi.isWritable())
     {
-        throw std::runtime_error( (sessionDir.absolutePath() + " is a directory but cannot be written to").toStdString() );
+        throw CGenErr ( sessionDir.absolutePath() + " is a directory but cannot be written to" );
     }
 
     // Explicitly set all the pointers to "empty"
@@ -360,13 +396,29 @@ void CJamRecorder::Start() {
     // Ensure any previous cleaning up has been done.
     OnEnd();
 
+    QString error;
+
     // needs to be after OnEnd() as that also locks
     ChIdMutex.lock();
     {
-        currentSession = new CJamSession( recordBaseDir );
-        isRecording = true;
+        try
+        {
+            currentSession = new CJamSession( recordBaseDir );
+            isRecording = true;
+        }
+        catch ( const CGenErr& err )
+        {
+            currentSession = nullptr;
+            error = err.GetErrorText();
+        }
     }
     ChIdMutex.unlock();
+
+    if ( !currentSession )
+    {
+        emit RecordingFailed ( error );
+        return;
+    }
 
     emit RecordingSessionStarted ( currentSession->SessionDir().path() );
 }
@@ -480,13 +532,15 @@ void CJamRecorder::AudacityLofFromCurrentSession()
 /**
  * @brief CJamRecorder::SessionDirToReaper Replica of CJamRecorder::OnEnd() but using the directory contents to construct the CReaperProject object
  * @param strSessionDirName
+ *
+ * This is used for testing and is not called from the regular Jamulus code.
  */
 void CJamRecorder::SessionDirToReaper(QString& strSessionDirName, int serverFrameSizeSamples)
 {
     const QFileInfo fiSessionDir(QDir::cleanPath(strSessionDirName));
     if (!fiSessionDir.exists() || !fiSessionDir.isDir())
     {
-        throw std::runtime_error( (fiSessionDir.absoluteFilePath() + " does not exist or is not a directory.  Aborting.").toStdString() );
+        throw CGenErr ( fiSessionDir.absoluteFilePath() + " does not exist or is not a directory.  Aborting." );
     }
 
     const QDir dSessionDir(fiSessionDir.absoluteFilePath());
@@ -494,12 +548,13 @@ void CJamRecorder::SessionDirToReaper(QString& strSessionDirName, int serverFram
     const QFileInfo fiRPP(reaperProjectFileName);
     if (fiRPP.exists())
     {
-        throw std::runtime_error( (fiRPP.absoluteFilePath() + " exists and will not be overwritten.  Aborting.").toStdString() );
+        throw CGenErr ( fiRPP.absoluteFilePath() + " exists and will not be overwritten.  Aborting." );
     }
 
     QFile outf (fiRPP.absoluteFilePath());
-    if (!outf.open(QFile::WriteOnly)) {
-        throw std::runtime_error( (fiRPP.absoluteFilePath() + " could not be written.  Aborting.").toStdString() );
+    if ( !outf.open ( QFile::WriteOnly ) )
+    {
+        throw CGenErr ( fiRPP.absoluteFilePath() + " could not be written.  Aborting." );
     }
     QTextStream out(&outf);
 
@@ -547,6 +602,12 @@ void CJamRecorder::OnFrame(const int iChID, const QString name, const CHostAddre
     if ( !isRecording )
     {
         Start();
+    }
+
+    // Start() may have failed, so check again:
+    if ( !isRecording )
+    {
+        return;
     }
 
     // needs to be after Start() as that also locks
