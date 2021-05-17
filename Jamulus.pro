@@ -1,4 +1,4 @@
-VERSION = 3.8.0beta2dev
+VERSION = 3.8.0rc1dev
 
 # use target name which does not use a captital letter at the beginning
 contains(CONFIG, "noupcasename") {
@@ -403,6 +403,7 @@ HEADERS += src/buffer.h \
     src/global.h \
     src/protocol.h \
     src/recorder/jamcontroller.h \
+    src/threadpool.h \
     src/server.h \
     src/serverlist.h \
     src/serverlogging.h \
@@ -748,6 +749,7 @@ DISTFILES += ChangeLog \
     src/res/fronticonserver.png \
     src/res/mixerboardbackground.png \
     src/res/transparent1x1.png \
+    src/res/mutediconorange.png \
     src/res/instruments/accordeon.png \
     src/res/instruments/aguitar.png \
     src/res/instruments/bassguitar.png \
