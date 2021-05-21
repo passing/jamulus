@@ -28,6 +28,8 @@
 #ifdef _WIN32
 CHighPrecisionTimer::CHighPrecisionTimer ( const bool bNewUseDoubleSystemFrameSize ) : bUseDoubleSystemFrameSize ( bNewUseDoubleSystemFrameSize )
 {
+        int bad_aligned;
+
     // add some error checking, the high precision timer implementation only
     // supports 64 and 128 samples frame size at 48 kHz sampling rate
 #    if ( SYSTEM_FRAME_SIZE_SAMPLES != 64 ) && ( DOUBLE_SYSTEM_FRAME_SIZE_SAMPLES != 128 )
