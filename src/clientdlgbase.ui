@@ -461,6 +461,25 @@
                 </property>
                </widget>
               </item>
+              <item row="2" column="1">
+               <widget class="QLabel" name="lblBuffersVal">
+                <property name="minimumSize">
+                 <size>
+                  <width>34</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
               <item row="2" column="3">
                <widget class="CMultiColorLED" name="ledBuffers" native="true">
                 <property name="sizePolicy">

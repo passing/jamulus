@@ -126,7 +126,8 @@ public:
     double GetLevelForMeterdBLeft() { return SignalLevelMeter.GetLevelForMeterdBLeftOrMono(); }
     double GetLevelForMeterdBRight() { return SignalLevelMeter.GetLevelForMeterdBRight(); }
 
-    bool GetAndResetbJitterBufferOKFlag();
+    int GetAndResetSocketJitterBufferFailCount();
+    int GetAndResetClientJitterBufferFailCount();
 
     bool IsConnected() { return Channel.IsConnected(); }
 
@@ -346,7 +347,7 @@ protected:
     EGUIDesign eGUIDesign;
     bool       bEnableOPUS64;
 
-    bool   bJitterBufferOK;
+    int    iJitterBufferFailCount;
     bool   bNuteMeInPersonalMix;
     QMutex MutexDriverReinit;
 

@@ -61,7 +61,7 @@ CClient::CClient ( const quint16  iPortNumber,
     bFraSiFactSafeSupported ( false ),
     eGUIDesign ( GD_ORIGINAL ),
     bEnableOPUS64 ( false ),
-    bJitterBufferOK ( true ),
+    iJitterBufferFailCount ( 0 ),
     bNuteMeInPersonalMix ( bNMuteMeInPersonalMix ),
     iServerSockBufNumFrames ( DEF_NET_BUF_SIZE_NUM_BL ),
     pSignalHandler ( CSignalHandler::getSingletonP() )
@@ -357,27 +357,22 @@ bool CClient::SetServerAddr ( QString strNAddr )
     }
 }
 
-bool CClient::GetAndResetbJitterBufferOKFlag()
+int CClient::GetAndResetSocketJitterBufferFailCount()
 {
-    // get the socket buffer put status flag and reset it
-    const bool bSocketJitBufOKFlag = Socket.GetAndResetbJitterBufferOKFlag();
+    // get the socket jitter buffer fail count and reset it
+    const int iSocketJitterBufferFailCount = Socket.GetAndResetSocketJitterBufferFailCount();
 
-    if ( !bJitterBufferOK )
-    {
-        // our jitter buffer get status is not OK so the overall status of the
-        // jitter buffer is also not OK (we do not have to consider the status
-        // of the socket buffer put status flag)
+    return iSocketJitterBufferFailCount;
+}
 
-        // reset flag before returning the function
-        bJitterBufferOK = true;
-        return false;
-    }
+int CClient::GetAndResetClientJitterBufferFailCount()
+{
+    int iRet = iJitterBufferFailCount;
 
-    // the jitter buffer get (our own status flag) is OK, the final status
-    // now depends on the jitter buffer put status flag from the socket
-    // since per definition the jitter buffer status is OK if both the
-    // put and get status are OK
-    return bSocketJitBufOKFlag;
+    // reset counter before returning it
+    iJitterBufferFailCount = 0;
+
+    return iRet;
 }
 
 void CClient::SetSndCrdPrefFrameSizeFactor ( const int iNewFactor )
@@ -756,7 +751,7 @@ void CClient::Stop()
     ConnLessProtocol.CreateCLDisconnection ( Channel.GetAddress() );
 
     // reset current signal level and LEDs
-    bJitterBufferOK = true;
+    iJitterBufferFailCount = 0;
     SignalLevelMeter.Reset();
 }
 
@@ -1142,7 +1137,7 @@ void CClient::ProcessAudioDataIntern ( CVector<int16_t>& vecsStereoSndCrd )
             pCurCodedData = nullptr;
 
             // invalidate the buffer OK status flag
-            bJitterBufferOK = false;
+            iJitterBufferFailCount++;
         }
 
         // OPUS decoding

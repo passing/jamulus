@@ -56,7 +56,7 @@ public:
     CSocket ( CChannel* pNewChannel, const quint16 iPortNumber, const quint16 iQosNumber, const QString& strServerBindIP ) :
         pChannel ( pNewChannel ),
         bIsClient ( true ),
-        bJitterBufferOK ( true )
+        iJitterBufferFailCount ( 0 )
     {
         Init ( iPortNumber, iQosNumber, strServerBindIP );
     }
@@ -64,7 +64,7 @@ public:
     CSocket ( CServer* pNServP, const quint16 iPortNumber, const quint16 iQosNumber, const QString& strServerBindIP ) :
         pServer ( pNServP ),
         bIsClient ( false ),
-        bJitterBufferOK ( true )
+        iJitterBufferFailCount ( 0 )
     {
         Init ( iPortNumber, iQosNumber, strServerBindIP );
     }
@@ -73,7 +73,8 @@ public:
 
     void SendPacket ( const CVector<uint8_t>& vecbySendBuf, const CHostAddress& HostAddr );
 
-    bool GetAndResetbJitterBufferOKFlag();
+    int GetAndResetSocketJitterBufferFailCount();
+
     void Close();
 
 protected:
@@ -97,7 +98,7 @@ protected:
 
     bool bIsClient;
 
-    bool bJitterBufferOK;
+    int iJitterBufferFailCount;
 
 public:
     void OnDataReceived();
@@ -156,7 +157,7 @@ public:
 
     void SendPacket ( const CVector<uint8_t>& vecbySendBuf, const CHostAddress& HostAddr ) { Socket.SendPacket ( vecbySendBuf, HostAddr ); }
 
-    bool GetAndResetbJitterBufferOKFlag() { return Socket.GetAndResetbJitterBufferOKFlag(); }
+    int GetAndResetSocketJitterBufferFailCount() { return Socket.GetAndResetSocketJitterBufferFailCount(); }
 
 protected:
     class CSocketThread : public QThread

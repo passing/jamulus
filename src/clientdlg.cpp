@@ -204,10 +204,11 @@ CClientDlg::CClientDlg ( CClient*         pNCliP,
     ledDelay->setToolTip ( tr ( "If this LED indicator turns red, "
                                 "you will not have much fun using the " ) +
                            APP_NAME + tr ( " software." ) + TOOLTIP_COM_END_TEXT );
-    lblPingVal->setText ( "---" );
+    lblPingVal->setText ( "-" );
     lblPingUnit->setText ( "" );
-    lblDelayVal->setText ( "---" );
+    lblDelayVal->setText ( "-" );
     lblDelayUnit->setText ( "" );
+    lblBuffersVal->setText ( "-" );
 
     // init GUI design
     SetGUIDesign ( pClient->GetGUIDesign() );
@@ -1049,19 +1050,43 @@ void CClientDlg::OnTimerSigMet()
 
 void CClientDlg::OnTimerBuffersLED()
 {
+    // get the client and socket jitter buffer fail counts and reset then
+    const int iBufferUnderrunCount = pClient->GetAndResetClientJitterBufferFailCount();
+    const int iBufferOverrunCount  = pClient->GetAndResetSocketJitterBufferFailCount();
+
+    const int iCombinedFailCount = iBufferUnderrunCount + iBufferOverrunCount;
+
     CMultiColorLED::ELightColor eCurStatus;
 
-    // get and reset current buffer state and set LED from that flag
-    if ( pClient->GetAndResetbJitterBufferOKFlag() )
+    // update led and text based on values
+    // color definition: 0 = green, 1 = yellow, otherwise red
+    if ( iCombinedFailCount == 0 )
     {
         eCurStatus = CMultiColorLED::RL_GREEN;
+        lblBuffersVal->setText ( "0" );
     }
     else
     {
-        eCurStatus = CMultiColorLED::RL_RED;
+        if ( iCombinedFailCount == 1 )
+        {
+            eCurStatus = CMultiColorLED::RL_YELLOW;
+        }
+        else
+        {
+            eCurStatus = CMultiColorLED::RL_RED;
+        }
+
+        if ( iBufferUnderrunCount > 0 )
+        {
+            lblBuffersVal->setText ( QString().setNum ( iBufferUnderrunCount ) );
+        }
+        else
+        {
+            lblBuffersVal->setText ( QString().setNum ( -iBufferOverrunCount ) );
+        }
     }
 
-    // update the buffer LED and the general settings dialog, too
+    // update the buffer LED
     ledBuffers->SetLight ( eCurStatus );
 }
 
@@ -1254,10 +1279,11 @@ OnTimerStatus();
     ledDelay->Reset();
 
     // clear text labels with client parameters
-    lblPingVal->setText ( "---" );
+    lblPingVal->setText ( "-" );
     lblPingUnit->setText ( "" );
-    lblDelayVal->setText ( "---" );
+    lblDelayVal->setText ( "-" );
     lblDelayUnit->setText ( "" );
+    lblBuffersVal->setText ( "-" );
 
     // clear mixer board (remove all faders)
     MainMixerBoard->HideAll();

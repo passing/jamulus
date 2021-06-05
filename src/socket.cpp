@@ -197,19 +197,14 @@ void CSocket::SendPacket ( const CVector<uint8_t>& vecbySendBuf, const CHostAddr
     }
 }
 
-bool CSocket::GetAndResetbJitterBufferOKFlag()
+int CSocket::GetAndResetSocketJitterBufferFailCount()
 {
-    // check jitter buffer status
-    if ( !bJitterBufferOK )
-    {
-        // reset flag and return "not OK" status
-        bJitterBufferOK = true;
-        return false;
-    }
+    int iRet = iJitterBufferFailCount;
 
-    // the buffer was OK, we do not have to reset anything and just return the
-    // OK status
-    return true;
+    // reset counter before returning it
+    iJitterBufferFailCount = 0;
+
+    return iRet;
 }
 
 void CSocket::OnDataReceived()
@@ -280,7 +275,7 @@ void CSocket::OnDataReceived()
             {
             case PS_AUDIO_ERR:
             case PS_GEN_ERROR:
-                bJitterBufferOK = false;
+                iJitterBufferFailCount++;
                 break;
 
             case PS_NEW_CONNECTION:
